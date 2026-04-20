@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | TrabaHanap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+    <aside class="w-full md:w-72 bg-white border-r border-slate-100 p-8 flex flex-col">
+        <div class="flex items-center justify-between mb-12">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center">
+                    <span class="text-white font-bold text-xs">T</span>
+                </div>
+                <div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900 block leading-tight">TrabaHanap</span>
+                    <span class="text-[9px] text-slate-400 font-medium">Online Job Application System</span>
+                </div>
+            </div>
+            <div class="relative">
+                <button onclick="toggleNotifPanel()" class="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-slate-500 text-lg">
+                    🔔
+                    <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                </button>
+                <div id="notif-panel" class="hidden absolute left-0 top-12 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                        <span class="font-bold text-slate-800 text-sm">Notifications</span>
+                        <button onclick="toggleNotifPanel()" class="text-slate-400 hover:text-slate-600 text-xs">Close</button>
+                    </div>
+                    <div id="notif-list" class="max-h-72 overflow-y-auto p-2"></div>
+                </div>
+            </div>
+        </div>
+        <nav class="space-y-2 flex-1">
+            <a href="/dashboard" class="flex items-center space-x-3 text-slate-400 hover:text-slate-600 px-4 py-3 rounded-2xl transition">
+                <span>🏠</span><span>Find Jobs</span>
+            </a>
+            <a href="/saved" class="flex items-center space-x-3 text-slate-400 hover:text-slate-600 px-4 py-3 rounded-2xl transition">
+                <span>🔖</span><span>Saved Jobs</span>
+            </a>
+            <a href="/applications" class="flex items-center space-x-3 text-slate-400 hover:text-slate-600 px-4 py-3 rounded-2xl transition">
+                <span>📂</span><span>Applications</span>
+            </a>
+            <a href="/profile" class="flex items-center space-x-3 bg-indigo-50 text-indigo-600 px-4 py-3 rounded-2xl font-semibold">
+                <span>👤</span><span>Profile</span>
+            </a>
+        </nav>
+        <button onclick="logout()" class="mt-10 text-slate-400 hover:text-red-500 font-medium px-4 py-3 text-left transition">Log out</button>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-12 overflow-y-auto">
+        <header class="mb-10">
+            <h1 class="text-3xl font-bold text-slate-900">My Profile</h1>
+            <p class="text-slate-500 mt-1">Manage your personal information and career details</p>
+        </header>
+
+        <div class="max-w-4xl space-y-6">
+
+            <!-- Hero card -->
+            <div class="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center gap-8">
+                <div class="w-28 h-28 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg shrink-0">
+                    <span id="profile-initials">??</span>
+                </div>
+                <div class="text-center md:text-left flex-1 min-w-0">
+                    <h2 id="display-full-name" class="text-2xl font-bold text-slate-900">User Name</h2>
+                    <p id="display-title" class="text-indigo-600 font-medium text-sm mt-0.5">Not Specified</p>
+                    <div class="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-slate-400 mt-2">
+                        <span>📍 <span id="display-location">Not Set</span></span>
+                        <span>📧 <span id="display-email">Not Set</span></span>
+                    </div>
+                </div>
+                <button onclick="openModal()" class="inline-flex items-center h-11 bg-slate-900 text-white px-6 rounded-2xl font-semibold hover:bg-indigo-600 transition shadow-lg shrink-0 self-center">Edit Profile</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Total Applied</p>
+                    <h4 id="display-applied" class="text-2xl font-bold text-slate-900">0 Jobs</h4>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Profile Strength</p>
+                    <div class="w-full bg-slate-100 h-2.5 rounded-full mb-2">
+                        <div id="strength-bar" class="h-2.5 rounded-full transition-all duration-700 bg-gradient-to-r from-indigo-500 to-teal-400" style="width: 20%;"></div>
+                    </div>
+                    <span id="strength-text" class="text-xs font-bold text-indigo-600">20% Completed</span>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Account Status</p>
+                    <span class="bg-green-50 text-green-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Active</span>
+                </div>
+            </div>
+
+            <!-- Profile Completion Checklist -->
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <h3 class="font-bold text-slate-900 mb-1">Complete your profile</h3>
+                <p class="text-xs text-slate-400 mb-4">A complete profile gets 3x more views from employers.</p>
+                <div id="checklist" class="space-y-2"></div>
+            </div>
+
+            <!-- Resume Score -->
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <h3 class="font-bold text-slate-900">Profile Score</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">How attractive your profile is to employers</p>
+                    </div>
+                    <button onclick="loadResumeScore()" class="btn btn-secondary btn-sm">Refresh Score</button>
+                </div>
+                <div id="resume-score-section">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="relative w-20 h-20 shrink-0">
+                            <svg class="w-20 h-20 -rotate-90" viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f1f5f9" stroke-width="3"/>
+                                <circle id="score-circle" cx="18" cy="18" r="15.9" fill="none" stroke="#4f46e5" stroke-width="3" stroke-dasharray="0 100" stroke-linecap="round" style="transition:stroke-dasharray 1s ease"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span id="score-number" class="text-lg font-black text-slate-900">—</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p id="score-grade" class="text-xl font-bold text-slate-900">Loading...</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Profile strength score</p>
+                        </div>
+                    </div>
+                    <div id="score-strengths" class="space-y-1.5 mb-4"></div>
+                    <div id="score-tips" class="space-y-1.5"></div>
+                </div>
+            </div>
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="font-bold text-slate-900">Skills</h3>
+                    <button onclick="openModal()" class="text-xs text-indigo-600 font-semibold hover:underline">+ Edit Skills</button>
+                </div>
+                <div id="skills-display" class="flex flex-wrap gap-2">
+                    <p class="text-slate-400 text-sm italic">No skills added yet. Edit your profile to add skills.</p>
+                </div>
+            </div>
+
+            <!-- Resume Upload -->
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="font-bold text-slate-900">Resume</h3>
+                    <span class="text-xs text-slate-400">PDF or DOCX, max 5MB</span>
+                </div>
+                <div id="resume-status" class="mb-4"></div>
+                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition group">
+                    <span class="text-3xl mb-2 group-hover:scale-110 transition">📄</span>
+                    <span class="text-sm font-semibold text-slate-500 group-hover:text-indigo-600">Click to upload your resume</span>
+                    <span class="text-xs text-slate-400 mt-1">PDF or DOCX only</span>
+                    <input type="file" id="resume-file" accept=".pdf,.docx" class="hidden" onchange="uploadResume()">
+                </label>
+                <div id="upload-progress" class="hidden mt-3">
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full">
+                        <div class="bg-indigo-500 h-1.5 rounded-full animate-pulse w-3/4"></div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Uploading...</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal p-4">
+        <div class="bg-white w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl">
+            <h3 class="text-xl font-bold mb-6">Update Profile</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Job Title / Position</label>
+                    <input type="text" id="edit-title" placeholder="e.g. Frontend Developer" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Location</label>
+                    <input type="text" id="edit-location" placeholder="e.g. Quezon City" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Skills (comma-separated)</label>
+                    <input type="text" id="edit-skills" placeholder="e.g. React, Java, Figma, SQL" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm">
+                    <p class="text-[10px] text-slate-400 mt-1 ml-1">Separate each skill with a comma</p>
+                </div>
+                <div class="flex items-stretch gap-3 pt-2">
+                    <button onclick="closeModal()" class="flex-1 h-14 text-slate-400 font-bold hover:text-slate-600 border border-slate-200 rounded-2xl transition">Cancel</button>
+                    <button onclick="saveProfile()" class="flex-1 h-14 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        if (!localStorage.getItem('jc_token')) window.location.href = 'index.html';
+
+        async function loadResumeScore() {
+            try {
+                const data = await apiGet('/profile/resume-score');
+                document.getElementById('score-number').innerText = data.score + '%';
+                const gradeColors = { green: '#16a34a', blue: '#2563eb', amber: '#d97706', red: '#dc2626' };
+                const strokeColor = gradeColors[data.gradeColor] || '#4f46e5';
+                document.getElementById('score-circle').style.stroke = strokeColor;
+                document.getElementById('score-circle').style.strokeDasharray = `${data.score} 100`;
+                document.getElementById('score-grade').innerText = data.grade;
+                document.getElementById('score-grade').style.color = strokeColor;
+
+                document.getElementById('score-strengths').innerHTML = data.strengths.map(s =>
+                    `<div class="flex items-center gap-2 text-xs text-green-700 bg-green-50 px-3 py-2 rounded-xl">
+                        <span class="text-green-500">✓</span> ${s}
+                    </div>`).join('');
+
+                document.getElementById('score-tips').innerHTML = data.tips.length ? `
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Improve your score</p>
+                    ${data.tips.map(t => `<div class="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 px-3 py-2 rounded-xl cursor-pointer hover:bg-amber-100 transition" onclick="openModal()">
+                        <span class="text-amber-500">→</span> ${t}
+                    </div>`).join('')}` : '';
+            } catch(e) { /* silent */ }
+        }
+
+        async function updatePageData() {
+            const profile = await apiGet('/profile');
+
+            document.getElementById('display-full-name').innerText = profile.fullName || 'User';
+            document.getElementById('display-location').innerText = profile.location || 'Not Set';
+            document.getElementById('display-email').innerText = profile.email || 'Not Set';
+            document.getElementById('display-title').innerText = profile.jobTitle || 'Not Specified';
+            document.getElementById('display-applied').innerText = `${profile.totalApplied} ${profile.totalApplied === 1 ? 'Job' : 'Jobs'}`;
+
+            const parts = (profile.fullName || '??').split(' ');
+            const initials = (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+            document.getElementById('profile-initials').innerText = initials;
+
+            // Profile strength
+            let strength = 20;
+            if (profile.jobTitle) strength += 30;
+            if (profile.skills) strength += 30;
+            if (profile.location) strength += 20;
+            document.getElementById('strength-bar').style.width = strength + '%';
+            document.getElementById('strength-text').innerText = strength + '% Completed';
+
+            // Checklist
+            const checks = [
+                { label: 'Add your job title / position', done: !!profile.jobTitle, action: "openModal()" },
+                { label: 'Add your location', done: !!profile.location, action: "openModal()" },
+                { label: 'Add your skills', done: !!profile.skills, action: "openModal()" },
+                { label: 'Upload your resume', done: false, action: "document.getElementById('resume-file').click()" },
+            ];
+            document.getElementById('checklist').innerHTML = checks.map(c => `
+                <div class="flex items-center gap-3 p-3 rounded-2xl ${c.done ? 'bg-green-50' : 'bg-slate-50 hover:bg-indigo-50 cursor-pointer'} transition" ${!c.done ? `onclick="${c.action}"` : ''}>
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${c.done ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-400'}">
+                        ${c.done ? '✓' : '→'}
+                    </div>
+                    <span class="text-sm ${c.done ? 'text-green-700 line-through' : 'text-slate-700 font-medium'}">${c.label}</span>
+                    ${!c.done ? '<span class="ml-auto text-xs text-indigo-500 font-semibold">Add now</span>' : ''}
+                </div>`).join('');
+
+            const skillsDiv = document.getElementById('skills-display');
+            if (profile.skills) {
+                const tags = profile.skills.split(',').map(s => s.trim()).filter(Boolean);
+                skillsDiv.innerHTML = tags.map(s =>
+                    `<span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-full">${s}</span>`
+                ).join('');
+            } else {
+                skillsDiv.innerHTML = '<p class="text-slate-400 text-sm italic">No skills added yet. Edit your profile to add skills.</p>';
+            }
+
+            // Resume status
+            const resumeInfo = await apiGet('/resume/info');
+            const resumeStatus = document.getElementById('resume-status');
+            if (resumeInfo.hasResume) {
+                resumeStatus.innerHTML = `<div class="flex items-center gap-3 bg-green-50 border border-green-100 rounded-2xl px-4 py-3">
+                    <span class="text-green-500 text-xl">✅</span>
+                    <div>
+                        <p class="text-sm font-semibold text-green-700">Resume uploaded</p>
+                        <p class="text-xs text-green-500">${resumeInfo.filename}</p>
+                    </div>
+                </div>`;
+            } else {
+                resumeStatus.innerHTML = `<div class="flex items-center gap-3 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3">
+                    <span class="text-amber-500 text-xl">⚠️</span>
+                    <p class="text-sm text-amber-700">No resume uploaded yet. Upload one to strengthen your profile.</p>
+                </div>`;
+            }
+
+            window._profileCache = profile;
+        }
+
+        async function uploadResume() {
+            const file = document.getElementById('resume-file').files[0];
+            if (!file) return;
+            document.getElementById('upload-progress').classList.remove('hidden');
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const data = await apiUpload('/resume/upload', formData);
+                document.getElementById('upload-progress').classList.add('hidden');
+                if (data.error) { toast(data.error, 'error'); return; }
+                toast('Resume uploaded successfully!', 'success');
+                updatePageData();
+            } catch(e) {
+                document.getElementById('upload-progress').classList.add('hidden');
+                toast('Upload failed. Please try again.', 'error');
+            }
+        }
+
+        function openModal() {
+            const p = window._profileCache || {};
+            document.getElementById('edit-title').value = p.jobTitle || '';
+            document.getElementById('edit-location').value = p.location || '';
+            document.getElementById('edit-skills').value = p.skills || '';
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeModal() { document.getElementById('editModal').classList.remove('active'); }
+
+        async function saveProfile() {
+            const jobTitle = document.getElementById('edit-title').value;
+            const location = document.getElementById('edit-location').value;
+            const skills = document.getElementById('edit-skills').value;
+            const btn = document.querySelector('#editModal button[onclick="saveProfile()"]');
+            setLoading(btn, true, 'Saving...');
+            await apiPut('/profile', { jobTitle, location, skills });
+            setLoading(btn, false);
+            closeModal();
+            toast('Profile updated!', 'success');
+            updatePageData();
+        }
+
+        function logout() {
+            localStorage.removeItem('jc_token');
+            localStorage.removeItem('jc_user');
+            window.location.href = 'index.html';
+        }
+
+        let notifOpen = false;
+        function toggleNotifPanel() {
+            notifOpen = !notifOpen;
+            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
+            if (notifOpen) loadNotificationDropdown();
+        }
+
+        window.onload = () => { loadNotificationBell(); updatePageData(); loadResumeScore(); };
+    </script>
+</body>
+</html>
+
+
+
+
+

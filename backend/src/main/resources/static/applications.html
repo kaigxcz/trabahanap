@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applications | TrabaHanap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+    <aside class="w-full md:w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0">
+        <div class="flex items-center justify-between mb-10">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
+                <div>
+                    <span class="font-bold text-lg tracking-tight block leading-tight">TrabaHanap</span>
+                    <span class="text-[9px] text-slate-400 font-medium leading-tight">Online Job Application System</span>
+                </div>
+            </div>
+            <div class="relative">
+                <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                    🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                </button>
+                <div id="notif-panel" class="hidden absolute left-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                        <span class="font-bold text-slate-800 text-sm">Notifications</span>
+                        <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">Close</button>
+                    </div>
+                    <div id="notif-list" class="max-h-72 overflow-y-auto p-2"></div>
+                </div>
+            </div>
+        </div>
+        <nav class="space-y-1 flex-1">
+            <a href="/dashboard" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🏠</span><span class="text-sm">Find Jobs</span></a>
+            <a href="/saved" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🔖</span><span class="text-sm">Saved Jobs</span></a>
+            <a href="/applications" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>📂</span><span class="text-sm">Applications</span></a>
+            <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
+        </nav>
+        <button onclick="logout()" class="mt-6 text-slate-400 hover:text-red-500 font-medium px-4 py-3 text-left transition text-sm">Log out</button>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-8">
+        <header class="mb-8">
+            <h1 class="text-2xl font-bold text-slate-900">My Applications</h1>
+            <p class="text-slate-400 text-sm mt-1">Track every step of your job search journey.</p>
+        </header>
+        <div id="apps-container" class="space-y-4">
+            <p class="text-slate-400 text-sm">Loading...</p>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        if (!localStorage.getItem('jc_token')) window.location.href = 'index.html';
+
+        const STEPS = ['Applied', 'Under Review', 'Interview', 'Offer'];
+        const STEP_ICONS = ['📤', '🔍', '🗣️', '🎉'];
+
+        function buildTimeline(currentStatus) {
+            const isRejected = currentStatus === 'Rejected';
+            if (isRejected) {
+                return `<div class="flex items-center gap-2 mt-3">
+                    <span class="step-dot bg-red-100 text-red-500">✕</span>
+                    <span class="text-xs font-bold text-red-500">Application Rejected</span>
+                </div>`;
+            }
+            const currentIdx = STEPS.indexOf(currentStatus);
+            return `<div class="flex items-center mt-4 gap-0">
+                ${STEPS.map((step, i) => {
+                    const done = i < currentIdx;
+                    const active = i === currentIdx;
+                    const dotClass = done ? 'bg-indigo-600 text-white' : active ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : 'bg-slate-100 text-slate-400';
+                    const lineClass = i < STEPS.length - 1 ? (done ? 'bg-indigo-600' : 'bg-slate-200') : '';
+                    return `
+                        <div class="flex flex-col items-center">
+                            <div class="step-dot ${dotClass}">${done ? '✓' : STEP_ICONS[i]}</div>
+                            <p class="text-[9px] font-semibold mt-1 ${active ? 'text-indigo-600' : done ? 'text-slate-500' : 'text-slate-300'} whitespace-nowrap">${step}</p>
+                        </div>
+                        ${i < STEPS.length - 1 ? `<div class="step-line ${lineClass} mb-4"></div>` : ''}`;
+                }).join('')}
+            </div>`;
+        }
+
+        async function loadApplications() {
+            const apps = await apiGet('/applications');
+            const container = document.getElementById('apps-container');
+            if (!apps.length) {
+                container.innerHTML = `<div class="text-center py-20 text-slate-400">
+                    <div class="text-5xl mb-4">📂</div>
+                    <p class="font-semibold text-slate-600">No applications yet.</p>
+                    <p class="text-sm mt-1">Start applying for jobs from the dashboard.</p>
+                    <a href="/dashboard" class="inline-block mt-6 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition text-sm">Find Jobs</a>
+                </div>`;
+                return;
+            }
+            container.innerHTML = apps.map(app => `
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl shrink-0">📄</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">${app.jobTitle}</h4>
+                                <p class="text-slate-500 text-sm">${app.company}</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Applied ${new Date(app.appliedAt).toLocaleDateString('en-PH', {year:'numeric',month:'short',day:'numeric'})}</p>
+                            </div>
+                        </div>
+                        <button onclick="withdraw(${app.id}, this)" class="inline-flex items-center h-8 text-xs text-slate-400 hover:text-red-500 border border-slate-200 hover:border-red-200 px-3 rounded-xl transition font-medium shrink-0">Withdraw</button>
+                    </div>
+                    ${buildTimeline(app.status)}
+                </div>`).join('');
+        }
+
+        async function withdraw(id, btn) {
+            showConfirm('This will remove your application. This cannot be undone.', async () => {
+                const data = await apiDelete('/applications/' + id);
+                if (data.message) {
+                    btn.closest('.card, .bg-white').remove();
+                    toast('Application withdrawn.', 'info');
+                    if (!document.querySelector('#apps-container .bg-white, #apps-container .card')) loadApplications();
+                } else toast(data.error || 'Something went wrong.', 'error');
+            });
+        }
+
+        let notifOpen = false;
+        function toggleNotifPanel() {
+            notifOpen = !notifOpen;
+            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
+            if (notifOpen) loadNotificationDropdown();
+        }
+
+        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
+        window.onload = () => { loadNotificationBell(); loadApplications(); };
+    </script>
+</body>
+</html>
+
+
+
+
+

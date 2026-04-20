@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Jobs | TrabaHanap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .job-card { transition: all 0.2s; }
+        .job-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); border-color: #e0e7ff; }
+        /* Dark mode */
+        body.dark { background: #0f172a; color: #e2e8f0; }
+        body.dark aside { background: #1e293b; border-color: #334155; }
+        body.dark .nav-link:hover { background: #334155; color: #818cf8; }
+        body.dark .nav-link.active { background: #312e81; color: #a5b4fc; }
+        body.dark main { background: #0f172a; }
+        body.dark .bg-white { background: #1e293b !important; border-color: #334155 !important; }
+        body.dark .text-slate-900 { color: #f1f5f9 !important; }
+        body.dark .text-slate-700 { color: #cbd5e1 !important; }
+        body.dark .text-slate-600 { color: #94a3b8 !important; }
+        body.dark .text-slate-500 { color: #64748b !important; }
+        body.dark .bg-slate-50 { background: #0f172a !important; }
+        body.dark .border-slate-100 { border-color: #334155 !important; }
+        body.dark .border-slate-200 { border-color: #334155 !important; }
+        body.dark input { background: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+        body.dark .flt-label:hover { background: #312e81; }
+        body.dark .flt-label span { color: #94a3b8; }
+        body.dark .flt-group-title { color: #64748b; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0 overflow-y-auto" style="height:100vh;position:sticky;top:0">
+        <div class="flex items-center justify-between mb-10">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md">
+                    <span class="text-white font-black text-xs">T</span>
+                </div>
+                <div>
+                    <span class="font-bold text-lg tracking-tight block leading-tight">TrabaHanap</span>
+                    <span class="text-[9px] text-slate-400 font-medium leading-tight">Online Job Application System</span>
+                </div>
+            </div>
+            <div class="relative">
+                <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                    🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                </button>
+                <div id="notif-panel" class="hidden absolute left-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                        <span class="font-bold text-slate-800 text-sm">Notifications</span>
+                        <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">Close</button>
+                    </div>
+                    <div id="notif-list" class="max-h-72 overflow-y-auto p-2"></div>
+                </div>
+            </div>
+        </div>
+        <nav class="space-y-1">
+            <a href="/dashboard" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🏠</span><span class="text-sm">Find Jobs</span></a>
+            <a href="/saved" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🔖</span><span class="text-sm">Saved Jobs</span></a>
+            <a href="/applications" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>📂</span><span class="text-sm">Applications</span>
+                <span id="app-count-badge" class="ml-auto text-[10px] font-bold bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full hidden"></span>
+            </a>
+            <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
+        </nav>
+        <!-- Filter Panel -->
+        <div class="mt-5 pt-5 border-t border-slate-100">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <p style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em">Filters</p>
+                <button onclick="clearFilters()" style="font-size:11px;font-weight:700;color:#6366f1;background:#eef2ff;border:none;padding:3px 10px;border-radius:8px;cursor:pointer">Clear all</button>
+            </div>
+
+            <style>
+                .flt-label { display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:10px; cursor:pointer; transition:background 0.15s; }
+                .flt-label:hover { background:#eef2ff; }
+                .flt-label:hover span { color:#4338ca; }
+                .flt-label input { width:15px; height:15px; accent-color:#4f46e5; flex-shrink:0; cursor:pointer; }
+                .flt-label span { font-size:13px; color:#475569; font-weight:500; line-height:1; transition:color 0.15s; }
+                .flt-group-title { font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; padding:0 10px; margin-bottom:4px; }
+                .flt-divider { border:none; border-top:1px solid #f1f5f9; margin:10px 0; }
+            </style>
+
+            <p class="flt-group-title">Job Type</p>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="Full-time" onchange="applyFilters()"><span>Full-time</span></label>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="Part-time" onchange="applyFilters()"><span>Part-time</span></label>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="Contract" onchange="applyFilters()"><span>Contract</span></label>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="Internship" onchange="applyFilters()"><span>Internship</span></label>
+
+            <hr class="flt-divider">
+            <p class="flt-group-title">Experience</p>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="Fresh/Entry" onchange="applyFilters()"><span>Fresh / Entry</span></label>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="1-3 years" onchange="applyFilters()"><span>1–3 years</span></label>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="3-5 years" onchange="applyFilters()"><span>3–5 years</span></label>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="5+ years" onchange="applyFilters()"><span>5+ years</span></label>
+
+            <hr class="flt-divider">
+            <p class="flt-group-title">Work Setup</p>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="Remote" onchange="applyFilters()"><span>Remote</span></label>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="Onsite" onchange="applyFilters()"><span>On-site</span></label>
+        </div>
+        <button onclick="logout()" class="mt-6 text-slate-400 hover:text-red-500 font-medium px-4 py-3 text-left transition text-sm">Log out</button>
+        <button onclick="toggleDark()" id="dark-btn" class="mt-2 text-slate-400 hover:text-slate-600 font-medium px-4 py-2 text-left transition text-sm flex items-center gap-2">🌙 <span id="dark-label">Dark Mode</span></button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+
+        <!-- Greeting + Search -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-slate-900">Good day, <span id="greeting-name" class="text-indigo-600">there</span> 👋</h1>
+            <p class="text-slate-400 text-sm mt-1">Here are the latest opportunities for you.</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm mb-6">
+            <div class="flex flex-col md:flex-row gap-3">
+                <div class="flex-1 relative">
+                    <span class="absolute left-4 top-3.5 text-slate-400 text-sm">🔍</span>
+                    <input type="text" id="search-role" oninput="handleSearch()" placeholder="Job title, skills, or company"
+                           class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 transition text-sm">
+                </div>
+                <div class="flex-1 relative">
+                    <span class="absolute left-4 top-3.5 text-slate-400 text-sm">📍</span>
+                    <input type="text" id="search-loc" oninput="handleSearch()" placeholder="City or region"
+                           class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 transition text-sm">
+                </div>
+                <button onclick="handleSearch()" class="h-[46px] bg-indigo-600 text-white px-8 rounded-2xl font-bold hover:bg-indigo-700 transition shrink-0 text-sm">Search</button>
+            </div>
+            <!-- Recent searches -->
+            <div id="recent-searches" class="mt-3 hidden">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Recent Searches</p>
+                <div id="recent-list" class="flex flex-wrap gap-2"></div>
+            </div>
+        </div>
+
+        <!-- Category Pills -->
+        <div class="flex flex-wrap gap-2 mb-6">
+            <button onclick="filterByCategory('all', this)" class="cat-pill active">All Jobs</button>
+            <button onclick="filterByCategory('Technology', this)" class="cat-pill">💻 Tech</button>
+            <button onclick="filterByCategory('Creative', this)" class="cat-pill">🎨 Creative</button>
+            <button onclick="filterByCategory('Finance', this)" class="cat-pill">🏦 Finance</button>
+            <button onclick="filterByCategory('Healthcare', this)" class="cat-pill">🏥 Healthcare</button>
+            <button onclick="filterByCategory('Education', this)" class="cat-pill">📚 Education</button>
+            <button onclick="filterByCategory('Marketing', this)" class="cat-pill">📣 Marketing</button>
+        </div>
+
+        <!-- Recommended Section -->
+        <div id="recommended-section" class="mb-8 hidden">
+            <h3 class="text-sm font-bold text-slate-700 mb-3">⭐ Recommended for you</h3>
+            <div id="recommended-grid" class="grid grid-cols-1 gap-3"></div>
+        </div>
+
+        <!-- All Jobs -->
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-slate-700" id="result-title">All Jobs</h3>
+            <span id="result-count" class="text-xs text-slate-400 bg-slate-100 px-3 py-1 rounded-full"></span>
+        </div>
+        <div class="grid grid-cols-1 gap-3" id="jobs-grid">
+            <!-- Skeleton loaders -->
+            ${[1,2,3].map(() => `<div class="card p-5 flex gap-4 items-center"><div class="skeleton w-12 h-12 shrink-0"></div><div class="flex-1 space-y-2"><div class="skeleton h-4 w-48"></div><div class="skeleton h-3 w-32"></div><div class="skeleton h-3 w-24"></div></div></div>`).join('')}
+        </div>
+    </main>
+
+    <!-- Job Detail Modal -->
+    <div id="jobModal" class="modal p-4">
+        <div class="modal-box bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-8 text-white shrink-0 relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 80% 20%, white 0%, transparent 60%)"></div>
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white transition text-sm">✕</button>
+                <div class="flex items-start gap-5 relative">
+                    <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-3xl shrink-0 border border-white/20" id="modal-icon"></div>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="text-xl font-bold" id="modal-title"></h2>
+                        <p class="text-indigo-200 text-sm mt-0.5" id="modal-company"></p>
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <span class="badge" style="background:rgba(255,255,255,0.2);color:white" id="modal-type"></span>
+                            <span class="badge" style="background:rgba(255,255,255,0.2);color:white" id="modal-exp"></span>
+                            <span class="badge" style="background:rgba(255,255,255,0.2);color:white" id="modal-loc"></span>
+                            <span class="badge" style="background:rgba(45,212,191,0.4);color:white" id="modal-salary"></span>
+                        </div>
+                    </div>
+                    <div class="shrink-0 text-center bg-white/20 backdrop-blur rounded-2xl px-4 py-3 border border-white/20">
+                        <p class="text-2xl font-black" id="modal-match-score">—</p>
+                        <p class="text-xs text-indigo-200">match</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-8 space-y-5 overflow-y-auto flex-1">
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">About the Role</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed" id="modal-desc"></p>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Requirements</h4>
+                    <div id="modal-reqs" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div id="similar-jobs-section" class="hidden">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Similar Jobs</h4>
+                    <div id="similar-jobs-list" class="space-y-2"></div>
+                </div>
+            </div>
+            <div class="px-8 pb-8 flex items-stretch gap-3 shrink-0 border-t border-slate-100 pt-5">
+                <button onclick="shareJob()" class="btn btn-secondary h-12 px-4" title="Copy link">🔗</button>
+                <button id="modal-save-btn" onclick="toggleSaveFromModal()" class="btn btn-secondary h-12 px-5">🤍 Save</button>
+                <button onclick="applyFromModal()" class="btn btn-primary flex-1 h-12">⚡ Easy Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        if (!localStorage.getItem('jc_token')) window.location.href = 'index.html';
+        const currentUser = JSON.parse(localStorage.getItem('jc_user') || '{}');
+        if (currentUser.role === 'EMPLOYER') { window.location.href = 'employer.html'; }
+        if (currentUser.role === 'ADMIN') { window.location.href = 'admin.html'; }
+
+        let currentCategory = 'all', savedIds = [], allJobsCache = [], currentModalJob = null;
+        let activeTypeFilters = [], activeExpFilters = [], activeWorkFilters = [];
+
+        async function init() {
+            const firstName = (currentUser.fullName || '').split(' ')[0];
+            if (firstName) document.getElementById('greeting-name').innerText = firstName;
+            savedIds = await apiGet('/saved/ids');
+            loadNotificationBell();
+            allJobsCache = await apiGet('/jobs?keyword=&location=&category=all');
+            renderRecommended();
+            renderJobs(allJobsCache);
+            loadRecentSearches();
+            loadAppCountBadge();
+        }
+
+        // ── Recent searches ──
+        function loadRecentSearches() {
+            const searches = JSON.parse(localStorage.getItem('jc_recent_searches') || '[]');
+            if (!searches.length) return;
+            document.getElementById('recent-searches').classList.remove('hidden');
+            document.getElementById('recent-list').innerHTML = searches.map(s =>
+                `<button onclick="applyRecentSearch('${s}')" class="text-xs bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 text-slate-600 font-medium px-3 py-1.5 rounded-full transition">🕐 ${s}</button>`
+            ).join('');
+        }
+
+        function saveRecentSearch(term) {
+            if (!term.trim()) return;
+            let searches = JSON.parse(localStorage.getItem('jc_recent_searches') || '[]');
+            searches = [term, ...searches.filter(s => s !== term)].slice(0, 5);
+            localStorage.setItem('jc_recent_searches', JSON.stringify(searches));
+            loadRecentSearches();
+        }
+
+        function applyRecentSearch(term) {
+            document.getElementById('search-role').value = term;
+            handleSearch();
+        }
+
+        // ── App count badge ──
+        async function loadAppCountBadge() {
+            try {
+                const apps = await apiGet('/applications');
+                const badge = document.getElementById('app-count-badge');
+                if (apps.length > 0) {
+                    badge.innerText = apps.length;
+                    badge.classList.remove('hidden');
+                }
+            } catch(e) {}
+        }
+
+        function renderRecommended() {
+            if (!currentUser.skills) return;
+            const userSkills = currentUser.skills.toLowerCase().split(',').map(s => s.trim());
+            const recommended = allJobsCache.filter(job => {
+                if (!job.requirements) return false;
+                const reqs = job.requirements.toLowerCase().split(',').map(r => r.trim());
+                return userSkills.some(s => reqs.some(r => r.includes(s) || s.includes(r)));
+            }).slice(0, 3);
+            if (!recommended.length) return;
+            document.getElementById('recommended-section').classList.remove('hidden');
+            document.getElementById('recommended-grid').innerHTML = recommended.map(job => buildJobCard(job, true)).join('');
+        }
+
+        function buildJobCard(job, compact = false) {
+            const isSaved = savedIds.includes(job.id);
+            const matchScore = calcLocalMatch(job);
+            const matchColor = matchScore >= 70 ? 'text-green-600 bg-green-50' : matchScore >= 40 ? 'text-amber-600 bg-amber-50' : 'text-slate-400 bg-slate-100';
+            const daysAgo = job.postedAt ? Math.floor((Date.now() - new Date(job.postedAt)) / 86400000) : null;
+            const postedLabel = daysAgo === null ? '' : daysAgo === 0 ? '<span class="badge badge-green">🆕 Today</span>' : daysAgo <= 3 ? `<span class="badge badge-indigo">${daysAgo}d ago</span>` : `<span class="badge badge-slate">${daysAgo}d ago</span>`;
+            return `
+                <div class="job-card card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 cursor-pointer" onclick="openJobModal(${job.id})">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="text-sm font-bold text-slate-900">${job.title}</h4>
+                                ${job.featured ? '<span class="badge" style="background:#fef3c7;color:#d97706">⭐ Featured</span>' : ''}
+                                <span class="badge badge-indigo">⚡ Easy Apply</span>
+                                ${matchScore > 0 ? `<span class="badge ${matchColor}">${matchScore}% match</span>` : ''}
+                                ${postedLabel}
+                            </div>
+                            <p class="text-slate-500 text-xs mt-0.5">${job.company} • ${job.location}</p>
+                            <div class="flex flex-wrap gap-1.5 mt-1.5">
+                                <span class="badge badge-slate">${job.type}</span>
+                                <span class="badge badge-slate">${job.experience}</span>
+                                <span class="text-[10px] font-bold text-teal-600">${job.salary}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0" onclick="event.stopPropagation()">
+                        <button onclick="toggleSave(${job.id}, this)" class="btn-icon ${isSaved ? 'text-red-500 border-red-200' : ''}" title="${isSaved ? 'Unsave' : 'Save job'}">${isSaved ? '❤️' : '🤍'}</button>
+                        <button onclick="quickApply('${job.title}', '${job.company}', ${job.id})" class="btn btn-primary btn-sm">Apply</button>
+                    </div>
+                </div>`;
+        }
+
+        function calcLocalMatch(job) {
+            if (!currentUser.skills || !job.requirements) return 0;
+            const skills = currentUser.skills.toLowerCase().split(',').map(s => s.trim());
+            const reqs = job.requirements.toLowerCase().split(',').map(r => r.trim());
+            const matches = skills.filter(s => reqs.some(r => r.includes(s) || s.includes(r))).length;
+            return Math.min(100, Math.round((matches / Math.max(reqs.length, 1)) * 100));
+        }
+
+        function renderJobs(jobs) {
+            const grid = document.getElementById('jobs-grid');
+            document.getElementById('result-count').innerText = `${jobs.length} job${jobs.length !== 1 ? 's' : ''}`;
+            if (!jobs.length) { grid.innerHTML = '<div class="text-center py-16 text-slate-400 fade-in"><div class="text-5xl mb-3">🔍</div><p class="font-semibold text-slate-600">No jobs found</p><p class="text-sm mt-1">Try adjusting your search or filters.</p></div>'; return; }
+            grid.innerHTML = jobs.map((j, i) => `<div style="animation-delay:${i*40}ms" class="fade-in">${buildJobCard(j)}</div>`).join('');
+        }
+
+        function getFilteredJobs() {
+            return allJobsCache.filter(job => {
+                const kw = document.getElementById('search-role').value.toLowerCase();
+                const loc = document.getElementById('search-loc').value.toLowerCase();
+                const matchKw = !kw || job.title.toLowerCase().includes(kw) || job.company.toLowerCase().includes(kw);
+                const matchLoc = !loc || job.location.toLowerCase().includes(loc);
+                const matchCat = currentCategory === 'all' || job.category === currentCategory;
+                const matchType = !activeTypeFilters.length || activeTypeFilters.includes(job.type);
+                const matchExp = !activeExpFilters.length || activeExpFilters.includes(job.experience);
+                const matchWork = !activeWorkFilters.length || activeWorkFilters.some(f => job.location.toLowerCase().includes(f.toLowerCase()));
+                return matchKw && matchLoc && matchCat && matchType && matchExp && matchWork;
+            });
+        }
+
+        function applyFilters() {
+            activeTypeFilters = [...document.querySelectorAll('.filter-check:checked')].filter(c => ['Full-time','Part-time','Contract','Internship'].includes(c.value)).map(c => c.value);
+            activeExpFilters = [...document.querySelectorAll('.filter-check:checked')].filter(c => ['Fresh/Entry','1-3 years','3-5 years','5+ years'].includes(c.value)).map(c => c.value);
+            activeWorkFilters = [...document.querySelectorAll('.filter-check:checked')].filter(c => ['Remote','Onsite'].includes(c.value)).map(c => c.value);
+            renderJobs(getFilteredJobs());
+        }
+
+        function clearFilters() {
+            document.querySelectorAll('.filter-check').forEach(c => c.checked = false);
+            activeTypeFilters = []; activeExpFilters = []; activeWorkFilters = [];
+            renderJobs(getFilteredJobs());
+        }
+
+        async function handleSearch() {
+            const kw = document.getElementById('search-role').value.trim();
+            if (kw) saveRecentSearch(kw);
+            renderJobs(getFilteredJobs());
+        }
+
+        function filterByCategory(cat, btn) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('result-title').innerText = cat === 'all' ? 'All Jobs' : cat + ' Jobs';
+            renderJobs(getFilteredJobs());
+        }
+
+        async function toggleSave(jobId, btn) {
+            const data = await apiPost('/saved/' + jobId, {}, true);
+            btn.innerHTML = data.saved ? '❤️' : '🤍';
+            btn.classList.toggle('text-red-500', data.saved);
+            btn.classList.toggle('text-slate-400', !data.saved);
+            if (data.saved) { if (!savedIds.includes(jobId)) savedIds.push(jobId); }
+            else { savedIds = savedIds.filter(id => id !== jobId); }
+        }
+
+        async function quickApply(jobTitle, company, jobId) {
+            const data = await apiPost('/applications', { jobTitle, company, jobId: String(jobId) }, true);
+            toast(data.message || data.error, data.error ? 'error' : 'success');
+        }
+
+        async function openJobModal(jobId) {
+            const job = allJobsCache.find(j => j.id === jobId);
+            if (!job) return;
+            currentModalJob = job;
+            document.getElementById('modal-icon').innerText = job.icon;
+            document.getElementById('modal-title').innerText = job.title;
+            document.getElementById('modal-company').innerText = job.company;
+            document.getElementById('modal-type').innerText = job.type;
+            document.getElementById('modal-exp').innerText = job.experience;
+            document.getElementById('modal-loc').innerText = '📍 ' + job.location;
+            document.getElementById('modal-salary').innerText = job.salary;
+            document.getElementById('modal-desc').innerText = job.description || 'No description available.';
+            const reqs = (job.requirements || '').split(',').map(r => r.trim()).filter(Boolean);
+            document.getElementById('modal-reqs').innerHTML = reqs.map(r => `<span class="bg-slate-100 text-slate-600 text-xs font-medium px-3 py-1 rounded-full">${r}</span>`).join('');
+            const score = calcLocalMatch(job);
+            const scoreEl = document.getElementById('modal-match-score');
+            scoreEl.innerText = score > 0 ? score + '%' : '—';
+            scoreEl.className = 'text-2xl font-black ' + (score >= 70 ? 'text-green-400' : score >= 40 ? 'text-amber-400' : 'text-white');
+            const isSaved = savedIds.includes(job.id);
+            const saveBtn = document.getElementById('modal-save-btn');
+            saveBtn.innerHTML = isSaved ? '❤️ Saved' : '🤍 Save';
+            saveBtn.className = `btn btn-secondary h-12 px-5 ${isSaved ? 'border-red-200 text-red-500' : ''}`;
+
+            // Similar jobs
+            const similar = allJobsCache.filter(j => j.id !== job.id && j.category === job.category).slice(0, 3);
+            const simSection = document.getElementById('similar-jobs-section');
+            if (similar.length) {
+                simSection.classList.remove('hidden');
+                document.getElementById('similar-jobs-list').innerHTML = similar.map(s => `
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-indigo-50 cursor-pointer transition" onclick="closeModal();setTimeout(()=>openJobModal(${s.id}),150)">
+                        <span class="text-xl">${s.icon}</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-slate-800 truncate">${s.title}</p>
+                            <p class="text-xs text-slate-500">${s.company} • ${s.salary}</p>
+                        </div>
+                        <span class="text-xs text-indigo-500 font-semibold shrink-0">View →</span>
+                    </div>`).join('');
+            } else {
+                simSection.classList.add('hidden');
+            }
+
+            document.getElementById('jobModal').classList.add('active');
+        }
+
+        function shareJob() {
+            if (!currentModalJob) return;
+            const url = `${location.origin}${location.pathname}?job=${currentModalJob.id}`;
+            navigator.clipboard.writeText(url).then(() => toast('Job link copied to clipboard!', 'success'));
+        }
+
+        function closeModal() { document.getElementById('jobModal').classList.remove('active'); }
+
+        async function toggleSaveFromModal() {
+            if (!currentModalJob) return;
+            const data = await apiPost('/saved/' + currentModalJob.id, {}, true);
+            const btn = document.getElementById('modal-save-btn');
+            if (data.saved) { btn.innerHTML = '❤️ Saved'; btn.className = 'h-12 px-6 border border-red-200 text-red-500 rounded-2xl font-semibold transition'; if (!savedIds.includes(currentModalJob.id)) savedIds.push(currentModalJob.id); }
+            else { btn.innerHTML = '🤍 Save'; btn.className = 'h-12 px-6 border border-slate-200 text-slate-500 hover:text-red-500 rounded-2xl font-semibold transition'; savedIds = savedIds.filter(id => id !== currentModalJob.id); }
+            renderJobs(getFilteredJobs());
+        }
+
+        async function applyFromModal() {
+            if (!currentModalJob) return;
+            const btn = document.querySelector('#jobModal .btn-primary');
+            setLoading(btn, true, 'Applying...');
+            const data = await apiPost('/applications', { jobTitle: currentModalJob.title, company: currentModalJob.company, jobId: String(currentModalJob.id) }, true);
+            setLoading(btn, false);
+            toast(data.message || data.error, data.error ? 'error' : 'success');
+            if (!data.error) closeModal();
+        }
+
+        document.getElementById('jobModal').addEventListener('click', e => { if (e.target === document.getElementById('jobModal')) closeModal(); });
+
+        let notifOpen = false;
+        function toggleNotifPanel() {
+            notifOpen = !notifOpen;
+            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
+            if (notifOpen) loadNotificationDropdown();
+        }
+
+        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
+
+
+
+
+

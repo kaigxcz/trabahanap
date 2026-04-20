@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Tips | TrabaHanap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hero-bg { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%); }
+        .tip-card { background: white; border-radius: 1.5rem; border: 1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.2s; overflow: hidden; }
+        .tip-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); border-color: #e0e7ff; }
+        .nav-sticky { position: sticky; top: 0; z-index: 100; background: rgba(15,23,42,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.08); }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <nav class="nav-sticky">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg"><span class="text-white font-black">T</span></div>
+                <div><span class="font-bold text-base text-white tracking-tight block leading-tight">TrabaHanap</span><span style="font-size:9px;color:#a5b4fc;font-weight:600">Online Job Application System</span></div>
+            </a>
+            <div class="flex items-center gap-3">
+                <a href="/login" class="text-slate-300 hover:text-white text-sm font-semibold transition px-4 py-2">Sign In</a>
+                <a href="/login" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-bg text-white py-20 px-6 text-center">
+        <div class="max-w-3xl mx-auto slide-up">
+            <p class="text-indigo-400 text-sm font-bold uppercase tracking-widest mb-4">Career Resources</p>
+            <h1 class="text-5xl font-extrabold mb-4">Career Tips & Advice</h1>
+            <p class="text-slate-400 text-lg">Expert guidance to help you land your next job faster.</p>
+        </div>
+    </section>
+
+    <!-- Tips Grid -->
+    <section class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Featured tip -->
+            <div class="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-[2rem] p-10 text-white mb-12 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div class="relative max-w-2xl">
+                    <span class="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-4">⭐ Featured Tip</span>
+                    <h2 class="text-3xl font-extrabold mb-3">Tailor your resume for every application</h2>
+                    <p class="text-indigo-200 leading-relaxed mb-6">Generic resumes get ignored. Recruiters spend an average of 7 seconds scanning a resume. Mirror the exact keywords from the job description, quantify your achievements with numbers, and lead with your most relevant experience. A tailored resume can increase your callback rate by up to 40%.</p>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">Resume</span>
+                        <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">Job Search</span>
+                        <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">ATS Optimization</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div class="tip-card fade-in">
+                    <div class="h-2 bg-gradient-to-r from-indigo-500 to-violet-500"></div>
+                    <div class="p-7">
+                        <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-2xl mb-4">📝</div>
+                        <span class="badge badge-indigo mb-3">Resume</span>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">Use the STAR method for achievements</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">Structure your bullet points as Situation, Task, Action, Result. Instead of "managed a team," write "Led a team of 5 engineers to deliver a product 2 weeks ahead of schedule, reducing costs by 15%."</p>
+                    </div>
+                </div>
+
+                <div class="tip-card fade-in" style="animation-delay:0.05s">
+                    <div class="h-2 bg-gradient-to-r from-teal-500 to-green-500"></div>
+                    <div class="p-7">
+                        <div class="w-12 h-12 bg-teal-50 rounded-2xl flex items-center justify-center text-2xl mb-4">🤝</div>
+                        <span class="badge badge-teal mb-3">Networking</span>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">80% of jobs are filled through networking</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">Most positions are never publicly posted. Connect with people in your target companies on LinkedIn, attend industry events, and reach out to former colleagues. A warm referral is 9x more likely to get you an interview.</p>
+                    </div>
+                </div>
+
+                <div class="tip-card fade-in" style="animation-delay:0.1s">
+                    <div class="h-2 bg-gradient-to-r from-amber-500 to-orange-500"></div>
+                    <div class="p-7">
+                        <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-2xl mb-4">🎯</div>
+                        <span class="badge badge-amber mb-3">Interview</span>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">Research the company deeply before interviews</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">Know their recent news, products, competitors, and culture. Prepare 3 thoughtful questions to ask. Interviewers remember candidates who show genuine curiosity about the company's challenges and direction.</p>
+                    </div>
+                </div>
+
+                <div class="tip-card fade-in" style="animation-delay:0.15s">
+                    <div class="h-2 bg-gradient-to-r from-violet-500 to-purple-500"></div>
+                    <div class="p-7">
+                        <div class="w-12 h-12 bg-violet-50 rounded-2xl flex items-center justify-center text-2xl mb-4">💰</div>
+                        <span class="badge badge-purple mb-3">Salary</span>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">Never give the first number in salary talks</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">When asked about salary expectations, redirect with "I'd love to understand the full scope of the role first." Research market rates on Glassdoor and LinkedIn Salary. Always negotiate — 85% of employers expect it.</p>
+                    </div>
+                </div>
+
+                <div class="tip-card fade-in" style="animation-delay:0.2s">
+                    <div class="h-2 bg-gradient-to-r from-rose-500 to-pink-500"></div>
+                    <div class="p-7">
+                        <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-2xl mb-4">🔗</div>
+                        <span class="badge badge-red mb-3">LinkedIn</span>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">Optimize your LinkedIn profile headline</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">Your headline is the first thing recruiters see. Don't just put your job title — add your value proposition. Example: "Frontend Engineer | React & TypeScript | Building fast, accessible web apps" gets 3x more profile views.</p>
+                    </div>
+                </div>
+
+                <div class="tip-card fade-in" style="animation-delay:0.25s">
+                    <div class="h-2 bg-gradient-to-r from-slate-500 to-slate-700"></div>
+                    <div class="p-7">
+                        <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-2xl mb-4">⏰</div>
+                        <span class="badge badge-slate mb-3">Productivity</span>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">Apply within 3 days of a job posting</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">Applications submitted in the first 3 days are 8x more likely to get an interview. Set up job alerts, check daily, and apply immediately to roles that match your profile. Speed matters more than perfection.</p>
+                    </div>
+                </div>
+
+                <div class="tip-card fade-in" style="animation-delay:0.3s">
+                    <div class="h-2 bg-gradient-to-r from-green-500 to-emerald-500"></div>
+                    <div class="p-7">
+                        <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-2xl mb-4">📊</div>
+                        <span class="badge badge-green mb-3">Skills</span>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">List skills that match the job description exactly</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">Most companies use ATS (Applicant Tracking Systems) that scan for keywords. If the job says "React.js" don't write "ReactJS." Copy the exact terminology from the posting. This alone can double your pass-through rate.</p>
+                    </div>
+                </div>
+
+                <div class="tip-card fade-in" style="animation-delay:0.35s">
+                    <div class="h-2 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+                    <div class="p-7">
+                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-2xl mb-4">✉️</div>
+                        <span class="badge badge-indigo mb-3">Cover Letter</span>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">Write a cover letter that tells a story</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">Don't summarize your resume. Instead, tell a specific story about why you want this role at this company. Open with a hook, connect your experience to their needs, and close with a clear call to action.</p>
+                    </div>
+                </div>
+
+                <div class="tip-card fade-in" style="animation-delay:0.4s">
+                    <div class="h-2 bg-gradient-to-r from-indigo-500 to-teal-500"></div>
+                    <div class="p-7">
+                        <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-2xl mb-4">🧠</div>
+                        <span class="badge badge-indigo mb-3">Mindset</span>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">Treat rejection as data, not failure</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">The average job seeker applies to 100+ positions before landing an offer. Every rejection narrows your search. Ask for feedback when possible, adjust your approach, and keep a consistent daily application habit rather than sporadic bursts.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 px-6 bg-white border-t border-slate-100">
+        <div class="max-w-2xl mx-auto text-center">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-3">Ready to put these tips to work?</h2>
+            <p class="text-slate-500 mb-8">Create your free profile and start applying to jobs that match your skills today.</p>
+            <a href="/login" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-4 rounded-2xl transition shadow-lg shadow-indigo-200">
+                Start Your Job Search →
+            </a>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 text-slate-500 py-8 px-6 text-center text-sm">
+        <p>© 2026 TrabaHanap. All rights reserved. · <a href="/" class="hover:text-white transition">Home</a> · <a href="/login" class="hover:text-white transition">Sign In</a></p>
+    </footer>
+
+</body>
+</html>
+
+
+
+
+

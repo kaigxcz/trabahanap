@@ -1,0 +1,7 @@
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+uploads/
+deploy/
+*.class
+*.log
+.DS_Store

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Jobs | TrabaHanap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+    <aside class="w-full md:w-72 bg-white border-r border-slate-100 p-8 flex flex-col">
+        <div class="flex items-center justify-between mb-12">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center">
+                    <span class="text-white font-bold text-xs">T</span>
+                </div>
+                <div>
+                    <span class="font-bold text-xl tracking-tight block leading-tight">TrabaHanap</span>
+                    <span class="text-[9px] text-slate-400 font-medium">Online Job Application System</span>
+                </div>
+            </div>
+            <div class="relative">
+                <button onclick="toggleNotifPanel()" class="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-slate-500 text-lg">
+                    🔔
+                    <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                </button>
+                <div id="notif-panel" class="hidden absolute left-0 top-12 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                        <span class="font-bold text-slate-800 text-sm">Notifications</span>
+                        <button onclick="toggleNotifPanel()" class="text-slate-400 hover:text-slate-600 text-xs">Close</button>
+                    </div>
+                    <div id="notif-list" class="max-h-72 overflow-y-auto p-2"></div>
+                </div>
+            </div>
+        </div>
+        <nav class="space-y-2 flex-1">
+            <a href="/dashboard" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>🏠</span><span>Find Jobs</span>
+            </a>
+            <a href="/saved" class="nav-link active w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>🔖</span><span>Saved Jobs</span>
+            </a>
+            <a href="/applications" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>📂</span><span>Applications</span>
+            </a>
+            <a href="/profile" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>👤</span><span>Profile</span>
+            </a>
+        </nav>
+        <button onclick="logout()" class="mt-10 text-slate-400 hover:text-red-500 font-medium px-4 py-3 text-left transition">Log out</button>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-12">
+        <header class="mb-10">
+            <h1 class="text-3xl font-bold text-slate-900">Saved Jobs</h1>
+            <p class="text-slate-500 mt-1">Jobs you've bookmarked for later</p>
+        </header>
+
+        <div class="grid grid-cols-1 gap-4" id="saved-grid">
+            <p class="text-slate-400 text-sm">Loading...</p>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        if (!localStorage.getItem('jc_token')) window.location.href = 'index.html';
+
+        async function loadSaved() {
+            const jobs = await apiGet('/saved');
+            const grid = document.getElementById('saved-grid');
+            if (!jobs.length) {
+                grid.innerHTML = `<div class="text-center py-20 text-slate-400">
+                    <div class="text-5xl mb-4">🔖</div>
+                    <p class="font-semibold">No saved jobs yet.</p>
+                    <p class="text-sm mt-1">Browse jobs and click the heart to save them here.</p>
+                    <a href="/dashboard" class="inline-block mt-6 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition">Browse Jobs</a>
+                </div>`;
+                return;
+            }
+            grid.innerHTML = jobs.map(job => `
+                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
+                        <div>
+                            <h4 class="text-base font-bold text-slate-900">${job.title}</h4>
+                            <p class="text-slate-500 text-sm">${job.company} • ${job.location}</p>
+                            <div class="flex flex-wrap gap-2 mt-1">
+                                <span class="text-xs bg-indigo-50 text-indigo-600 font-semibold px-2 py-0.5 rounded-full">${job.type}</span>
+                                <span class="text-xs bg-slate-100 text-slate-500 font-medium px-2 py-0.5 rounded-full">${job.experience}</span>
+                                <span class="text-xs font-bold text-teal-600">${job.salary}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0 self-end md:self-auto">
+                        <button onclick="unsave(${job.id}, this)" class="inline-flex items-center h-10 px-4 border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 rounded-xl text-sm font-medium transition">Remove</button>
+                        <button onclick="apply('${job.title}', '${job.company}')" class="inline-flex items-center h-10 bg-slate-900 text-white px-6 rounded-xl text-sm font-semibold hover:bg-indigo-600 transition">Apply</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        async function unsave(jobId, btn) {
+            await apiPost('/saved/' + jobId, {}, true);
+            btn.closest('.bg-white').remove();
+            if (!document.querySelector('#saved-grid .bg-white')) loadSaved();
+        }
+
+        async function apply(jobTitle, company) {
+            const data = await apiPost('/applications', { jobTitle, company }, true);
+            toast(data.message || data.error, data.error ? 'error' : 'success');
+        }
+
+        function logout() {
+            localStorage.removeItem('jc_token');
+            localStorage.removeItem('jc_user');
+            window.location.href = 'index.html';
+        }
+
+        let notifOpen = false;
+        function toggleNotifPanel() {
+            notifOpen = !notifOpen;
+            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
+            if (notifOpen) loadNotificationDropdown();
+        }
+
+        window.onload = () => { loadNotificationBell(); loadSaved(); };
+    </script>
+</body>
+</html>
+
+
+
+
+

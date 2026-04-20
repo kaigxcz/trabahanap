@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | TrabaHanap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .tab-btn.active { background: #4f46e5; color: white; border-radius: 1rem; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+    <aside class="w-full md:w-72 bg-white border-r border-slate-100 p-8 flex flex-col">
+        <div class="flex items-center justify-between mb-12">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-red-600 rounded-xl shadow-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-xs">A</span>
+                </div>
+                <div>
+                    <span class="font-bold text-xl tracking-tight block leading-tight">Admin Panel</span>
+                    <span class="text-[9px] text-slate-400 font-medium">TrabaHanap</span>
+                </div>
+            </div>
+            <span class="text-xs bg-red-100 text-red-700 font-bold px-2 py-1 rounded-lg">Admin</span>
+        </div>
+        <nav class="space-y-2 flex-1">
+            <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn active w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>📊</span><span>Dashboard</span>
+            </button>
+            <button onclick="showTab('users')" id="tab-users" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>👥</span><span>Users</span>
+            </button>
+            <button onclick="showTab('jobs')" id="tab-jobs" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>💼</span><span>Job Listings</span>
+            </button>
+        </nav>
+        <button onclick="logout()" class="mt-10 text-slate-400 hover:text-red-500 font-medium px-4 py-3 text-left transition">Log out</button>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+
+        <!-- Dashboard Tab -->
+        <div id="view-dashboard">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-slate-900">Platform Overview</h1>
+                <p class="text-slate-400 text-sm mt-1">Monitor the health of TrabaHanap.</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-5 mb-8">
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Total Users</p>
+                    <h3 id="s-users" class="text-3xl font-bold text-slate-900">—</h3>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Candidates</p>
+                    <h3 id="s-candidates" class="text-3xl font-bold text-indigo-600">—</h3>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Employers</p>
+                    <h3 id="s-employers" class="text-3xl font-bold text-teal-600">—</h3>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Total Jobs</p>
+                    <h3 id="s-jobs" class="text-3xl font-bold text-slate-900">—</h3>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Active Jobs</p>
+                    <h3 id="s-active" class="text-3xl font-bold text-green-600">—</h3>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Applications</p>
+                    <h3 id="s-apps" class="text-3xl font-bold text-amber-600">—</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="view-users" class="hidden">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-slate-900">User Management</h1>
+                <p class="text-slate-400 text-sm mt-1">View, change roles, or remove users.</p>
+            </div>
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Name</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Username</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Email</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Role</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Jobs Tab -->
+        <div id="view-jobs" class="hidden">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-slate-900">Job Listings</h1>
+                <p class="text-slate-400 text-sm mt-1">Monitor and manage all job postings.</p>
+            </div>
+            <div id="admin-jobs-list" class="space-y-4"></div>
+        </div>
+
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        const user = JSON.parse(localStorage.getItem('jc_user') || '{}');
+        if (!localStorage.getItem('jc_token') || user.role !== 'ADMIN') window.location.href = 'index.html';
+
+        const roleColors = { ADMIN: 'bg-red-50 text-red-600', EMPLOYER: 'bg-indigo-50 text-indigo-600', CANDIDATE: 'bg-teal-50 text-teal-600' };
+
+        function showTab(tab) {
+            ['dashboard','users','jobs'].forEach(t => {
+                document.getElementById('view-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).classList.remove('active');
+            });
+            document.getElementById('view-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).classList.add('active');
+            if (tab === 'dashboard') loadStats();
+            if (tab === 'users') loadUsers();
+            if (tab === 'jobs') loadJobs();
+        }
+
+        async function loadStats() {
+            const s = await apiGet('/admin/stats');
+            document.getElementById('s-users').innerText = s.totalUsers;
+            document.getElementById('s-candidates').innerText = s.candidates;
+            document.getElementById('s-employers').innerText = s.employers;
+            document.getElementById('s-jobs').innerText = s.totalJobs;
+            document.getElementById('s-active').innerText = s.activeJobs;
+            document.getElementById('s-apps').innerText = s.totalApplications;
+        }
+
+        async function loadUsers() {
+            const users = await apiGet('/admin/users');
+            document.getElementById('users-table').innerHTML = users.map(u => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 text-sm font-semibold text-slate-800">${u.fullName}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500">@${u.username}</td>
+                    <td class="px-6 py-4 text-sm text-slate-400">${u.email || '—'}</td>
+                    <td class="px-6 py-4">
+                        <span class="text-[11px] font-bold px-3 py-1 rounded-full uppercase ${roleColors[u.role] || 'bg-slate-100 text-slate-500'}">${u.role}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <select onchange="changeRole(${u.id}, this.value)" class="text-xs p-1.5 border border-slate-200 rounded-lg outline-none bg-white">
+                                ${['CANDIDATE','EMPLOYER','ADMIN'].map(r => `<option ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}
+                            </select>
+                            <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+
+        async function changeRole(id, role) {
+            await apiPut('/admin/users/' + id + '/role', { role });
+            toast('Role updated to ' + role, 'success');
+        }
+
+        async function deleteUser(id, username) {
+            showConfirm(`Delete user @${username}? All their data will be permanently removed.`, async () => {
+                await apiDelete('/admin/users/' + id);
+                toast(`User @${username} deleted.`, 'info');
+                loadUsers();
+            });
+        }
+
+        async function loadJobs() {
+            const jobs = await apiGet('/admin/jobs');
+            document.getElementById('admin-jobs-list').innerHTML = jobs.map(job => `
+                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
+                        <div>
+                            <h4 class="font-bold text-slate-900">${job.title}</h4>
+                            <p class="text-slate-500 text-sm">${job.company} • ${job.location}</p>
+                            <div class="flex gap-2 mt-1">
+                                <span class="text-xs ${job.active ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-400'} font-semibold px-2 py-0.5 rounded-full">${job.active ? 'Active' : 'Inactive'}</span>
+                                ${job.postedBy ? `<span class="text-xs bg-indigo-50 text-indigo-500 font-medium px-2 py-0.5 rounded-full">by @${job.postedBy}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="toggleJob(${job.id})" class="h-9 px-4 border border-slate-200 text-slate-500 hover:border-amber-400 hover:text-amber-600 rounded-xl text-sm font-medium transition">${job.active ? 'Deactivate' : 'Activate'}</button>
+                        <button onclick="deleteJob(${job.id})" class="h-9 px-4 border border-red-100 text-red-400 hover:bg-red-50 rounded-xl text-sm font-medium transition">Delete</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        async function toggleJob(id) {
+            const data = await apiPut('/admin/jobs/' + id + '/toggle', {});
+            toast('Job ' + (data.active ? 'activated' : 'deactivated') + '.', 'info');
+            loadJobs();
+        }
+
+        async function deleteJob(id) {
+            showConfirm('Delete this job listing permanently?', async () => {
+                await apiDelete('/admin/jobs/' + id);
+                toast('Job deleted.', 'info');
+                loadJobs();
+                loadStats();
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('jc_token');
+            localStorage.removeItem('jc_user');
+            window.location.href = 'index.html';
+        }
+
+        window.onload = loadStats;
+    </script>
+</body>
+</html>
+
+
+
+
+

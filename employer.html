@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Portal | TrabaHanap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .tab-btn.active { background: #4f46e5; color: white; }
+        .kanban-col { min-height: 120px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+    <aside class="w-full md:w-72 bg-white border-r border-slate-100 p-8 flex flex-col">
+        <div class="flex items-center justify-between mb-12">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center">
+                    <span class="text-white font-bold text-xs">T</span>
+                </div>
+                <div>
+                    <span class="font-bold text-xl tracking-tight block leading-tight">TrabaHanap</span>
+                    <span class="text-[9px] text-slate-400 font-medium">Online Job Application System</span>
+                </div>
+            </div>
+            <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded-lg">Employer</span>
+        </div>
+        <nav class="space-y-2 flex-1">
+            <button onclick="showTab('overview')" class="tab-btn active nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-overview">
+                <span>📊</span><span>Overview</span>
+            </button>
+            <button onclick="showTab('jobs')" class="tab-btn nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-jobs">
+                <span>💼</span><span>My Job Posts</span>
+            </button>
+            <button onclick="showTab('applicants')" class="tab-btn nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-applicants">
+                <span>👥</span><span>Applicants</span>
+            </button>
+        </nav>
+        <button onclick="logout()" class="mt-10 text-slate-400 hover:text-red-500 font-medium px-4 py-3 text-left transition">Log out</button>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+
+        <!-- Overview Tab -->
+        <div id="view-overview">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-slate-900">Welcome back, <span id="employer-name" class="text-indigo-600">Employer</span> 👋</h1>
+                <p class="text-slate-400 text-sm mt-1">Here's your hiring activity at a glance.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Total Job Posts</p>
+                    <h3 id="stat-jobs" class="text-3xl font-bold text-slate-900">0</h3>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Active Jobs</p>
+                    <h3 id="stat-active" class="text-3xl font-bold text-indigo-600">0</h3>
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Total Applicants</p>
+                    <h3 id="stat-applicants" class="text-3xl font-bold text-teal-600">0</h3>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-4">Quick Actions</h3>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="openPostModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition">+ Post a New Job</button>
+                    <button onclick="showTab('applicants')" class="border border-slate-200 text-slate-600 px-6 py-3 rounded-2xl font-semibold hover:bg-slate-50 transition">View Applicants</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jobs Tab -->
+        <div id="view-jobs" class="hidden">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">My Job Posts</h1>
+                    <p class="text-slate-400 text-sm mt-1">Manage your active and inactive listings.</p>
+                </div>
+                <button onclick="openPostModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition">+ Post Job</button>
+            </div>
+            <div id="jobs-list" class="space-y-4"></div>
+        </div>
+
+        <!-- Applicants Tab -->
+        <div id="view-applicants" class="hidden">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-slate-900">Applicants</h1>
+                <p class="text-slate-400 text-sm mt-1">Review and manage candidates for your jobs.</p>
+            </div>
+            <div class="flex flex-wrap gap-3 mb-6 items-center">
+                <select id="job-filter" onchange="loadApplicants()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-indigo-500">
+                    <option value="">Select a job...</option>
+                </select>
+                <label class="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-2xl cursor-pointer hover:border-indigo-400 transition">
+                    <input type="checkbox" id="blind-toggle" onchange="loadApplicants()" class="accent-indigo-600">
+                    <span class="text-sm font-medium text-slate-600">🙈 Blind Screening</span>
+                </label>
+            </div>
+            <!-- Kanban Board -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kanban-board">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                    <div class="bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500 uppercase">Applied</div>
+                    <div id="col-Applied" class="kanban-col p-3 space-y-2"></div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                    <div class="bg-blue-50 px-4 py-2 text-xs font-bold text-blue-500 uppercase">Under Review</div>
+                    <div id="col-Under Review" class="kanban-col p-3 space-y-2"></div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                    <div class="bg-purple-50 px-4 py-2 text-xs font-bold text-purple-500 uppercase">Interview</div>
+                    <div id="col-Interview" class="kanban-col p-3 space-y-2"></div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                    <div class="bg-green-50 px-4 py-2 text-xs font-bold text-green-500 uppercase">Offer</div>
+                    <div id="col-Offer" class="kanban-col p-3 space-y-2"></div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                    <div class="bg-red-50 px-4 py-2 text-xs font-bold text-red-400 uppercase">Rejected</div>
+                    <div id="col-Rejected" class="kanban-col p-3 space-y-2"></div>
+                </div>
+            </div>
+            <p id="no-applicants" class="text-slate-400 text-sm mt-6 hidden">Select a job above to see applicants.</p>
+        </div>
+    </main>
+
+    <!-- Post Job Modal -->
+    <div id="postModal" class="modal p-4">
+        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <h3 class="text-xl font-bold mb-6" id="modal-title">Post a New Job</h3>
+                <input type="hidden" id="edit-job-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Job Title *</label>
+                        <input id="f-title" type="text" placeholder="e.g. Frontend Engineer" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Company *</label>
+                        <input id="f-company" type="text" placeholder="Company name" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Location *</label>
+                        <input id="f-location" type="text" placeholder="e.g. Remote, Manila" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Salary Range</label>
+                        <input id="f-salary" type="text" placeholder="e.g. ₱50k-₱80k" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Category</label>
+                        <select id="f-category" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
+                            <option>Technology</option><option>Creative</option><option>Finance</option>
+                            <option>Healthcare</option><option>Education</option><option>Marketing</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Job Type</label>
+                        <select id="f-type" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
+                            <option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Experience Level</label>
+                        <select id="f-experience" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
+                            <option>Fresh/Entry</option><option>1-3 years</option><option>3-5 years</option><option>5+ years</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Job Description *</label>
+                        <textarea id="f-desc" rows="3" placeholder="Describe the role and responsibilities..." class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm resize-none"></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Requirements (comma-separated)</label>
+                        <input id="f-reqs" type="text" placeholder="e.g. React, Java, SQL" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button onclick="closePostModal()" class="flex-1 h-12 border border-slate-200 text-slate-400 font-bold rounded-2xl hover:text-slate-600 transition">Cancel</button>
+                    <button onclick="submitJob()" class="flex-1 h-12 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition">Post Job</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        const user = JSON.parse(localStorage.getItem('jc_user') || '{}');
+        if (!localStorage.getItem('jc_token') || user.role !== 'EMPLOYER') window.location.href = 'index.html';
+
+        document.getElementById('employer-name').innerText = (user.fullName || '').split(' ')[0] || 'Employer';
+
+        let myJobs = [];
+
+        function showTab(tab) {
+            ['overview','jobs','applicants'].forEach(t => {
+                document.getElementById('view-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).classList.remove('active', 'bg-indigo-600', 'text-white');
+                document.getElementById('tab-' + t).classList.add('text-slate-400');
+            });
+            document.getElementById('view-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).classList.add('active');
+            if (tab === 'overview') loadStats();
+            if (tab === 'jobs') loadMyJobs();
+            if (tab === 'applicants') loadJobFilter();
+        }
+
+        async function loadStats() {
+            const s = await apiGet('/employer/stats');
+            document.getElementById('stat-jobs').innerText = s.totalJobs;
+            document.getElementById('stat-active').innerText = s.activeJobs;
+            document.getElementById('stat-applicants').innerText = s.totalApplicants;
+        }
+
+        async function loadMyJobs() {
+            myJobs = await apiGet('/employer/jobs');
+            const list = document.getElementById('jobs-list');
+            if (!myJobs.length) {
+                list.innerHTML = '<p class="text-slate-400 italic">No jobs posted yet. Click "+ Post Job" to get started.</p>';
+                return;
+            }
+            list.innerHTML = myJobs.map(job => `
+                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
+                        <div>
+                            <h4 class="font-bold text-slate-900">${job.title}</h4>
+                            <p class="text-slate-500 text-sm">${job.company} • ${job.location}</p>
+                            <div class="flex gap-2 mt-1">
+                                <span class="text-xs bg-indigo-50 text-indigo-600 font-semibold px-2 py-0.5 rounded-full">${job.type}</span>
+                                <span class="text-xs ${job.active ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-400'} font-semibold px-2 py-0.5 rounded-full">${job.active ? 'Active' : 'Inactive'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="editJob(${job.id})" class="h-9 px-4 border border-slate-200 text-slate-500 hover:border-indigo-400 hover:text-indigo-600 rounded-xl text-sm font-medium transition">Edit</button>
+                        <button onclick="toggleJobActive(${job.id}, ${job.active})" class="h-9 px-4 border border-slate-200 text-slate-500 hover:border-amber-400 hover:text-amber-600 rounded-xl text-sm font-medium transition">${job.active ? 'Deactivate' : 'Activate'}</button>
+                        <button onclick="deleteJob(${job.id})" class="h-9 px-4 border border-red-100 text-red-400 hover:bg-red-50 rounded-xl text-sm font-medium transition">Delete</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        async function loadJobFilter() {
+            myJobs = await apiGet('/employer/jobs');
+            const sel = document.getElementById('job-filter');
+            sel.innerHTML = '<option value="">Select a job...</option>' +
+                myJobs.map(j => `<option value="${j.id}">${j.title} — ${j.company}</option>`).join('');
+        }
+
+        async function loadApplicants() {
+            const jobId = document.getElementById('job-filter').value;
+            const blind = document.getElementById('blind-toggle').checked;
+            ['Applied','Under Review','Interview','Offer','Rejected'].forEach(s => {
+                document.getElementById('col-' + s).innerHTML = '';
+            });
+            if (!jobId) { document.getElementById('no-applicants').classList.remove('hidden'); return; }
+            document.getElementById('no-applicants').classList.add('hidden');
+            const apps = await apiGet(`/employer/jobs/${jobId}/applicants?blind=${blind}`);
+            if (!apps.length) {
+                document.getElementById('col-Applied').innerHTML = '<p class="text-xs text-slate-400 italic p-2">No applicants yet.</p>';
+                return;
+            }
+            apps.forEach(app => {
+                const col = document.getElementById('col-' + app.status) || document.getElementById('col-Applied');
+                const matchColor = app.matchScore >= 70 ? 'text-green-600 bg-green-50' : app.matchScore >= 40 ? 'text-amber-600 bg-amber-50' : 'text-slate-500 bg-slate-100';
+                col.innerHTML += `
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-sm font-bold text-slate-800">${app.name}</p>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${matchColor}">${app.matchScore}% match</span>
+                        </div>
+                        <p class="text-xs text-slate-500">${app.jobTitle_candidate || 'No title'}</p>
+                        <p class="text-xs text-slate-400">${app.location}</p>
+                        ${app.skills ? `<p class="text-[10px] text-indigo-500 mt-1 truncate">${app.skills}</p>` : ''}
+                        <div class="mt-2">
+                            <select onchange="updateStatus(${app.applicationId}, this.value)" class="w-full text-xs p-1.5 border border-slate-200 rounded-lg outline-none bg-white">
+                                ${['Applied','Under Review','Interview','Offer','Rejected'].map(s =>
+                                    `<option ${s === app.status ? 'selected' : ''}>${s}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        async function updateStatus(appId, status) {
+            await apiPut(`/employer/applications/${appId}/status`, { status });
+            loadApplicants();
+        }
+
+        function openPostModal(job = null) {
+            document.getElementById('edit-job-id').value = job ? job.id : '';
+            document.getElementById('modal-title').innerText = job ? 'Edit Job' : 'Post a New Job';
+            document.getElementById('f-title').value = job?.title || '';
+            document.getElementById('f-company').value = job?.company || '';
+            document.getElementById('f-location').value = job?.location || '';
+            document.getElementById('f-salary').value = job?.salary || '';
+            document.getElementById('f-desc').value = job?.description || '';
+            document.getElementById('f-reqs').value = job?.requirements || '';
+            if (job?.category) document.getElementById('f-category').value = job.category;
+            if (job?.type) document.getElementById('f-type').value = job.type;
+            if (job?.experience) document.getElementById('f-experience').value = job.experience;
+            document.getElementById('postModal').classList.add('active');
+        }
+
+        function closePostModal() { document.getElementById('postModal').classList.remove('active'); }
+
+        async function submitJob() {
+            const id = document.getElementById('edit-job-id').value;
+            const body = {
+                title: document.getElementById('f-title').value,
+                company: document.getElementById('f-company').value,
+                location: document.getElementById('f-location').value,
+                salary: document.getElementById('f-salary').value,
+                category: document.getElementById('f-category').value,
+                type: document.getElementById('f-type').value,
+                experience: document.getElementById('f-experience').value,
+                description: document.getElementById('f-desc').value,
+                requirements: document.getElementById('f-reqs').value,
+                icon: '💼'
+            };
+            if (!body.title || !body.company || !body.location) { toast('Please fill in required fields.', 'warning'); return; }
+            const btn = document.querySelector('#postModal .btn-primary, #postModal button[onclick="submitJob()"]');
+            if (btn) setLoading(btn, true, id ? 'Saving...' : 'Posting...');
+            if (id) { await apiPut('/employer/jobs/' + id, body); toast('Job updated!', 'success'); }
+            else { await apiPost('/employer/jobs', body, true); toast('Job posted!', 'success'); }
+            if (btn) setLoading(btn, false);
+            closePostModal();
+            loadMyJobs();
+            loadStats();
+        }
+
+        function editJob(id) {
+            const job = myJobs.find(j => j.id === id);
+            if (job) openPostModal(job);
+        }
+
+        async function toggleJobActive(id, current) {
+            await apiPut('/employer/jobs/' + id, { active: String(!current) });
+            loadMyJobs();
+        }
+
+        async function deleteJob(id) {
+            showConfirm('This will permanently delete this job posting and all its applicant data.', async () => {
+                await apiDelete('/employer/jobs/' + id);
+                toast('Job deleted.', 'info');
+                loadMyJobs();
+                loadStats();
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('jc_token');
+            localStorage.removeItem('jc_user');
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('postModal').addEventListener('click', e => { if (e.target === document.getElementById('postModal')) closePostModal(); });
+
+        window.onload = loadStats;
+    </script>
+</body>
+</html>
+
+
+
+
+
