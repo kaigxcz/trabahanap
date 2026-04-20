@@ -10,10 +10,10 @@ public class PageController {
     public String landing() { return "forward:/landing.html"; }
 
     @GetMapping("/login")
-    public String login() { return "forward:/index.html"; }
+    public String login() { return "forward:/login.html"; }
 
     @GetMapping("/register")
-    public String register() { return "forward:/index.html"; }
+    public String register() { return "forward:/login.html"; }
 
     @GetMapping("/dashboard")
     public String dashboard() { return "forward:/dashboard.html"; }
