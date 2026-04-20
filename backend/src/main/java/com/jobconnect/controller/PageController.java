@@ -12,6 +12,9 @@ public class PageController {
     @GetMapping("/login")
     public String login() { return "forward:/index.html"; }
 
+    @GetMapping("/register")
+    public String register() { return "forward:/index.html"; }
+
     @GetMapping("/dashboard")
     public String dashboard() { return "forward:/dashboard.html"; }
 
