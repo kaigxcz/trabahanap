@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.LinkedHashMap;
 
 @RestController
 @RequestMapping("/api/employer")
@@ -174,6 +175,23 @@ public class EmployerController {
             "activeJobs", jobs.stream().filter(Job::isActive).count(),
             "totalApplicants", totalApplicants
         ));
+    }
+
+    // Analytics per job
+    @GetMapping("/analytics")
+    public ResponseEntity<?> getAnalytics() {
+        requireEmployer();
+        String username = getCurrentUser().getUsername();
+        List<Job> jobs = jobRepository.findByPostedBy(username);
+        List<Map<String, Object>> data = jobs.stream().map(j -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("jobTitle", j.getTitle());
+            m.put("company", j.getCompany());
+            m.put("applicants", applicationRepository.countByJobId(j.getId()));
+            m.put("active", j.isActive());
+            return m;
+        }).toList();
+        return ResponseEntity.ok(data);
     }
 
     private int calcMatchScore(User candidate, Long jobId) {

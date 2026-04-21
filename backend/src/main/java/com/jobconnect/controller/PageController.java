@@ -35,4 +35,7 @@ public class PageController {
 
     @GetMapping("/tips")
     public String tips() { return "forward:/tips.html"; }
+
+    @GetMapping("/messages")
+    public String messages() { return "forward:/messages.html"; }
 }
