@@ -8,6 +8,15 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
+
+    <!-- Mobile Header -->
+    <header class="mobile-header hidden">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-black text-xs">T</span></div>
+            <div><span class="font-bold text-sm block leading-tight">TrabaHanap</span><span style="font-size:8px;color:#94a3b8;font-weight:600">Online Job Application System</span></div>
+        </div>
+        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
+    </header>
     <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0">
         <div class="flex items-center justify-between mb-10">
             <div class="flex items-center gap-2">
@@ -154,16 +163,13 @@
         window.onload = () => { loadNotificationBell(); loadApplications(); };
     </script>
 
-    <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-bottom-nav hidden">
-        <a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a>
-        <a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a>
-        <a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a>
-        <a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a>
-        <a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a>
-    </nav>
+    
+<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item active"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
 </body>
 </html>
+
+
+
 
 
 
