@@ -9,7 +9,7 @@
 </head>
 <body class="min-h-screen flex flex-col md:flex-row bg-slate-50">
 
-    <aside class="w-full md:w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
+    <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
         <div class="flex items-center gap-2 mb-10">
             <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
             <div>
@@ -171,5 +171,15 @@
         function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = '/login'; }
         window.onload = loadConversations;
     </script>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav hidden">
+        <a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a>
+        <a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a>
+        <a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a>
+        <a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a>
+        <a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a>
+    </nav>
 </body>
 </html>
+
