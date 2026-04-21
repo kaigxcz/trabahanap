@@ -131,8 +131,34 @@
             document.getElementById('role-employer').classList.toggle('selected', role === 'EMPLOYER');
         }
         function redirectByRole(role) {
-            if (role === 'ADMIN') window.location.href = 'admin.html';
-            else if (role === 'EMPLOYER') window.location.href = 'employer.html';
+            if (role === 'ADMIN') window.location.href = '/admin';
+            else if (role === 'EMPLOYER') window.location.href = '/employer';
+            else window.location.href = '/dashboard';
+        }
+
+        // Google Sign In
+        function initGoogleSignIn() {
+            if (typeof google === 'undefined') { setTimeout(initGoogleSignIn, 300); return; }
+            google.accounts.id.initialize({
+                client_id: '958494351239-rlulqm9i9au07od88oshj85g19bri3rr.apps.googleusercontent.com',
+                callback: handleGoogleResponse
+            });
+            const btn = document.getElementById('google-signin-btn');
+            if (btn) google.accounts.id.renderButton(btn, { theme: 'outline', size: 'large', width: 380 });
+        }
+
+        async function handleGoogleResponse(response) {
+            try {
+                const role = selectedRole || 'CANDIDATE';
+                const data = await apiPost('/auth/google', { idToken: response.credential, role });
+                if (data.error) { alert(data.error); return; }
+                localStorage.setItem('jc_token', data.token);
+                localStorage.setItem('jc_user', JSON.stringify(data));
+                redirectByRole(data.role);
+            } catch(e) { alert('Google sign in failed. Please try email login.'); }
+        }
+
+        window.addEventListener('load', initGoogleSignIn);
             else window.location.href = 'dashboard.html';
         }
         async function handleLogin() {
