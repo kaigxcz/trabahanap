@@ -88,30 +88,30 @@
                 </div>`;
                 return;
             }
-            grid.innerHTML = jobs.map(job => `
-                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition">
+            grid.innerHTML = jobs.map((job, i) => `
+                <div class="card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 fade-in" style="animation-delay:${i*40}ms">
                     <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
+                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
                         <div>
-                            <h4 class="text-base font-bold text-slate-900">${job.title}</h4>
-                            <p class="text-slate-500 text-sm">${job.company} • ${job.location}</p>
-                            <div class="flex flex-wrap gap-2 mt-1">
-                                <span class="text-xs bg-indigo-50 text-indigo-600 font-semibold px-2 py-0.5 rounded-full">${job.type}</span>
-                                <span class="text-xs bg-slate-100 text-slate-500 font-medium px-2 py-0.5 rounded-full">${job.experience}</span>
-                                <span class="text-xs font-bold text-teal-600">${job.salary}</span>
+                            <h4 class="text-sm font-bold text-slate-900">${job.title}</h4>
+                            <p class="text-slate-500 text-xs mt-0.5">${job.company} • ${job.location}</p>
+                            <div class="flex flex-wrap gap-1.5 mt-1.5">
+                                <span class="badge badge-indigo">${job.type}</span>
+                                <span class="badge badge-slate">${job.experience}</span>
+                                <span class="text-[10px] font-bold text-teal-600">${job.salary}</span>
                             </div>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0 self-end md:self-auto">
-                        <button onclick="unsave(${job.id}, this)" class="inline-flex items-center h-10 px-4 border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 rounded-xl text-sm font-medium transition">Remove</button>
-                        <button onclick="apply('${job.title}', '${job.company}')" class="inline-flex items-center h-10 bg-slate-900 text-white px-6 rounded-xl text-sm font-semibold hover:bg-indigo-600 transition">Apply</button>
+                        <button onclick="unsave(${job.id}, this)" class="btn btn-secondary btn-sm h-9">Remove</button>
+                        <button onclick="apply('${job.title}', '${job.company}')" class="btn btn-primary btn-sm h-9">Apply</button>
                     </div>
                 </div>`).join('');
         }
 
         async function unsave(jobId, btn) {
             await apiPost('/saved/' + jobId, {}, true);
-            btn.closest('.bg-white').remove();
+            btn.closest('.card, .bg-white').remove();
             if (!document.querySelector('#saved-grid .bg-white')) loadSaved();
         }
 
