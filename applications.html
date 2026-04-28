@@ -6,6 +6,13 @@
     <title>Applications | TrabaHanap</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background: #f1f5f9; }
+        .step-dot { width:2.25rem; height:2.25rem; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.875rem; font-weight:700; flex-shrink:0; }
+        .step-line { flex:1; height:3px; margin-bottom:1.25rem; border-radius:999px; }
+        .app-card { background:white; border-radius:1.5rem; border:1px solid #f1f5f9; box-shadow:0 2px 8px rgba(0,0,0,0.04); transition:all 0.2s; }
+        .app-card:hover { box-shadow:0 6px 24px rgba(0,0,0,0.07); border-color:#e0e7ff; }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
@@ -38,6 +45,7 @@
                     <div id="notif-list" class="max-h-72 overflow-y-auto p-2"></div>
                 </div>
             </div>
+            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
         </div>
         <nav class="space-y-1 flex-1">
             <a href="/dashboard" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🏠</span><span class="text-sm">Find Jobs</span></a>
@@ -46,7 +54,7 @@
             <a href="/messages" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>💬</span><span class="text-sm">Messages</span></a>
             <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
         </nav>
-        <button onclick="logout()" class="mt-6 text-slate-400 hover:text-red-500 font-medium px-4 py-3 text-left transition text-sm">Log out</button>
+        
     </aside>
 
     <main class="flex-1 p-6 md:p-8">
@@ -69,24 +77,29 @@
         function buildTimeline(currentStatus) {
             const isRejected = currentStatus === 'Rejected';
             if (isRejected) {
-                return `<div class="flex items-center gap-2 mt-3">
-                    <span class="step-dot bg-red-100 text-red-500">✕</span>
-                    <span class="text-xs font-bold text-red-500">Application Rejected</span>
+                return `<div class="flex items-center gap-3 mt-4 p-3 bg-red-50 rounded-2xl border border-red-100">
+                    <div class="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center text-red-500 text-lg shrink-0">✕</div>
+                    <div>
+                        <p class="text-sm font-bold text-red-600">Application Rejected</p>
+                        <p class="text-xs text-red-400 mt-0.5">This application was not successful.</p>
+                    </div>
                 </div>`;
             }
             const currentIdx = STEPS.indexOf(currentStatus);
-            return `<div class="flex items-center mt-4 gap-0">
+            return `<div class="flex items-center mt-5 px-1">
                 ${STEPS.map((step, i) => {
                     const done = i < currentIdx;
                     const active = i === currentIdx;
-                    const dotClass = done ? 'bg-indigo-600 text-white' : active ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : 'bg-slate-100 text-slate-400';
-                    const lineClass = i < STEPS.length - 1 ? (done ? 'bg-indigo-600' : 'bg-slate-200') : '';
+                    const dotBg = done ? 'background:#4f46e5' : active ? 'background:#4f46e5;box-shadow:0 0 0 4px rgba(79,70,229,0.15)' : 'background:#e2e8f0';
+                    const dotColor = (done || active) ? 'color:white' : 'color:#94a3b8';
+                    const lineColor = done ? 'background:#4f46e5' : 'background:#e2e8f0';
+                    const labelColor = active ? 'color:#4f46e5;font-weight:700' : done ? 'color:#64748b;font-weight:600' : 'color:#cbd5e1;font-weight:500';
                     return `
-                        <div class="flex flex-col items-center">
-                            <div class="step-dot ${dotClass}">${done ? '✓' : STEP_ICONS[i]}</div>
-                            <p class="text-[9px] font-semibold mt-1 ${active ? 'text-indigo-600' : done ? 'text-slate-500' : 'text-slate-300'} whitespace-nowrap">${step}</p>
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                            <div class="step-dot" style="${dotBg};${dotColor}">${done ? '✓' : STEP_ICONS[i]}</div>
+                            <p style="font-size:9px;${labelColor};white-space:nowrap">${step}</p>
                         </div>
-                        ${i < STEPS.length - 1 ? `<div class="step-line ${lineClass} mb-4"></div>` : ''}`;
+                        ${i < STEPS.length - 1 ? `<div class="step-line" style="${lineColor}"></div>` : ''}`;
                 }).join('')}
             </div>`;
         }
@@ -123,17 +136,17 @@
                         ${interview.notes ? `<p class="text-xs text-purple-500 mt-1">📝 ${interview.notes}</p>` : ''}
                     </div>` : '';
                 return `
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <div class="app-card p-6 fade-in">
                     <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-xl shrink-0">📄</div>
+                            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-2xl flex items-center justify-center text-white text-xl shrink-0 shadow-md shadow-indigo-100">📄</div>
                             <div>
-                                <h4 class="font-bold text-slate-900">${app.jobTitle}</h4>
-                                <p class="text-slate-500 text-sm">${app.company}</p>
+                                <h4 class="font-bold text-slate-900 text-base">${app.jobTitle}</h4>
+                                <p class="text-slate-500 text-sm font-medium">${app.company}</p>
                                 <p class="text-xs text-slate-400 mt-0.5">Applied ${new Date(app.appliedAt).toLocaleDateString('en-PH', {year:'numeric',month:'short',day:'numeric'})}</p>
                             </div>
                         </div>
-                        <button onclick="withdraw(${app.id}, this)" class="inline-flex items-center h-8 text-xs text-slate-400 hover:text-red-500 border border-slate-200 hover:border-red-200 px-3 rounded-xl transition font-medium shrink-0">Withdraw</button>
+                        <button onclick="withdraw(${app.id}, this)" class="inline-flex items-center h-8 text-xs text-slate-400 hover:text-red-500 border border-slate-200 hover:border-red-200 px-3 rounded-xl transition font-medium shrink-0 self-start">Withdraw</button>
                     </div>
                     ${buildTimeline(app.status)}
                     ${interviewSection}
@@ -167,6 +180,7 @@
 <nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item active"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
 </body>
 </html>
+
 
 
 
