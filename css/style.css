@@ -118,7 +118,6 @@ body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
     .mobile-bottom-nav { display: flex !important; }
     .mobile-header { display: flex !important; }
     body { padding-bottom: 72px; }
-    aside { display: none !important; }
 }
 @media (min-width: 769px) {
     .mobile-bottom-nav { display: none !important; }

@@ -89,6 +89,8 @@
                     <div id="notif-list" class="max-h-72 overflow-y-auto p-2"></div>
                 </div>
             </div>
+            <button onclick="toggleDark()" id="dark-btn" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
+            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-lg" title="Log out">🚪</button>
         </div>
         <nav class="space-y-1">
             <a href="/dashboard" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🏠</span><span class="text-sm">Find Jobs</span></a>
@@ -135,8 +137,6 @@
             <label class="flt-label"><input type="checkbox" class="filter-check" value="Remote" onchange="applyFilters()"><span>Remote</span></label>
             <label class="flt-label"><input type="checkbox" class="filter-check" value="Onsite" onchange="applyFilters()"><span>On-site</span></label>
         </div>
-        <button onclick="logout()" class="mt-6 text-slate-400 hover:text-red-500 font-medium px-4 py-3 text-left transition text-sm">Log out</button>
-        <button onclick="toggleDark()" id="dark-btn" class="mt-2 text-slate-400 hover:text-slate-600 font-medium px-4 py-2 text-left transition text-sm flex items-center gap-2">🌙 <span id="dark-label">Dark Mode</span></button>
     </aside>
 
     <!-- Main Content -->
