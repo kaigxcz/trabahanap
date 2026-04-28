@@ -8,7 +8,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>
+        body { background: #f1f5f9; }
         .tab-btn.active { background: #4f46e5; color: white; border-radius: 1rem; }
+        .stat-card { background:white; border-radius:1.5rem; border:1px solid #f1f5f9; box-shadow:0 2px 8px rgba(0,0,0,0.04); padding:1.5rem; transition:all 0.2s; }
+        .stat-card:hover { box-shadow:0 6px 20px rgba(0,0,0,0.07); }
+        .stat-icon { width:3rem; height:3rem; border-radius:1rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin-bottom:0.75rem; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -48,31 +52,41 @@
                 <h1 class="text-2xl font-bold text-slate-900">Platform Overview</h1>
                 <p class="text-slate-400 text-sm mt-1">Monitor the health of TrabaHanap.</p>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-5 mb-8">
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Total Users</p>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#eef2ff">👥</div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Users</p>
                     <h3 id="s-users" class="text-3xl font-bold text-slate-900">—</h3>
                 </div>
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Candidates</p>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#eef2ff">🎯</div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Candidates</p>
                     <h3 id="s-candidates" class="text-3xl font-bold text-indigo-600">—</h3>
                 </div>
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Employers</p>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#f0fdfa">🏢</div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Employers</p>
                     <h3 id="s-employers" class="text-3xl font-bold text-teal-600">—</h3>
                 </div>
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Total Jobs</p>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#fefce8">💼</div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Jobs</p>
                     <h3 id="s-jobs" class="text-3xl font-bold text-slate-900">—</h3>
                 </div>
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Active Jobs</p>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#f0fdf4">✅</div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Active Jobs</p>
                     <h3 id="s-active" class="text-3xl font-bold text-green-600">—</h3>
                 </div>
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Applications</p>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#fffbeb">📋</div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Applications</p>
                     <h3 id="s-apps" class="text-3xl font-bold text-amber-600">—</h3>
                 </div>
+            </div>
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-4">Platform Overview</h3>
+                <canvas id="adminChart" height="100"></canvas>
             </div>
         </div>
 
