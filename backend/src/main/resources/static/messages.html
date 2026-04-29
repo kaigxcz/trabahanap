@@ -6,6 +6,14 @@
     <title>Messages | TrabaHanap</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background: #f1f5f9; }
+        .msg-bubble-mine { background: #4f46e5; color: white; border-radius: 1.25rem 1.25rem 0.25rem 1.25rem; }
+        .msg-bubble-other { background: white; color: #1e293b; border: 1px solid #f1f5f9; border-radius: 1.25rem 1.25rem 1.25rem 0.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+        .convo-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem; border-radius:1rem; cursor:pointer; transition:all 0.15s; }
+        .convo-item:hover { background:#f5f3ff; }
+        .convo-item.active { background:#eef2ff; }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row bg-slate-50">
 
@@ -122,13 +130,13 @@
                 if (!seen.has(other)) { seen.add(other); convos.push({ username: other, name: otherName, last: m }); }
             });
             list.innerHTML = convos.map(c => `
-                <div onclick="openConvo('${c.username}', '${c.name}')" class="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer transition ${currentConvo === c.username ? 'bg-indigo-50' : ''}">
+                <div onclick="openConvo('${c.username}', '${c.name}')" class="convo-item ${currentConvo === c.username ? 'active' : ''}">
                     <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">${c.name[0].toUpperCase()}</div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-slate-800 truncate">${c.name}</p>
-                        <p class="text-xs text-slate-400 truncate">${c.last.content}</p>
+                        <p class="text-xs text-slate-400 truncate mt-0.5">${c.last.content}</p>
                     </div>
-                    ${!c.last.isRead && !c.last.isMine ? '<span class="w-2 h-2 bg-indigo-500 rounded-full shrink-0"></span>' : ''}
+                    ${!c.last.isRead && !c.last.isMine ? '<span class="w-2.5 h-2.5 bg-indigo-500 rounded-full shrink-0"></span>' : ''}
                 </div>`).join('');
         }
 
@@ -143,13 +151,13 @@
 
             const msgs = await apiGet('/messages/conversation/' + username);
             const container = document.getElementById('chat-messages');
-            container.innerHTML = msgs.map(m => `
-                <div class="flex ${m.isMine ? 'justify-end' : 'justify-start'}">
-                    <div class="max-w-xs lg:max-w-md px-4 py-3 rounded-2xl text-sm ${m.isMine ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-white border border-slate-100 text-slate-800 rounded-bl-sm shadow-sm'}">
+            container.innerHTML = msgs.length ? msgs.map(m => `
+                <div class="flex ${m.isMine ? 'justify-end' : 'justify-start'} mb-1">
+                    <div class="max-w-xs lg:max-w-md px-4 py-2.5 text-sm ${m.isMine ? 'msg-bubble-mine' : 'msg-bubble-other'}">
                         <p>${m.content}</p>
                         <p class="text-[10px] mt-1 ${m.isMine ? 'text-indigo-200' : 'text-slate-400'}">${timeAgo(m.sentAt)}</p>
                     </div>
-                </div>`).join('');
+                </div>`).join('') : '<p class="text-center text-slate-400 text-sm py-8">No messages yet. Say hello!</p>';
             container.scrollTop = container.scrollHeight;
             loadConversations();
         }
