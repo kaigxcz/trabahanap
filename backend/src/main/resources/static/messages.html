@@ -27,11 +27,28 @@
     </header>
 
     <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
-        <div class="flex items-center gap-2 mb-10">
-            <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
-            <div>
-                <span class="font-bold text-base tracking-tight block leading-tight">TrabaHanap</span>
-                <span style="font-size:9px;color:#94a3b8;font-weight:600">Online Job Application System</span>
+        <div class="flex items-center justify-between mb-10">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
+                <div>
+                    <span class="font-bold text-base tracking-tight block leading-tight">TrabaHanap</span>
+                    <span style="font-size:9px;color:#94a3b8;font-weight:600">Online Job Application System</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-1">
+                <div class="relative">
+                    <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                        🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                    </button>
+                    <div id="notif-panel" class="hidden absolute left-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                            <span class="font-bold text-slate-800 text-sm">Notifications</span>
+                            <button onclick="toggleNotifPanel()" class="text-slate-400 hover:text-slate-600 text-xs">Close</button>
+                        </div>
+                        <div id="notif-list" class="max-h-72 overflow-y-auto p-2"></div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
         </div>
         <nav class="space-y-1 flex-1">
@@ -186,7 +203,15 @@
         }
 
         function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = '/login'; }
-        window.onload = loadConversations;
+
+        let notifOpen = false;
+        function toggleNotifPanel() {
+            notifOpen = !notifOpen;
+            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
+            if (notifOpen) loadNotificationDropdown();
+        }
+
+        window.onload = () => { loadNotificationBell(); loadConversations(); };
     </script>
 
     

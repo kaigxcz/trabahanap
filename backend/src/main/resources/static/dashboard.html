@@ -91,21 +91,10 @@
                         <div id="notif-list" class="p-2"></div>
                     </div>
                 </div>
-                <!-- User Avatar Dropdown -->
-                <div class="relative">
-                    <button onclick="toggleUserMenu()" id="user-avatar-btn" class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-xl flex items-center justify-center text-white font-black text-sm hover:opacity-90 transition shadow-sm" id="user-avatar">T</button>
-                    <div id="user-menu" class="hidden absolute right-0 top-11 w-48 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden">
-                        <div class="px-4 py-3 border-b border-slate-100">
-                            <p id="user-menu-name" class="text-sm font-bold text-slate-800 truncate">User</p>
-                            <p class="text-xs text-slate-400">Candidate</p>
-                        </div>
-                        <div class="p-2">
-                            <a href="/profile" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-sm text-slate-700 font-medium transition">👤 My Profile</a>
-                            <button onclick="toggleDark()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-sm text-slate-700 font-medium transition text-left">🌙 <span id="dark-label">Dark Mode</span></button>
-                            <button onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 text-sm text-red-500 font-medium transition text-left">🚪 Log out</button>
-                        </div>
-                    </div>
-                </div>
+                <!-- Dark Mode Toggle -->
+                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
+                <!-- Logout -->
+                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
         </div>
         <nav class="space-y-1">
@@ -274,9 +263,6 @@
             const firstName = (currentUser.fullName || '').split(' ')[0];
             if (firstName) {
                 document.getElementById('greeting-name').innerText = firstName;
-                document.getElementById('user-menu-name').innerText = currentUser.fullName || 'User';
-                const initials = (currentUser.fullName || 'U').split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-                document.getElementById('user-avatar').innerText = initials;
             }
             savedIds = await apiGet('/saved/ids');
             loadNotificationBell();
@@ -515,22 +501,11 @@
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
             document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
-            if (notifOpen) { userMenuOpen = false; document.getElementById('user-menu').classList.add('hidden'); loadNotificationDropdown(); }
-        }
-
-        let userMenuOpen = false;
-        function toggleUserMenu() {
-            userMenuOpen = !userMenuOpen;
-            document.getElementById('user-menu').classList.toggle('hidden', !userMenuOpen);
-            if (userMenuOpen) { notifOpen = false; document.getElementById('notif-panel').classList.add('hidden'); }
+            if (notifOpen) { loadNotificationDropdown(); }
         }
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', e => {
-            if (!e.target.closest('#user-avatar-btn') && !e.target.closest('#user-menu')) {
-                userMenuOpen = false;
-                document.getElementById('user-menu')?.classList.add('hidden');
-            }
             if (!e.target.closest('#notif-panel') && !e.target.closest('[onclick="toggleNotifPanel()"]')) {
                 notifOpen = false;
                 document.getElementById('notif-panel')?.classList.add('hidden');

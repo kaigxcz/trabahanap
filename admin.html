@@ -28,7 +28,10 @@
                     <span class="text-[9px] text-slate-400 font-medium">TrabaHanap</span>
                 </div>
             </div>
-            <span class="text-xs bg-red-100 text-red-700 font-bold px-2 py-1 rounded-lg">Admin</span>
+            <div class="flex items-center gap-1">
+                <span class="text-xs bg-red-100 text-red-700 font-bold px-2 py-1 rounded-lg">Admin</span>
+                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
+            </div>
         </div>
         <nav class="space-y-2 flex-1">
             <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn active w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
@@ -41,7 +44,6 @@
                 <span>💼</span><span>Job Listings</span>
             </button>
         </nav>
-        <button onclick="logout()" class="mt-10 text-slate-400 hover:text-red-500 font-medium px-4 py-3 text-left transition">Log out</button>
     </aside>
 
     <main class="flex-1 p-6 md:p-10 overflow-y-auto">

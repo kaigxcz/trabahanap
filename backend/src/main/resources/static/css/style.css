@@ -96,6 +96,7 @@ body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
 
 /* ── Sidebar ── */
 .sidebar { width:16rem; background:white; border-right:1px solid #f1f5f9; padding:1.5rem; display:flex; flex-direction:column; flex-shrink:0; height:100vh; position:sticky; top:0; overflow-y:auto; }
+.desktop-sidebar { display:flex; flex-direction:column; }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width:5px; height:5px; }
