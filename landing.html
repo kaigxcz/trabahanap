@@ -32,7 +32,6 @@
                 </div>
                 <div>
                     <span class="font-bold text-xl text-white tracking-tight block leading-tight">TrabaHanap</span>
-                    <span class="text-[9px] text-indigo-300 font-medium">Online Job Application System</span>
                 </div>
             </div>
             <div class="hidden md:flex items-center gap-8 text-sm text-slate-400">
@@ -82,7 +81,7 @@
                 <!-- Stats -->
                 <div class="grid grid-cols-2 gap-4 fade-in">
                     <div class="stat-card rounded-2xl p-6 float" style="animation-delay:0s">
-                        <p class="text-4xl font-black text-white mb-1">20+</p>
+                        <p id="hero-job-count" class="text-4xl font-black text-white mb-1">—</p>
                         <p class="text-slate-400 text-sm">Active Jobs</p>
                         <p class="text-indigo-400 text-xs mt-2 font-semibold">↑ Updated daily</p>
                     </div>
@@ -307,6 +306,12 @@
         </div>
     </footer>
 
+    <script>
+        fetch('/api/jobs?keyword=&location=&category=all')
+            .then(r => r.json())
+            .then(jobs => { const el = document.getElementById('hero-job-count'); if (el) el.innerText = jobs.length + '+'; })
+            .catch(() => { const el = document.getElementById('hero-job-count'); if (el) el.innerText = '20+'; });
+    </script>
 </body>
 </html>
 

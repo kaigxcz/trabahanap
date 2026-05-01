@@ -6,14 +6,23 @@
     <title>My Profile | TrabaHanap</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .custom-pin { background:#4f46e5; border:3px solid white; border-radius:50% 50% 50% 0; width:28px; height:28px; transform:rotate(-45deg); box-shadow:0 4px 12px rgba(79,70,229,0.5); }
+        .loc-suggestion { padding:0.6rem 1rem; font-size:0.8125rem; cursor:pointer; border-bottom:1px solid #f1f5f9; transition:background 0.1s; color:#374151; }
+        .loc-suggestion:last-child { border-bottom:none; }
+        .loc-suggestion:hover { background:#f5f3ff; color:#4f46e5; }
+        .leaflet-container { font-family:'Inter',sans-serif; }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col md:flex-row">
+<body class="min-h-screen flex flex-col md:flex-row bg-slate-50">
 
     <!-- Mobile Header -->
     <header class="mobile-header hidden">
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-black text-xs">T</span></div>
-            <div><span class="font-bold text-sm block leading-tight">TrabaHanap</span><span style="font-size:8px;color:#94a3b8;font-weight:600">Online Job Application System</span></div>
+            <div><span class="font-bold text-sm block leading-tight">TrabaHanap</span></div>
         </div>
         <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
     </header>
@@ -26,7 +35,6 @@
                 </div>
                 <div>
                     <span class="font-bold text-xl tracking-tight text-slate-900 block leading-tight">TrabaHanap</span>
-                    <span class="text-[9px] text-slate-400 font-medium">Online Job Application System</span>
                 </div>
             </div>
             <div class="relative">
@@ -34,7 +42,7 @@
                     🔔
                     <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                 </button>
-                <div id="notif-panel" class="hidden absolute left-0 top-12 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden">
+                <div id="notif-panel" class="hidden absolute right-0 top-12 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden" style="max-height:360px;overflow-y:auto">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                         <span class="font-bold text-slate-800 text-sm">Notifications</span>
                         <button onclick="toggleNotifPanel()" class="text-slate-400 hover:text-slate-600 text-xs">Close</button>
@@ -79,10 +87,13 @@
                 <div class="text-center md:text-left flex-1 min-w-0">
                     <h2 id="display-full-name" class="text-2xl font-bold text-slate-900">User Name</h2>
                     <p id="display-title" class="text-indigo-600 font-medium text-sm mt-0.5">Not Specified</p>
+                    <p id="display-bio" class="text-slate-500 text-sm mt-1 hidden"></p>
                     <div class="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-slate-400 mt-2">
                         <span>📍 <span id="display-location">Not Set</span></span>
                         <span>📧 <span id="display-email">Not Set</span></span>
                     </div>
+                    <!-- Social links -->
+                    <div id="display-socials" class="flex flex-wrap justify-center md:justify-start gap-3 mt-3 hidden"></div>
                 </div>
                 <button onclick="openModal()" class="inline-flex items-center h-11 bg-slate-900 text-white px-6 rounded-2xl font-semibold hover:bg-indigo-600 transition shadow-lg shrink-0 self-center">Edit Profile</button>
             </div>
@@ -152,6 +163,20 @@
                 </div>
             </div>
 
+            <!-- Work Experience -->
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <h3 class="font-bold text-slate-900">Work Experience</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Your professional history</p>
+                    </div>
+                    <button onclick="openExpModal()" class="text-xs text-indigo-600 font-semibold hover:underline">+ Add Experience</button>
+                </div>
+                <div id="exp-list" class="space-y-3">
+                    <p class="text-slate-400 text-sm italic">No work experience added yet.</p>
+                </div>
+            </div>
+
             <!-- Resume Upload -->
             <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
                 <div class="flex items-center justify-between mb-5">
@@ -209,8 +234,11 @@
 
     <!-- Edit Modal -->
     <div id="editModal" class="modal p-4">
-        <div class="bg-white w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl">
-            <h3 class="text-xl font-bold mb-6">Update Profile</h3>
+        <div class="bg-white w-full max-w-lg p-8 rounded-[2.5rem] shadow-2xl" style="max-height:90vh;overflow-y:auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold">Update Profile</h3>
+                <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition">✕</button>
+            </div>
             <div class="space-y-4">
                 <div>
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Job Title / Position</label>
@@ -218,16 +246,62 @@
                 </div>
                 <div>
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Location</label>
-                    <input type="text" id="edit-location" placeholder="e.g. Quezon City" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm">
+                    <div class="relative mt-1">
+                        <input type="text" id="edit-location" placeholder="e.g. Quezon City" class="w-full p-4 pr-14 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm" oninput="searchLocationProfile(this.value)">
+                        <button type="button" onclick="toggleMapProfile()" title="Pick on map" class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">📍</button>
+                    </div>
+                    <div id="profile-loc-suggestions" class="hidden mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden" style="position:relative;z-index:50"></div>
+                    <div id="profile-map-wrap" class="hidden mt-2" style="height:220px;position:relative;border-radius:1rem;overflow:hidden;border:1.5px solid #e2e8f0">
+                        <div id="profile-map" style="height:100%;width:100%"></div>
+                        <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:999">
+                            <span style="background:rgba(255,255,255,0.92);font-size:11px;font-weight:600;color:#475569;padding:4px 12px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">Drag the pin or click to set your location</span>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Skills (comma-separated)</label>
                     <input type="text" id="edit-skills" placeholder="e.g. React, Java, Figma, SQL" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm">
                     <p class="text-[10px] text-slate-400 mt-1 ml-1">Separate each skill with a comma</p>
                 </div>
+                <div class="border-t border-slate-100 pt-4">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Bio / Headline <span class="text-slate-300 font-normal normal-case">(optional)</span></p>
+                    <textarea id="edit-bio" rows="2" placeholder="e.g. Passionate developer with 3 years of experience..." class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm resize-none"></textarea>
+                </div>
+                <div class="border-t border-slate-100 pt-4">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Social Links <span class="text-slate-300 font-normal normal-case">(optional)</span></p>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2"><span class="text-base w-6 text-center shrink-0">💼</span><input type="url" id="edit-linkedin" placeholder="https://linkedin.com/in/yourname" class="flex-1 p-3 bg-slate-50 border rounded-xl outline-none focus:border-indigo-500 text-sm"></div>
+                        <div class="flex items-center gap-2"><span class="text-base w-6 text-center shrink-0">🐙</span><input type="url" id="edit-github" placeholder="https://github.com/yourname" class="flex-1 p-3 bg-slate-50 border rounded-xl outline-none focus:border-indigo-500 text-sm"></div>
+                        <div class="flex items-center gap-2"><span class="text-base w-6 text-center shrink-0">🌐</span><input type="url" id="edit-portfolio" placeholder="https://yourportfolio.com" class="flex-1 p-3 bg-slate-50 border rounded-xl outline-none focus:border-indigo-500 text-sm"></div>
+                    </div>
+                </div>
                 <div class="flex items-stretch gap-3 pt-2">
                     <button onclick="closeModal()" class="flex-1 h-14 text-slate-400 font-bold hover:text-slate-600 border border-slate-200 rounded-2xl transition">Cancel</button>
                     <button onclick="saveProfile()" class="flex-1 h-14 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Work Experience Modal -->
+    <div id="expModal" class="modal p-4">
+        <div class="bg-white w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold">Add Experience</h3>
+                <button onclick="closeExpModal()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition">✕</button>
+            </div>
+            <div class="space-y-4">
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Job Title *</label><input type="text" id="exp-title" placeholder="e.g. Frontend Developer" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Company *</label><input type="text" id="exp-company" placeholder="e.g. Acme Corp" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Start</label><input type="month" id="exp-start" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase ml-1">End</label><input type="month" id="exp-end" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm"></div>
+                </div>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="exp-current" class="accent-indigo-600 w-4 h-4" onchange="document.getElementById('exp-end').disabled=this.checked;document.getElementById('exp-end').value=''"><span class="text-sm text-slate-600 font-medium">I currently work here</span></label>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Description <span class="text-slate-300 font-normal normal-case">(optional)</span></label><textarea id="exp-desc" rows="3" placeholder="Briefly describe your role and achievements..." class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm resize-none"></textarea></div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="closeExpModal()" class="flex-1 h-12 text-slate-400 font-bold border border-slate-200 rounded-2xl transition hover:text-slate-600">Cancel</button>
+                    <button onclick="saveExp()" class="flex-1 h-12 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition">Add</button>
                 </div>
             </div>
         </div>
@@ -263,12 +337,28 @@
 
         async function updatePageData() {
             const profile = await apiGet('/profile');
+            const extra = JSON.parse(localStorage.getItem('jc_profile_extra') || '{}');
 
             document.getElementById('display-full-name').innerText = profile.fullName || 'User';
             document.getElementById('display-location').innerText = profile.location || 'Not Set';
             document.getElementById('display-email').innerText = profile.email || 'Not Set';
             document.getElementById('display-title').innerText = profile.jobTitle || 'Not Specified';
             document.getElementById('display-applied').innerText = `${profile.totalApplied} ${profile.totalApplied === 1 ? 'Job' : 'Jobs'}`;
+
+            // Bio
+            const bioEl = document.getElementById('display-bio');
+            if (extra.bio) { bioEl.innerText = extra.bio; bioEl.classList.remove('hidden'); }
+            else bioEl.classList.add('hidden');
+
+            // Social links
+            const socialsEl = document.getElementById('display-socials');
+            const links = [
+                extra.linkedin ? `<a href="${extra.linkedin}" target="_blank" class="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:underline bg-indigo-50 px-3 py-1 rounded-full">💼 LinkedIn</a>` : '',
+                extra.github ? `<a href="${extra.github}" target="_blank" class="flex items-center gap-1 text-xs font-semibold text-slate-700 hover:underline bg-slate-100 px-3 py-1 rounded-full">🐙 GitHub</a>` : '',
+                extra.portfolio ? `<a href="${extra.portfolio}" target="_blank" class="flex items-center gap-1 text-xs font-semibold text-teal-600 hover:underline bg-teal-50 px-3 py-1 rounded-full">🌐 Portfolio</a>` : '',
+            ].filter(Boolean);
+            if (links.length) { socialsEl.innerHTML = links.join(''); socialsEl.classList.remove('hidden'); }
+            else socialsEl.classList.add('hidden');
 
             const parts = (profile.fullName || '??').split(' ');
             const initials = (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
@@ -350,18 +440,37 @@
 
         function openModal() {
             const p = window._profileCache || {};
+            const extra = JSON.parse(localStorage.getItem('jc_profile_extra') || '{}');
             document.getElementById('edit-title').value = p.jobTitle || '';
             document.getElementById('edit-location').value = p.location || '';
             document.getElementById('edit-skills').value = p.skills || '';
+            document.getElementById('edit-bio').value = extra.bio || '';
+            document.getElementById('edit-linkedin').value = extra.linkedin || '';
+            document.getElementById('edit-github').value = extra.github || '';
+            document.getElementById('edit-portfolio').value = extra.portfolio || '';
+            document.getElementById('profile-map-wrap').classList.add('hidden');
+            document.getElementById('profile-loc-suggestions').classList.add('hidden');
+            profileMapOpen = false;
+            if (profileMap) { profileMap.remove(); profileMap = null; profileMarker = null; }
             document.getElementById('editModal').classList.add('active');
         }
 
-        function closeModal() { document.getElementById('editModal').classList.remove('active'); }
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+            if (profileMap) { profileMap.remove(); profileMap = null; profileMarker = null; }
+            profileMapOpen = false;
+        }
 
         async function saveProfile() {
             const jobTitle = document.getElementById('edit-title').value;
             const location = document.getElementById('edit-location').value;
             const skills = document.getElementById('edit-skills').value;
+            const bio = document.getElementById('edit-bio').value;
+            const linkedin = document.getElementById('edit-linkedin').value;
+            const github = document.getElementById('edit-github').value;
+            const portfolio = document.getElementById('edit-portfolio').value;
+            // Save extra fields locally
+            localStorage.setItem('jc_profile_extra', JSON.stringify({ bio, linkedin, github, portfolio }));
             const btn = document.querySelector('#editModal button[onclick="saveProfile()"]');
             setLoading(btn, true, 'Saving...');
             await apiPut('/profile', { jobTitle, location, skills });
@@ -429,11 +538,139 @@ Generated by TrabaHanap - Online Job Application System
             if (notifOpen) loadNotificationDropdown();
         }
 
-        window.onload = () => { loadNotificationBell(); updatePageData(); loadResumeScore(); };
+        window.onload = () => { loadNotificationBell(); updatePageData(); loadResumeScore(); renderExpList(); };
+
+        // ── Work Experience (localStorage) ──
+        function getExperiences() { return JSON.parse(localStorage.getItem('jc_experiences') || '[]'); }
+        function saveExperiences(list) { localStorage.setItem('jc_experiences', JSON.stringify(list)); }
+
+        function renderExpList() {
+            const list = getExperiences();
+            const el = document.getElementById('exp-list');
+            if (!list.length) { el.innerHTML = '<p class="text-slate-400 text-sm italic">No work experience added yet.</p>'; return; }
+            el.innerHTML = list.map((e, i) => `
+                <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-sm shrink-0">🏢</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-slate-900 text-sm">${e.title}</p>
+                        <p class="text-slate-500 text-xs">${e.company}</p>
+                        <p class="text-slate-400 text-xs mt-0.5">${e.start || ''} — ${e.current ? 'Present' : (e.end || '')}</p>
+                        ${e.desc ? `<p class="text-slate-500 text-xs mt-1 leading-relaxed">${e.desc}</p>` : ''}
+                    </div>
+                    <button onclick="deleteExp(${i})" class="text-slate-300 hover:text-red-400 transition text-sm shrink-0">✕</button>
+                </div>`).join('');
+        }
+
+        function openExpModal() { document.getElementById('expModal').classList.add('active'); }
+        function closeExpModal() {
+            document.getElementById('expModal').classList.remove('active');
+            ['exp-title','exp-company','exp-start','exp-end','exp-desc'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('exp-current').checked = false;
+            document.getElementById('exp-end').disabled = false;
+        }
+
+        function saveExp() {
+            const title = document.getElementById('exp-title').value.trim();
+            const company = document.getElementById('exp-company').value.trim();
+            if (!title || !company) { toast('Please fill in job title and company.', 'warning'); return; }
+            const list = getExperiences();
+            list.unshift({
+                title, company,
+                start: document.getElementById('exp-start').value,
+                end: document.getElementById('exp-end').value,
+                current: document.getElementById('exp-current').checked,
+                desc: document.getElementById('exp-desc').value.trim()
+            });
+            saveExperiences(list);
+            closeExpModal();
+            renderExpList();
+            toast('Experience added!', 'success');
+        }
+
+        function deleteExp(idx) {
+            showConfirm('Remove this experience?', () => {
+                const list = getExperiences();
+                list.splice(idx, 1);
+                saveExperiences(list);
+                renderExpList();
+            });
+        }
+
+        // ── Location map picker ──
+        let profileMap = null, profileMarker = null, profileMapOpen = false, profileSuggestTimer = null;
+
+        function toggleMapProfile() {
+            const wrap = document.getElementById('profile-map-wrap');
+            profileMapOpen = !profileMapOpen;
+            wrap.classList.toggle('hidden', !profileMapOpen);
+            if (profileMapOpen) setTimeout(() => { if (!profileMap) initProfileMap(); else profileMap.invalidateSize(); }, 50);
+        }
+
+        function initProfileMap() {
+            profileMap = L.map('profile-map').setView([12.8797, 121.7740], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19
+            }).addTo(profileMap);
+            const pinIcon = L.divIcon({ className: '', html: '<div class="custom-pin"></div>', iconSize: [28,28], iconAnchor: [14,28] });
+            profileMarker = L.marker([12.8797, 121.7740], { icon: pinIcon, draggable: true }).addTo(profileMap);
+            profileMarker.on('dragend', () => { const p = profileMarker.getLatLng(); reverseGeocodeProfile(p.lat, p.lng); });
+            profileMap.on('click', e => { profileMarker.setLatLng(e.latlng); reverseGeocodeProfile(e.latlng.lat, e.latlng.lng); });
+            const existing = document.getElementById('edit-location').value.trim();
+            if (existing) geocodeAndFlyProfile(existing);
+        }
+
+        async function reverseGeocodeProfile(lat, lng) {
+            try {
+                const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: {'Accept-Language':'en'} });
+                const d = await r.json();
+                const a = d.address;
+                const city = a.city || a.town || a.municipality || a.county || a.state || d.display_name.split(',')[0];
+                const prov = a.state || '';
+                document.getElementById('edit-location').value = city + (prov && prov !== city ? ', ' + prov : '');
+            } catch(e) {}
+        }
+
+        async function geocodeAndFlyProfile(q) {
+            try {
+                const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=ph`, { headers: {'Accept-Language':'en'} });
+                const d = await r.json();
+                if (d.length) { profileMap.setView([d[0].lat, d[0].lon], 13); profileMarker.setLatLng([d[0].lat, d[0].lon]); }
+            } catch(e) {}
+        }
+
+        async function searchLocationProfile(q) {
+            clearTimeout(profileSuggestTimer);
+            const box = document.getElementById('profile-loc-suggestions');
+            if (!q || q.length < 3) { box.classList.add('hidden'); return; }
+            profileSuggestTimer = setTimeout(async () => {
+                try {
+                    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&countrycodes=ph`, { headers: {'Accept-Language':'en'} });
+                    const results = await r.json();
+                    if (!results.length) { box.classList.add('hidden'); return; }
+                    box.classList.remove('hidden');
+                    box.innerHTML = results.map(r => {
+                        const label = r.display_name.split(',').slice(0,3).join(',');
+                        return `<div class="loc-suggestion" onclick="pickLocationProfile('${r.display_name.replace(/'/g,"\\'")}',${r.lat},${r.lon})">📍 ${label}</div>`;
+                    }).join('');
+                } catch(e) { box.classList.add('hidden'); }
+            }, 350);
+        }
+
+        function pickLocationProfile(name, lat, lon) {
+            const parts = name.split(',');
+            document.getElementById('edit-location').value = parts[0].trim() + (parts[1] ? ', ' + parts[1].trim() : '');
+            document.getElementById('profile-loc-suggestions').classList.add('hidden');
+            if (profileMap && profileMarker) { profileMap.setView([lat, lon], 13); profileMarker.setLatLng([lat, lon]); }
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#editModal'))
+                document.getElementById('profile-loc-suggestions')?.classList.add('hidden');
+        });
     </script>
 
     
-<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>��</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item active"><span>👤</span><span>Profile</span></a></nav>
+<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item active"><span>👤</span><span>Profile</span></a></nav>
 </body>
 </html>
 

@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         body { background: #f1f5f9; }
         .tab-btn.active { background: #4f46e5; color: white; border-radius: 1rem; }
@@ -15,6 +17,11 @@
         .kanban-card:hover { border-color: #c7d2fe; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .stat-card { background: white; border-radius: 1.5rem; border: 1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 1.5rem; }
         .stat-icon { width: 3rem; height: 3rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 0.75rem; }
+        .custom-pin { background:#4f46e5; border:3px solid white; border-radius:50% 50% 50% 0; width:28px; height:28px; transform:rotate(-45deg); box-shadow:0 4px 12px rgba(79,70,229,0.5); }
+        .loc-suggestion { padding:0.6rem 1rem; font-size:0.8125rem; cursor:pointer; border-bottom:1px solid #f1f5f9; transition:background 0.1s; color:#374151; }
+        .loc-suggestion:last-child { border-bottom:none; }
+        .loc-suggestion:hover { background:#f5f3ff; color:#4f46e5; }
+        .leaflet-container { font-family:'Inter',sans-serif; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -27,7 +34,6 @@
                 </div>
                 <div>
                     <span class="font-bold text-xl tracking-tight block leading-tight">TrabaHanap</span>
-                    <span class="text-[9px] text-slate-400 font-medium">Online Job Application System</span>
                 </div>
             </div>
             <div class="flex items-center gap-1">
@@ -262,7 +268,17 @@
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase">Location *</label>
-                        <input id="f-location" type="text" placeholder="e.g. Remote, Manila" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
+                        <div class="relative mt-1">
+                            <input id="f-location" type="text" placeholder="e.g. Remote, Manila" class="w-full p-3 pr-12 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm" oninput="searchLocationEmployer(this.value)">
+                            <button type="button" onclick="toggleMapEmployer()" title="Pick on map" class="absolute right-2 top-2 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">📍</button>
+                        </div>
+                        <div id="emp-loc-suggestions" class="hidden mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden" style="position:relative;z-index:50"></div>
+                        <div id="emp-map-wrap" class="hidden mt-2" style="height:200px;position:relative;border-radius:1rem;overflow:hidden;border:1.5px solid #e2e8f0">
+                            <div id="emp-map" style="height:100%;width:100%"></div>
+                            <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:999">
+                                <span style="background:rgba(255,255,255,0.92);font-size:11px;font-weight:600;color:#475569;padding:4px 12px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">Click or drag pin to set job location</span>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase">Salary Range</label>
@@ -425,10 +441,21 @@
             if (job?.category) document.getElementById('f-category').value = job.category;
             if (job?.type) document.getElementById('f-type').value = job.type;
             if (job?.experience) document.getElementById('f-experience').value = job.experience;
+            // Reset map
+            document.getElementById('emp-map-wrap').classList.add('hidden');
+            document.getElementById('emp-loc-suggestions').classList.add('hidden');
+            empMapOpen = false;
+            if (empMap) { empMap.remove(); empMap = null; empMarker = null; }
             document.getElementById('postModal').classList.add('active');
         }
 
-        function closePostModal() { document.getElementById('postModal').classList.remove('active'); }
+        function closePostModal() {
+            document.getElementById('postModal').classList.remove('active');
+            document.getElementById('emp-map-wrap').classList.add('hidden');
+            document.getElementById('emp-loc-suggestions').classList.add('hidden');
+            empMapOpen = false;
+            if (empMap) { empMap.remove(); empMap = null; empMarker = null; }
+        }
 
         async function submitJob() {
             const id = document.getElementById('edit-job-id').value;
@@ -594,6 +621,78 @@
 
         document.getElementById('interviewModal').addEventListener('click', e => { if (e.target === document.getElementById('interviewModal')) closeInterviewModal(); });
         document.getElementById('empNewMsgModal').addEventListener('click', e => { if (e.target === document.getElementById('empNewMsgModal')) closeEmpNewMsg(); });
+
+        // ── Location map picker (employer) ──
+        let empMap = null, empMarker = null, empMapOpen = false, empSuggestTimer = null;
+
+        function toggleMapEmployer() {
+            const wrap = document.getElementById('emp-map-wrap');
+            empMapOpen = !empMapOpen;
+            wrap.classList.toggle('hidden', !empMapOpen);
+            if (empMapOpen) setTimeout(() => { if (!empMap) initEmpMap(); else empMap.invalidateSize(); }, 50);
+        }
+
+        function initEmpMap() {
+            empMap = L.map('emp-map').setView([12.8797, 121.7740], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19
+            }).addTo(empMap);
+            const pinIcon = L.divIcon({ className: '', html: '<div class="custom-pin"></div>', iconSize: [28,28], iconAnchor: [14,28] });
+            empMarker = L.marker([12.8797, 121.7740], { icon: pinIcon, draggable: true }).addTo(empMap);
+            empMarker.on('dragend', () => { const p = empMarker.getLatLng(); reverseGeocodeEmp(p.lat, p.lng); });
+            empMap.on('click', e => { empMarker.setLatLng(e.latlng); reverseGeocodeEmp(e.latlng.lat, e.latlng.lng); });
+            const existing = document.getElementById('f-location').value.trim();
+            if (existing && existing !== 'Remote') geocodeAndFlyEmp(existing);
+        }
+
+        async function reverseGeocodeEmp(lat, lng) {
+            try {
+                const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: {'Accept-Language':'en'} });
+                const d = await r.json();
+                const a = d.address;
+                const city = a.city || a.town || a.municipality || a.county || a.state || d.display_name.split(',')[0];
+                const prov = a.state || '';
+                document.getElementById('f-location').value = city + (prov && prov !== city ? ', ' + prov : '');
+            } catch(e) {}
+        }
+
+        async function geocodeAndFlyEmp(q) {
+            try {
+                const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`, { headers: {'Accept-Language':'en'} });
+                const d = await r.json();
+                if (d.length) { empMap.setView([d[0].lat, d[0].lon], 13); empMarker.setLatLng([d[0].lat, d[0].lon]); }
+            } catch(e) {}
+        }
+
+        async function searchLocationEmployer(q) {
+            clearTimeout(empSuggestTimer);
+            const box = document.getElementById('emp-loc-suggestions');
+            if (!q || q.length < 3) { box.classList.add('hidden'); return; }
+            empSuggestTimer = setTimeout(async () => {
+                try {
+                    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5`, { headers: {'Accept-Language':'en'} });
+                    const results = await r.json();
+                    if (!results.length) { box.classList.add('hidden'); return; }
+                    box.classList.remove('hidden');
+                    box.innerHTML = results.map(r => {
+                        const label = r.display_name.split(',').slice(0,3).join(',');
+                        return `<div class="loc-suggestion" onclick="pickLocationEmployer('${r.display_name.replace(/'/g,"\\'")}',${r.lat},${r.lon})">📍 ${label}</div>`;
+                    }).join('');
+                } catch(e) { box.classList.add('hidden'); }
+            }, 350);
+        }
+
+        function pickLocationEmployer(name, lat, lon) {
+            const parts = name.split(',');
+            document.getElementById('f-location').value = parts[0].trim() + (parts[1] ? ', ' + parts[1].trim() : '');
+            document.getElementById('emp-loc-suggestions').classList.add('hidden');
+            if (empMap && empMarker) { empMap.setView([lat, lon], 13); empMarker.setLatLng([lat, lon]); }
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#postModal'))
+                document.getElementById('emp-loc-suggestions')?.classList.add('hidden');
+        });
 
         window.onload = loadStats;
     </script>

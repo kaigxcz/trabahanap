@@ -9,7 +9,9 @@
     <style>
         body { background: #f1f5f9; }
         .saved-card { background:white; border-radius:1.5rem; border:1px solid #f1f5f9; box-shadow:0 2px 8px rgba(0,0,0,0.04); transition:all 0.2s; }
-        .saved-card:hover { box-shadow:0 6px 24px rgba(0,0,0,0.07); border-color:#e0e7ff; transform:translateY(-1px); }
+        .saved-card:hover { box-shadow:0 8px 28px rgba(0,0,0,0.08); border-color:#e0e7ff; transform:translateY(-2px); }
+        .sort-btn { padding:0.35rem 0.875rem; border-radius:999px; font-size:0.75rem; font-weight:600; border:1.5px solid #e2e8f0; color:#64748b; background:white; cursor:pointer; transition:all 0.15s; }
+        .sort-btn.active { background:#4f46e5; color:white; border-color:#4f46e5; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -23,85 +25,107 @@
         <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
     </header>
 
-    <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-8 flex flex-col">
-        <div class="flex items-center justify-between mb-12">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center">
-                    <span class="text-white font-bold text-xs">T</span>
-                </div>
+    <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
+        <div class="flex items-center justify-between mb-10">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
                 <div>
-                    <span class="font-bold text-xl tracking-tight block leading-tight">TrabaHanap</span>
+                    <span class="font-bold text-lg tracking-tight block leading-tight">TrabaHanap</span>
                     <span class="text-[9px] text-slate-400 font-medium">Online Job Application System</span>
                 </div>
             </div>
-            <div class="relative">
-                <button onclick="toggleNotifPanel()" class="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-slate-500 text-lg">
-                    🔔
-                    <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
-                </button>
-                <div id="notif-panel" class="hidden absolute left-0 top-12 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden">
-                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-                        <span class="font-bold text-slate-800 text-sm">Notifications</span>
-                        <button onclick="toggleNotifPanel()" class="text-slate-400 hover:text-slate-600 text-xs">Close</button>
+            <div class="flex items-center gap-1">
+                <div class="relative">
+                    <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                        🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                    </button>
+                    <div id="notif-panel" class="hidden absolute left-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50" style="max-height:320px;overflow-y:auto">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white">
+                            <span class="font-bold text-slate-800 text-sm">Notifications</span>
+                            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">✕</button>
+                        </div>
+                        <div id="notif-list" class="p-2"></div>
                     </div>
-                    <div id="notif-list" class="max-h-72 overflow-y-auto p-2"></div>
                 </div>
+                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
-            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
         </div>
-        <nav class="space-y-2 flex-1">
-            <a href="/dashboard" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
-                <span>🏠</span><span>Find Jobs</span>
-            </a>
-            <a href="/saved" class="nav-link active w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
-                <span>🔖</span><span>Saved Jobs</span>
-            </a>
-            <a href="/applications" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
-                <span>📂</span><span>Applications</span>
-            </a>
-            <a href="/messages" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
-                <span>💬</span><span>Messages</span>
-            </a>
-            <a href="/profile" class="nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
-                <span>👤</span><span>Profile</span>
-            </a>
+        <nav class="space-y-1 flex-1">
+            <a href="/dashboard" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🏠</span><span class="text-sm">Find Jobs</span></a>
+            <a href="/saved" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🔖</span><span class="text-sm">Saved Jobs</span></a>
+            <a href="/applications" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>📂</span><span class="text-sm">Applications</span></a>
+            <a href="/messages" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>💬</span><span class="text-sm">Messages</span></a>
+            <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
         </nav>
-        
     </aside>
 
-    <main class="flex-1 p-6 md:p-12">
-        <header class="mb-10">
-            <h1 class="text-3xl font-bold text-slate-900">Saved Jobs</h1>
-            <p class="text-slate-500 mt-1">Jobs you've bookmarked for later</p>
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+        <header class="mb-6">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Saved Jobs</h1>
+                    <p class="text-slate-400 text-sm mt-1">Jobs you've bookmarked for later — <span id="saved-count" class="font-semibold text-slate-600">0</span> saved</p>
+                </div>
+                <a href="/dashboard" class="btn btn-secondary btn-sm h-9">+ Find More Jobs</a>
+            </div>
         </header>
 
+        <!-- Search + Sort -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-5 flex flex-col sm:flex-row gap-3 items-center">
+            <div class="relative flex-1 w-full">
+                <span class="absolute left-3 top-2.5 text-slate-400 text-sm">🔍</span>
+                <input type="text" id="search-saved" oninput="renderSaved()" placeholder="Search saved jobs..."
+                    class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 transition text-sm">
+            </div>
+            <div class="flex gap-2 shrink-0">
+                <button class="sort-btn active" onclick="setSort('saved', this)">🕐 Recent</button>
+                <button class="sort-btn" onclick="setSort('title', this)">🔤 Title</button>
+                <button class="sort-btn" onclick="setSort('company', this)">🏢 Company</button>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 gap-4" id="saved-grid">
-            <p class="text-slate-400 text-sm">Loading...</p>
+            <div class="saved-card p-5 animate-pulse flex gap-4"><div class="w-12 h-12 bg-slate-100 rounded-2xl shrink-0"></div><div class="flex-1 space-y-2"><div class="h-4 bg-slate-100 rounded w-48"></div><div class="h-3 bg-slate-100 rounded w-32"></div></div></div>
+            <div class="saved-card p-5 animate-pulse flex gap-4"><div class="w-12 h-12 bg-slate-100 rounded-2xl shrink-0"></div><div class="flex-1 space-y-2"><div class="h-4 bg-slate-100 rounded w-48"></div><div class="h-3 bg-slate-100 rounded w-32"></div></div></div>
         </div>
     </main>
 
     <script src="js/api.js"></script>
     <script>
         if (!localStorage.getItem('jc_token')) window.location.href = 'index.html';
+        let allSaved = [], currentSort = 'saved';
 
-        async function loadSaved() {
-            const jobs = await apiGet('/saved');
+        function setSort(sort, btn) {
+            currentSort = sort;
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderSaved();
+        }
+
+        function renderSaved() {
+            const q = document.getElementById('search-saved').value.toLowerCase();
+            let jobs = allSaved.filter(j =>
+                !q || j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q) || (j.location || '').toLowerCase().includes(q)
+            );
+            if (currentSort === 'title') jobs = [...jobs].sort((a, b) => a.title.localeCompare(b.title));
+            else if (currentSort === 'company') jobs = [...jobs].sort((a, b) => a.company.localeCompare(b.company));
+
             const grid = document.getElementById('saved-grid');
             if (!jobs.length) {
                 grid.innerHTML = `<div class="text-center py-20 text-slate-400">
                     <div class="text-5xl mb-4">🔖</div>
-                    <p class="font-semibold">No saved jobs yet.</p>
-                    <p class="text-sm mt-1">Browse jobs and click the heart to save them here.</p>
-                    <a href="/dashboard" class="inline-block mt-6 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition">Browse Jobs</a>
+                    <p class="font-semibold text-slate-600">${q ? 'No results for "' + q + '"' : 'No saved jobs yet.'}</p>
+                    <p class="text-sm mt-1">${q ? 'Try a different search term.' : 'Browse jobs and click the heart to save them here.'}</p>
+                    ${!q ? `<a href="/dashboard" class="inline-block mt-6 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition text-sm">Browse Jobs</a>` : ''}
                 </div>`;
                 return;
             }
             grid.innerHTML = jobs.map((job, i) => `
-                <div class="card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 fade-in" style="animation-delay:${i*40}ms">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
-                        <div>
-                            <h4 class="text-sm font-bold text-slate-900">${job.title}</h4>
+                <div class="saved-card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 fade-in" style="animation-delay:${i*40}ms" data-id="${job.id}">
+                    <div class="flex items-center gap-4 flex-1 min-w-0">
+                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon || '💼'}</div>
+                        <div class="min-w-0">
+                            <h4 class="text-sm font-bold text-slate-900 truncate">${job.title}</h4>
                             <p class="text-slate-500 text-xs mt-0.5">${job.company} • ${job.location}</p>
                             <div class="flex flex-wrap gap-1.5 mt-1.5">
                                 <span class="badge badge-indigo">${job.type}</span>
@@ -111,28 +135,32 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0 self-end md:self-auto">
-                        <button onclick="unsave(${job.id}, this)" class="btn btn-secondary btn-sm h-9">Remove</button>
-                        <button onclick="apply('${job.title}', '${job.company}')" class="btn btn-primary btn-sm h-9">Apply</button>
+                        <button onclick="unsave(${job.id}, this)" class="btn btn-secondary btn-sm h-9 hover:border-red-200 hover:text-red-500">🗑 Remove</button>
+                        <button onclick="apply('${job.title.replace(/'/g,"\\'")}', '${job.company.replace(/'/g,"\\'")}', ${job.id})" class="btn btn-primary btn-sm h-9">⚡ Apply</button>
                     </div>
                 </div>`).join('');
         }
 
-        async function unsave(jobId, btn) {
-            await apiPost('/saved/' + jobId, {}, true);
-            btn.closest('.card, .bg-white').remove();
-            if (!document.querySelector('#saved-grid .bg-white')) loadSaved();
+        async function loadSaved() {
+            allSaved = await apiGet('/saved');
+            document.getElementById('saved-count').innerText = allSaved.length;
+            renderSaved();
         }
 
-        async function apply(jobTitle, company) {
-            const data = await apiPost('/applications', { jobTitle, company }, true);
+        async function unsave(jobId, btn) {
+            await apiPost('/saved/' + jobId, {}, true);
+            allSaved = allSaved.filter(j => j.id !== jobId);
+            document.getElementById('saved-count').innerText = allSaved.length;
+            renderSaved();
+            toast('Job removed from saved.', 'info');
+        }
+
+        async function apply(jobTitle, company, jobId) {
+            const data = await apiPost('/applications', { jobTitle, company, jobId: String(jobId) }, true);
             toast(data.message || data.error, data.error ? 'error' : 'success');
         }
 
-        function logout() {
-            localStorage.removeItem('jc_token');
-            localStorage.removeItem('jc_user');
-            window.location.href = 'index.html';
-        }
+        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
 
         let notifOpen = false;
         function toggleNotifPanel() {
@@ -144,18 +172,6 @@
         window.onload = () => { loadNotificationBell(); loadSaved(); };
     </script>
 
-    
 <nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item active"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-

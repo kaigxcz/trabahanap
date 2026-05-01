@@ -4,7 +4,10 @@ import com.jobconnect.model.Notification;
 import com.jobconnect.model.User;
 import com.jobconnect.repository.NotificationRepository;
 import com.jobconnect.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -66,5 +69,25 @@ public class ResumeController {
         String filename = user.getResumeFilename();
         if (filename == null) return ResponseEntity.ok(Map.of("hasResume", false));
         return ResponseEntity.ok(Map.of("hasResume", true, "filename", filename));
+    }
+
+    @GetMapping("/download/{filename}")
+    public ResponseEntity<Resource> downloadResume(@PathVariable String filename) throws java.io.IOException {
+        User user = getCurrentUser();
+        // Only allow downloading own resume
+        if (!filename.equals(user.getResumeFilename())) {
+            return ResponseEntity.status(403).build();
+        }
+        Path filePath = Paths.get("uploads").resolve(filename).normalize();
+        Resource resource = new UrlResource(filePath.toUri());
+        if (!resource.exists() || !resource.isReadable()) {
+            return ResponseEntity.notFound().build();
+        }
+        String contentType = filename.endsWith(".pdf") ? "application/pdf"
+                : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(resource);
     }
 }

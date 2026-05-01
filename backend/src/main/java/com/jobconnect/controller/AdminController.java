@@ -55,14 +55,20 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers() {
         requireAdmin();
-        List<Map<String, Object>> users = userRepository.findAll().stream().map(u -> Map.<String, Object>of(
-            "id", u.getId(),
-            "username", u.getUsername(),
-            "fullName", u.getFirstName() + " " + u.getLastName(),
-            "email", u.getEmail() != null ? u.getEmail() : "",
-            "role", u.getRole() != null ? u.getRole() : "CANDIDATE",
-            "location", u.getLocation() != null ? u.getLocation() : ""
-        )).toList();
+        List<Map<String, Object>> users = userRepository.findAll().stream().map(u -> {
+            String firstName = u.getFirstName() != null ? u.getFirstName() : "";
+            String lastName  = u.getLastName()  != null ? u.getLastName()  : "";
+            String fullName  = (firstName + " " + lastName).trim();
+            if (fullName.isEmpty()) fullName = u.getUsername();
+            return Map.<String, Object>of(
+                "id",       u.getId(),
+                "username", u.getUsername(),
+                "fullName", fullName,
+                "email",    u.getEmail()    != null ? u.getEmail()    : "",
+                "role",     u.getRole()     != null ? u.getRole()     : "CANDIDATE",
+                "location", u.getLocation() != null ? u.getLocation() : ""
+            );
+        }).toList();
         return ResponseEntity.ok(users);
     }
 

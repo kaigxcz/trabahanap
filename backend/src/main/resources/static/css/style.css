@@ -144,3 +144,120 @@ body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
     align-items: center; justify-content: space-between;
     box-shadow: 0 1px 8px rgba(0,0,0,0.04);
 }
+
+
+/* ══════════════════════════════════════════════
+   ADDITIONS — Dark mode, transitions, a11y, print
+   ══════════════════════════════════════════════ */
+
+/* ── Smooth page transitions ── */
+html { scroll-behavior: smooth; }
+body { transition: background 0.3s ease, color 0.3s ease; }
+
+/* ── Better focus rings (accessibility) ── */
+:focus-visible {
+    outline: 2px solid #4f46e5;
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid #4f46e5;
+    outline-offset: 3px;
+}
+
+/* ── Page loader overlay ── */
+.page-loader {
+    position: fixed; inset: 0; z-index: 99999;
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1rem;
+    transition: opacity 0.4s ease;
+}
+.page-loader.hide { opacity: 0; pointer-events: none; }
+.page-loader .loader-logo {
+    width: 3rem; height: 3rem; background: #4f46e5; border-radius: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 900; font-size: 1.25rem;
+    animation: bounce 1s ease-in-out infinite;
+}
+.page-loader p { font-size: 0.875rem; color: #94a3b8; font-weight: 600; }
+
+/* ── Dark mode — extended element coverage ── */
+body.dark { background: #0f172a; color: #e2e8f0; }
+body.dark .card { background: #1e293b !important; border-color: #334155 !important; }
+body.dark .input, body.dark .input-field {
+    background: #0f172a !important; color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+body.dark .input:focus, body.dark .input-field:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.2) !important;
+}
+body.dark .badge-slate { background: #334155 !important; color: #94a3b8 !important; }
+body.dark .badge-indigo { background: #312e81 !important; color: #a5b4fc !important; }
+body.dark .badge-teal { background: #134e4a !important; color: #5eead4 !important; }
+body.dark .badge-green { background: #14532d !important; color: #86efac !important; }
+body.dark .badge-amber { background: #451a03 !important; color: #fcd34d !important; }
+body.dark .badge-red { background: #450a0a !important; color: #fca5a5 !important; }
+body.dark .badge-purple { background: #3b0764 !important; color: #d8b4fe !important; }
+body.dark .modal-box, body.dark .modal > div { background: #1e293b !important; }
+body.dark .btn-secondary {
+    background: #1e293b !important; color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
+body.dark .btn-secondary:hover { border-color: #6366f1 !important; color: #a5b4fc !important; background: #312e81 !important; }
+body.dark .cat-pill { background: #1e293b !important; color: #94a3b8 !important; border-color: #334155 !important; }
+body.dark .cat-pill.active { background: #4f46e5 !important; color: white !important; border-color: #4f46e5 !important; }
+body.dark .cat-pill:hover { border-color: #6366f1 !important; color: #a5b4fc !important; }
+body.dark .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%) !important; background-size: 200% 100% !important; }
+body.dark .mobile-bottom-nav { background: #1e293b !important; border-color: #334155 !important; }
+body.dark .mobile-header { background: #1e293b !important; border-color: #334155 !important; }
+body.dark select { background: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+body.dark textarea { background: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+body.dark .page-loader { background: #0f172a; }
+
+/* ── Dark mode toggle button ── */
+[onclick="toggleDark()"] { transition: transform 0.2s ease; }
+[onclick="toggleDark()"]:hover { transform: rotate(20deg); }
+
+/* ── Sort select styling ── */
+#sort-jobs { cursor: pointer; }
+
+/* ── Kanban column count badge ── */
+.kanban-col-header { display: flex; align-items: center; justify-content: space-between; }
+.kanban-count { font-size: 0.6875rem; font-weight: 700; background: rgba(0,0,0,0.08); border-radius: 999px; padding: 0.1rem 0.5rem; }
+
+/* ── Employer job card hover ── */
+.employer-job-card { transition: all 0.2s; }
+.employer-job-card:hover { transform: translateY(-1px); }
+
+/* ── Admin table row ── */
+#users-table tr { transition: background 0.1s; }
+
+/* ── Smooth tab transitions ── */
+[id^="view-"] { animation: fadeIn 0.2s ease both; }
+
+@media print {
+    .desktop-sidebar, .mobile-bottom-nav, .mobile-header,
+    button, .btn, nav, header, footer,
+    #editModal, #toast-container, .page-loader { display: none !important; }
+    body { background: white !important; color: black !important; font-size: 12pt; }
+    main { padding: 0 !important; margin: 0 !important; }
+    .card, .bg-white { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+    #resume-preview { border: 1px solid #ccc !important; page-break-inside: avoid; }
+    a { color: black !important; text-decoration: none !important; }
+    @page { margin: 1.5cm; }
+}
+
+/* ── Print styles (resume page) ── */
+@media print {
+    .desktop-sidebar, .mobile-bottom-nav, .mobile-header,
+    button, .btn, nav, header, footer,
+    #editModal, #toast-container, .page-loader { display: none !important; }
+    body { background: white !important; color: black !important; font-size: 12pt; }
+    main { padding: 0 !important; margin: 0 !important; }
+    .card, .bg-white { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+    #resume-preview { border: 1px solid #ccc !important; page-break-inside: avoid; }
+    a { color: black !important; text-decoration: none !important; }
+    @page { margin: 1.5cm; }
+}

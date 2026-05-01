@@ -7,12 +7,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        body { background: #f1f5f9; }
-        .msg-bubble-mine { background: #4f46e5; color: white; border-radius: 1.25rem 1.25rem 0.25rem 1.25rem; }
+        body { background: #f1f5f9; overflow: hidden; }
+        .msg-bubble-mine { background: linear-gradient(135deg,#4f46e5,#7c3aed); color: white; border-radius: 1.25rem 1.25rem 0.25rem 1.25rem; }
         .msg-bubble-other { background: white; color: #1e293b; border: 1px solid #f1f5f9; border-radius: 1.25rem 1.25rem 1.25rem 0.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
         .convo-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem; border-radius:1rem; cursor:pointer; transition:all 0.15s; }
         .convo-item:hover { background:#f5f3ff; }
-        .convo-item.active { background:#eef2ff; }
+        .convo-item.active { background:#eef2ff; border-left:3px solid #4f46e5; padding-left:calc(0.75rem - 3px); }
+        #chat-messages { scroll-behavior: smooth; }
+        .typing-indicator span { display:inline-block; width:6px; height:6px; background:#94a3b8; border-radius:50%; animation:bounce 1.2s infinite; }
+        .typing-indicator span:nth-child(2) { animation-delay:0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay:0.4s; }
+        @media (max-width: 768px) {
+            .convo-panel { position:fixed; inset:0; z-index:30; background:white; transform:translateX(0); transition:transform 0.25s; }
+            .convo-panel.hidden-mobile { transform:translateX(-100%); }
+            .chat-panel { position:fixed; inset:0; z-index:30; background:white; }
+            body { overflow: auto; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row bg-slate-50">
@@ -20,8 +30,9 @@
     <!-- Mobile Header -->
     <header class="mobile-header hidden">
         <div class="flex items-center gap-2">
+            <button id="back-btn" onclick="showConvoList()" class="hidden w-8 h-8 items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">←</button>
             <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-black text-xs">T</span></div>
-            <div><span class="font-bold text-sm block leading-tight">TrabaHanap</span><span style="font-size:8px;color:#94a3b8;font-weight:600">Online Job Application System</span></div>
+            <div><span class="font-bold text-sm block leading-tight" id="mobile-title">Messages</span></div>
         </div>
         <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
     </header>
@@ -32,7 +43,6 @@
                 <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
                 <div>
                     <span class="font-bold text-base tracking-tight block leading-tight">TrabaHanap</span>
-                    <span style="font-size:9px;color:#94a3b8;font-weight:600">Online Job Application System</span>
                 </div>
             </div>
             <div class="flex items-center gap-1">
@@ -40,12 +50,12 @@
                     <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
                         🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
-                    <div id="notif-panel" class="hidden absolute left-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden">
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                    <div id="notif-panel" class="hidden absolute right-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50" style="max-height:360px;overflow-y:auto">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white rounded-t-2xl">
                             <span class="font-bold text-slate-800 text-sm">Notifications</span>
-                            <button onclick="toggleNotifPanel()" class="text-slate-400 hover:text-slate-600 text-xs">Close</button>
+                            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">✕</button>
                         </div>
-                        <div id="notif-list" class="max-h-72 overflow-y-auto p-2"></div>
+                        <div id="notif-list" class="p-2"></div>
                     </div>
                 </div>
                 <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
@@ -58,44 +68,57 @@
             <a href="/messages" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>💬</span><span class="text-sm">Messages</span></a>
             <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
         </nav>
-        
     </aside>
 
     <main class="flex-1 flex overflow-hidden" style="height:100vh">
         <!-- Conversation list -->
-        <div class="w-80 bg-white border-r border-slate-100 flex flex-col shrink-0">
-            <div class="p-5 border-b border-slate-100">
-                <h1 class="text-lg font-bold text-slate-900">Messages</h1>
-                <p class="text-xs text-slate-400 mt-0.5">Your conversations</p>
+        <div id="convo-panel" class="convo-panel w-full md:w-80 bg-white border-r border-slate-100 flex flex-col shrink-0">
+            <div class="p-4 border-b border-slate-100">
+                <div class="flex items-center justify-between mb-3">
+                    <h1 class="text-lg font-bold text-slate-900">Messages</h1>
+                    <button onclick="openNewMsg()" class="w-8 h-8 bg-indigo-600 text-white rounded-xl flex items-center justify-center hover:bg-indigo-700 transition text-lg font-bold" title="New message">✏️</button>
+                </div>
+                <div class="relative">
+                    <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+                    <input type="text" id="search-convo" oninput="filterConvos()" placeholder="Search conversations..."
+                        class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 transition text-xs">
+                </div>
             </div>
             <div id="conversation-list" class="flex-1 overflow-y-auto p-3 space-y-1">
                 <p class="text-slate-400 text-sm text-center py-8">Loading...</p>
             </div>
-            <!-- New message -->
-            <div class="p-4 border-t border-slate-100">
-                <button onclick="openNewMsg()" class="btn btn-primary w-full h-10 text-sm">+ New Message</button>
-            </div>
         </div>
 
         <!-- Chat area -->
-        <div class="flex-1 flex flex-col">
-            <div id="chat-header" class="p-5 border-b border-slate-100 bg-white hidden">
-                <h2 id="chat-name" class="font-bold text-slate-900"></h2>
-                <p id="chat-username" class="text-xs text-slate-400"></p>
-            </div>
+        <div id="chat-panel" class="chat-panel flex-1 flex flex-col hidden md:flex">
             <div id="chat-empty" class="flex-1 flex items-center justify-center text-slate-400">
                 <div class="text-center">
-                    <div class="text-5xl mb-3">💬</div>
-                    <p class="font-semibold text-slate-600">Select a conversation</p>
-                    <p class="text-sm mt-1">or start a new one</p>
+                    <div class="text-6xl mb-4">💬</div>
+                    <p class="font-bold text-slate-600 text-lg">Your messages</p>
+                    <p class="text-sm mt-1 text-slate-400">Select a conversation or start a new one</p>
+                    <button onclick="openNewMsg()" class="mt-5 btn btn-primary btn-sm h-9 px-5">✏️ New Message</button>
                 </div>
             </div>
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-3 hidden"></div>
-            <div id="chat-input" class="p-4 border-t border-slate-100 bg-white hidden">
-                <div class="flex gap-3">
-                    <input type="text" id="msg-input" placeholder="Type a message..." class="input flex-1" onkeydown="if(event.key==='Enter') sendMessage()">
-                    <button onclick="sendMessage()" class="btn btn-primary h-11 px-5">Send</button>
+            <div id="chat-header" class="p-4 border-b border-slate-100 bg-white hidden">
+                <div class="flex items-center gap-3">
+                    <div id="chat-avatar" class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">?</div>
+                    <div>
+                        <h2 id="chat-name" class="font-bold text-slate-900 text-sm"></h2>
+                        <p id="chat-username" class="text-xs text-slate-400"></p>
+                    </div>
                 </div>
+            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-3 hidden bg-slate-50"></div>
+            <div id="chat-input" class="p-4 border-t border-slate-100 bg-white hidden">
+                <div class="flex gap-2 items-end">
+                    <textarea id="msg-input" rows="1" placeholder="Type a message…"
+                        class="input flex-1 resize-none text-sm"
+                        style="max-height:120px;overflow-y:auto"
+                        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+                    <button onclick="sendMessage()" class="btn btn-primary h-10 px-4 shrink-0">Send</button>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Enter to send · Shift+Enter for new line</p>
             </div>
         </div>
     </main>
@@ -103,23 +126,26 @@
     <!-- New Message Modal -->
     <div id="newMsgModal" class="modal p-4">
         <div class="modal-box bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-8">
-            <h3 class="text-lg font-bold mb-5">New Message</h3>
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg font-bold">New Message</h3>
+                <button onclick="closeNewMsg()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition">✕</button>
+            </div>
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">To (Username)</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">To (Username)</label>
                     <input type="text" id="new-receiver" placeholder="Enter username" class="input mt-1">
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Subject</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Subject <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
                     <input type="text" id="new-subject" placeholder="e.g. Regarding your application" class="input mt-1">
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Message</label>
-                    <textarea id="new-content" rows="4" placeholder="Write your message..." class="input mt-1 resize-none"></textarea>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Message</label>
+                    <textarea id="new-content" rows="4" placeholder="Write your message…" class="input mt-1 resize-none"></textarea>
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button onclick="closeNewMsg()" class="btn btn-secondary flex-1 h-11">Cancel</button>
-                    <button onclick="sendNewMessage()" class="btn btn-primary flex-1 h-11">Send</button>
+                    <button onclick="sendNewMessage()" class="btn btn-primary flex-1 h-11">Send Message</button>
                 </div>
             </div>
         </div>
@@ -129,77 +155,126 @@
     <script>
         if (!localStorage.getItem('jc_token')) window.location.href = '/login';
         const me = JSON.parse(localStorage.getItem('jc_user') || '{}');
-        let currentConvo = null;
+        let currentConvo = null, allConvos = [];
 
-        async function loadConversations() {
-            const msgs = await apiGet('/messages/inbox');
+        function filterConvos() {
+            const q = document.getElementById('search-convo').value.toLowerCase();
+            const filtered = q ? allConvos.filter(c => c.name.toLowerCase().includes(q) || c.username.toLowerCase().includes(q)) : allConvos;
+            renderConvoList(filtered);
+        }
+
+        function renderConvoList(convos) {
             const list = document.getElementById('conversation-list');
-            if (!msgs.length) {
-                list.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No messages yet.</p>';
+            if (!convos.length) {
+                list.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No conversations yet.</p>';
                 return;
             }
-            // Group by other person
-            const seen = new Set();
-            const convos = [];
-            msgs.forEach(m => {
-                const other = m.isMine ? m.receiverUsername : m.senderUsername;
-                const otherName = m.isMine ? m.receiverUsername : m.senderName;
-                if (!seen.has(other)) { seen.add(other); convos.push({ username: other, name: otherName, last: m }); }
-            });
             list.innerHTML = convos.map(c => `
                 <div onclick="openConvo('${c.username}', '${c.name}')" class="convo-item ${currentConvo === c.username ? 'active' : ''}">
                     <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">${c.name[0].toUpperCase()}</div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-slate-800 truncate">${c.name}</p>
-                        <p class="text-xs text-slate-400 truncate mt-0.5">${c.last.content}</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-semibold text-slate-800 truncate">${c.name}</p>
+                            <p class="text-[10px] text-slate-400 shrink-0 ml-2">${timeAgo(c.last.sentAt)}</p>
+                        </div>
+                        <p class="text-xs text-slate-400 truncate mt-0.5">${c.last.isMine ? 'You: ' : ''}${c.last.content}</p>
                     </div>
-                    ${!c.last.isRead && !c.last.isMine ? '<span class="w-2.5 h-2.5 bg-indigo-500 rounded-full shrink-0"></span>' : ''}
+                    ${!c.last.isRead && !c.last.isMine ? '<span class="w-2.5 h-2.5 bg-indigo-500 rounded-full shrink-0 ml-1"></span>' : ''}
                 </div>`).join('');
+        }
+
+        async function loadConversations() {
+            const msgs = await apiGet('/messages/inbox');
+            const seen = new Set();
+            allConvos = [];
+            msgs.forEach(m => {
+                const other = m.isMine ? m.receiverUsername : m.senderUsername;
+                const otherName = m.isMine ? m.receiverUsername : m.senderName;
+                if (!seen.has(other)) { seen.add(other); allConvos.push({ username: other, name: otherName, last: m }); }
+            });
+            renderConvoList(allConvos);
         }
 
         async function openConvo(username, name) {
             currentConvo = username;
+            // Mobile: show chat panel
+            document.getElementById('convo-panel').classList.add('hidden-mobile');
+            document.getElementById('chat-panel').classList.remove('hidden');
+            document.getElementById('back-btn').classList.remove('hidden');
+            document.getElementById('back-btn').classList.add('flex');
+            document.getElementById('mobile-title').innerText = name;
+
             document.getElementById('chat-empty').classList.add('hidden');
             document.getElementById('chat-messages').classList.remove('hidden');
             document.getElementById('chat-input').classList.remove('hidden');
             document.getElementById('chat-header').classList.remove('hidden');
             document.getElementById('chat-name').innerText = name;
             document.getElementById('chat-username').innerText = '@' + username;
+            document.getElementById('chat-avatar').innerText = name[0].toUpperCase();
 
             const msgs = await apiGet('/messages/conversation/' + username);
             const container = document.getElementById('chat-messages');
-            container.innerHTML = msgs.length ? msgs.map(m => `
-                <div class="flex ${m.isMine ? 'justify-end' : 'justify-start'} mb-1">
-                    <div class="max-w-xs lg:max-w-md px-4 py-2.5 text-sm ${m.isMine ? 'msg-bubble-mine' : 'msg-bubble-other'}">
-                        <p>${m.content}</p>
-                        <p class="text-[10px] mt-1 ${m.isMine ? 'text-indigo-200' : 'text-slate-400'}">${timeAgo(m.sentAt)}</p>
-                    </div>
-                </div>`).join('') : '<p class="text-center text-slate-400 text-sm py-8">No messages yet. Say hello!</p>';
+            if (!msgs.length) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">No messages yet. Say hello! 👋</p>';
+            } else {
+                let lastDate = null;
+                container.innerHTML = msgs.map(m => {
+                    const msgDate = new Date(m.sentAt).toLocaleDateString('en-PH', {month:'short',day:'numeric'});
+                    const dateSep = msgDate !== lastDate ? `<div class="flex items-center gap-3 my-3"><div class="flex-1 h-px bg-slate-200"></div><span class="text-[10px] text-slate-400 font-semibold">${msgDate}</span><div class="flex-1 h-px bg-slate-200"></div></div>` : '';
+                    lastDate = msgDate;
+                    return `${dateSep}<div class="flex ${m.isMine ? 'justify-end' : 'justify-start'} mb-1">
+                        <div class="max-w-xs lg:max-w-md px-4 py-2.5 text-sm ${m.isMine ? 'msg-bubble-mine' : 'msg-bubble-other'}">
+                            <p>${m.content}</p>
+                            <p class="text-[10px] mt-1 ${m.isMine ? 'text-indigo-200' : 'text-slate-400'}">${timeAgo(m.sentAt)}</p>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
             container.scrollTop = container.scrollHeight;
-            loadConversations();
+            document.getElementById('msg-input').focus();
+            renderConvoList(allConvos);
+        }
+
+        function showConvoList() {
+            document.getElementById('convo-panel').classList.remove('hidden-mobile');
+            document.getElementById('chat-panel').classList.add('hidden');
+            document.getElementById('back-btn').classList.add('hidden');
+            document.getElementById('back-btn').classList.remove('flex');
+            document.getElementById('mobile-title').innerText = 'Messages';
         }
 
         async function sendMessage() {
             const content = document.getElementById('msg-input').value.trim();
             if (!content || !currentConvo) return;
-            await apiPost('/messages', { receiverUsername: currentConvo, content }, true);
             document.getElementById('msg-input').value = '';
+            document.getElementById('msg-input').style.height = 'auto';
+            await apiPost('/messages', { receiverUsername: currentConvo, content }, true);
             openConvo(currentConvo, document.getElementById('chat-name').innerText);
+            loadConversations();
         }
 
         function openNewMsg() { document.getElementById('newMsgModal').classList.add('active'); }
-        function closeNewMsg() { document.getElementById('newMsgModal').classList.remove('active'); }
+        function closeNewMsg() {
+            document.getElementById('newMsgModal').classList.remove('active');
+            document.getElementById('new-receiver').value = '';
+            document.getElementById('new-subject').value = '';
+            document.getElementById('new-content').value = '';
+        }
 
         async function sendNewMessage() {
             const receiver = document.getElementById('new-receiver').value.trim();
             const subject = document.getElementById('new-subject').value.trim();
             const content = document.getElementById('new-content').value.trim();
-            if (!receiver || !content) { toast('Please fill in all fields.', 'warning'); return; }
+            if (!receiver || !content) { toast('Please fill in recipient and message.', 'warning'); return; }
+            const btn = document.querySelector('#newMsgModal .btn-primary');
+            setLoading(btn, true, 'Sending...');
             const data = await apiPost('/messages', { receiverUsername: receiver, subject, content }, true);
+            setLoading(btn, false);
             if (data.error) { toast(data.error, 'error'); return; }
             toast('Message sent!', 'success');
             closeNewMsg();
-            loadConversations();
+            await loadConversations();
+            openConvo(receiver, receiver);
         }
 
         function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = '/login'; }
@@ -214,12 +289,6 @@
         window.onload = () => { loadNotificationBell(); loadConversations(); };
     </script>
 
-    
 <nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item active"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
 </body>
 </html>
-
-
-
-
-
