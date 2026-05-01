@@ -107,6 +107,7 @@ public class ProfileController {
             "tips", tips
         ));
     }
+    @GetMapping("/recommendations")
     public List<Job> getRecommendations() {
         User user = getCurrentUser();
         List<Job> allJobs = jobRepository.findAll();

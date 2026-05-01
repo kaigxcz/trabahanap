@@ -94,9 +94,19 @@
 
         <!-- Users Tab -->
         <div id="view-users" class="hidden">
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-slate-900">User Management</h1>
-                <p class="text-slate-400 text-sm mt-1">View, change roles, or remove users.</p>
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">User Management</h1>
+                    <p class="text-slate-400 text-sm mt-1">View, change roles, or remove users.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+                        <input type="text" id="user-search" oninput="filterUsers()" placeholder="Search users..."
+                            class="pl-8 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition w-48">
+                    </div>
+                    <a href="/api/admin/export/users" class="h-9 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-sm font-semibold transition flex items-center gap-1">⬇ CSV</a>
+                </div>
             </div>
             <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
                 <table class="w-full text-left">
@@ -116,9 +126,12 @@
 
         <!-- Jobs Tab -->
         <div id="view-jobs" class="hidden">
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-slate-900">Job Listings</h1>
-                <p class="text-slate-400 text-sm mt-1">Monitor and manage all job postings.</p>
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Job Listings</h1>
+                    <p class="text-slate-400 text-sm mt-1">Monitor and manage all job postings.</p>
+                </div>
+                <a href="/api/admin/export/jobs" class="h-9 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-sm font-semibold transition flex items-center gap-1">⬇ Export CSV</a>
             </div>
             <div id="admin-jobs-list" class="space-y-4"></div>
         </div>
@@ -170,8 +183,24 @@
             });
         }
 
+        let allUsers = [];
+
         async function loadUsers() {
-            const users = await apiGet('/admin/users');
+            allUsers = await apiGet('/admin/users');
+            renderUsers(allUsers);
+        }
+
+        function filterUsers() {
+            const q = document.getElementById('user-search').value.toLowerCase();
+            renderUsers(q ? allUsers.filter(u =>
+                u.fullName.toLowerCase().includes(q) ||
+                u.username.toLowerCase().includes(q) ||
+                (u.email || '').toLowerCase().includes(q) ||
+                u.role.toLowerCase().includes(q)
+            ) : allUsers);
+        }
+
+        function renderUsers(users) {
             document.getElementById('users-table').innerHTML = users.map(u => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
                     <td class="px-6 py-4 text-sm font-semibold text-slate-800">${u.fullName}</td>
@@ -200,26 +229,33 @@
             showConfirm(`Delete user @${username}? All their data will be permanently removed.`, async () => {
                 await apiDelete('/admin/users/' + id);
                 toast(`User @${username} deleted.`, 'info');
-                loadUsers();
+                allUsers = allUsers.filter(u => u.id !== id);
+                filterUsers();
+                loadStats();
             });
         }
 
         async function loadJobs() {
             const jobs = await apiGet('/admin/jobs');
             document.getElementById('admin-jobs-list').innerHTML = jobs.map(job => `
-                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition hover:shadow-md hover:border-indigo-100">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
                         <div>
-                            <h4 class="font-bold text-slate-900">${job.title}</h4>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="font-bold text-slate-900">${job.title}</h4>
+                                ${job.featured ? '<span class="text-[10px] font-bold bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full">⭐ Featured</span>' : ''}
+                            </div>
                             <p class="text-slate-500 text-sm">${job.company} • ${job.location}</p>
-                            <div class="flex gap-2 mt-1">
-                                <span class="text-xs ${job.active ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-400'} font-semibold px-2 py-0.5 rounded-full">${job.active ? 'Active' : 'Inactive'}</span>
+                            <div class="flex gap-2 mt-1 flex-wrap">
+                                <span class="text-xs ${job.active ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-400'} font-semibold px-2 py-0.5 rounded-full">${job.active ? '● Active' : '○ Inactive'}</span>
                                 ${job.postedBy ? `<span class="text-xs bg-indigo-50 text-indigo-500 font-medium px-2 py-0.5 rounded-full">by @${job.postedBy}</span>` : ''}
+                                <span class="text-xs bg-slate-50 text-slate-400 font-medium px-2 py-0.5 rounded-full">${job.type}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 shrink-0">
+                    <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                        <button onclick="featureJob(${job.id})" class="h-9 px-4 border ${job.featured ? 'border-amber-200 text-amber-600 bg-amber-50' : 'border-slate-200 text-slate-500'} hover:border-amber-400 hover:text-amber-600 rounded-xl text-sm font-medium transition">${job.featured ? '★ Unfeature' : '☆ Feature'}</button>
                         <button onclick="toggleJob(${job.id})" class="h-9 px-4 border border-slate-200 text-slate-500 hover:border-amber-400 hover:text-amber-600 rounded-xl text-sm font-medium transition">${job.active ? 'Deactivate' : 'Activate'}</button>
                         <button onclick="deleteJob(${job.id})" class="h-9 px-4 border border-red-100 text-red-400 hover:bg-red-50 rounded-xl text-sm font-medium transition">Delete</button>
                     </div>
@@ -229,6 +265,12 @@
         async function toggleJob(id) {
             const data = await apiPut('/admin/jobs/' + id + '/toggle', {});
             toast('Job ' + (data.active ? 'activated' : 'deactivated') + '.', 'info');
+            loadJobs();
+        }
+
+        async function featureJob(id) {
+            const data = await apiPut('/admin/jobs/' + id + '/feature', {});
+            toast('Job ' + (data.featured ? 'featured ⭐' : 'unfeatured') + '.', 'info');
             loadJobs();
         }
 

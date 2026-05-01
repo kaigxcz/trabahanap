@@ -11,7 +11,11 @@
         .step-dot { width:2.25rem; height:2.25rem; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.875rem; font-weight:700; flex-shrink:0; }
         .step-line { flex:1; height:3px; margin-bottom:1.25rem; border-radius:999px; }
         .app-card { background:white; border-radius:1.5rem; border:1px solid #f1f5f9; box-shadow:0 2px 8px rgba(0,0,0,0.04); transition:all 0.2s; }
-        .app-card:hover { box-shadow:0 6px 24px rgba(0,0,0,0.07); border-color:#e0e7ff; }
+        .app-card:hover { box-shadow:0 8px 28px rgba(0,0,0,0.08); border-color:#e0e7ff; transform:translateY(-1px); }
+        .stat-pill { background:white; border:1px solid #f1f5f9; border-radius:1rem; padding:1rem 1.25rem; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+        .filter-tab { padding:0.4rem 1rem; border-radius:999px; font-size:0.8125rem; font-weight:600; border:1.5px solid #e2e8f0; color:#64748b; background:white; cursor:pointer; transition:all 0.15s; }
+        .filter-tab:hover { border-color:#4f46e5; color:#4f46e5; }
+        .filter-tab.active { background:#4f46e5; color:white; border-color:#4f46e5; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row bg-slate-50">
@@ -22,9 +26,12 @@
             <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-black text-xs">T</span></div>
             <div><span class="font-bold text-sm block leading-tight">TrabaHanap</span><span style="font-size:8px;color:#94a3b8;font-weight:600">Online Job Application System</span></div>
         </div>
-        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
+        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+            🔔<span id="notif-badge-mobile" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+        </button>
     </header>
-    <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0">
+
+    <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
         <div class="flex items-center justify-between mb-10">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
@@ -33,19 +40,21 @@
                     <span class="text-[9px] text-slate-400 font-medium leading-tight">Online Job Application System</span>
                 </div>
             </div>
-            <div class="relative">
-                <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
-                    🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
-                </button>
-                <div id="notif-panel" class="hidden absolute left-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50">
-                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-                        <span class="font-bold text-slate-800 text-sm">Notifications</span>
-                        <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">Close</button>
+            <div class="flex items-center gap-1">
+                <div class="relative">
+                    <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                        🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                    </button>
+                    <div id="notif-panel" class="hidden absolute left-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50" style="max-height:320px;overflow-y:auto">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white">
+                            <span class="font-bold text-slate-800 text-sm">Notifications</span>
+                            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">✕</button>
+                        </div>
+                        <div id="notif-list" class="p-2"></div>
                     </div>
-                    <div id="notif-list" class="max-h-72 overflow-y-auto p-2"></div>
                 </div>
+                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
-            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
         </div>
         <nav class="space-y-1 flex-1">
             <a href="/dashboard" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🏠</span><span class="text-sm">Find Jobs</span></a>
@@ -54,16 +63,36 @@
             <a href="/messages" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>💬</span><span class="text-sm">Messages</span></a>
             <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
         </nav>
-        
     </aside>
 
-    <main class="flex-1 p-6 md:p-8">
-        <header class="mb-8">
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+        <header class="mb-6">
             <h1 class="text-2xl font-bold text-slate-900">My Applications</h1>
             <p class="text-slate-400 text-sm mt-1">Track every step of your job search journey.</p>
         </header>
+
+        <!-- Stats Row -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6" id="stats-row">
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total</p><p id="stat-total" class="text-2xl font-black text-slate-900">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Applied</p><p id="stat-applied" class="text-2xl font-black text-indigo-600">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">In Review</p><p id="stat-review" class="text-2xl font-black text-blue-500">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interview</p><p id="stat-interview" class="text-2xl font-black text-purple-600">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Offer 🎉</p><p id="stat-offer" class="text-2xl font-black text-green-600">—</p></div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex flex-wrap gap-2 mb-6">
+            <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
+            <button class="filter-tab" onclick="setFilter('Applied', this)">📤 Applied</button>
+            <button class="filter-tab" onclick="setFilter('Under Review', this)">🔍 Under Review</button>
+            <button class="filter-tab" onclick="setFilter('Interview', this)">🗣️ Interview</button>
+            <button class="filter-tab" onclick="setFilter('Offer', this)">🎉 Offer</button>
+            <button class="filter-tab" onclick="setFilter('Rejected', this)">✕ Rejected</button>
+        </div>
+
         <div id="apps-container" class="space-y-4">
-            <p class="text-slate-400 text-sm">Loading...</p>
+            <div class="app-card p-6 animate-pulse"><div class="flex gap-4"><div class="w-12 h-12 bg-slate-100 rounded-2xl shrink-0"></div><div class="flex-1 space-y-2"><div class="h-4 bg-slate-100 rounded w-48"></div><div class="h-3 bg-slate-100 rounded w-32"></div></div></div></div>
+            <div class="app-card p-6 animate-pulse"><div class="flex gap-4"><div class="w-12 h-12 bg-slate-100 rounded-2xl shrink-0"></div><div class="flex-1 space-y-2"><div class="h-4 bg-slate-100 rounded w-48"></div><div class="h-3 bg-slate-100 rounded w-32"></div></div></div></div>
         </div>
     </main>
 
@@ -73,29 +102,31 @@
 
         const STEPS = ['Applied', 'Under Review', 'Interview', 'Offer'];
         const STEP_ICONS = ['📤', '🔍', '🗣️', '🎉'];
+        let allApps = [], currentFilter = 'all';
+
+        function setFilter(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderApps();
+        }
 
         function buildTimeline(currentStatus) {
-            const isRejected = currentStatus === 'Rejected';
-            if (isRejected) {
+            if (currentStatus === 'Rejected') {
                 return `<div class="flex items-center gap-3 mt-4 p-3 bg-red-50 rounded-2xl border border-red-100">
                     <div class="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center text-red-500 text-lg shrink-0">✕</div>
-                    <div>
-                        <p class="text-sm font-bold text-red-600">Application Rejected</p>
-                        <p class="text-xs text-red-400 mt-0.5">This application was not successful.</p>
-                    </div>
+                    <div><p class="text-sm font-bold text-red-600">Application Rejected</p><p class="text-xs text-red-400 mt-0.5">This application was not successful.</p></div>
                 </div>`;
             }
             const currentIdx = STEPS.indexOf(currentStatus);
             return `<div class="flex items-center mt-5 px-1">
                 ${STEPS.map((step, i) => {
-                    const done = i < currentIdx;
-                    const active = i === currentIdx;
+                    const done = i < currentIdx, active = i === currentIdx;
                     const dotBg = done ? 'background:#4f46e5' : active ? 'background:#4f46e5;box-shadow:0 0 0 4px rgba(79,70,229,0.15)' : 'background:#e2e8f0';
                     const dotColor = (done || active) ? 'color:white' : 'color:#94a3b8';
                     const lineColor = done ? 'background:#4f46e5' : 'background:#e2e8f0';
                     const labelColor = active ? 'color:#4f46e5;font-weight:700' : done ? 'color:#64748b;font-weight:600' : 'color:#cbd5e1;font-weight:500';
-                    return `
-                        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
                             <div class="step-dot" style="${dotBg};${dotColor}">${done ? '✓' : STEP_ICONS[i]}</div>
                             <p style="font-size:9px;${labelColor};white-space:nowrap">${step}</p>
                         </div>
@@ -104,25 +135,20 @@
             </div>`;
         }
 
-        async function loadApplications() {
-            const apps = await apiGet('/applications');
-            let interviews = [];
-            try { interviews = await apiGet('/interviews/mine'); } catch(e) {}
-            const interviewMap = {};
-            interviews.forEach(i => { interviewMap[i.jobTitle + i.company] = i; });
-
+        function renderApps() {
+            const filtered = currentFilter === 'all' ? allApps : allApps.filter(a => a.status === currentFilter);
             const container = document.getElementById('apps-container');
-            if (!apps.length) {
-                container.innerHTML = `<div class="text-center py-20 text-slate-400">
-                    <div class="text-5xl mb-4">📂</div>
-                    <p class="font-semibold text-slate-600">No applications yet.</p>
-                    <p class="text-sm mt-1">Start applying for jobs from the dashboard.</p>
-                    <a href="/dashboard" class="inline-block mt-6 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition text-sm">Find Jobs</a>
+            if (!filtered.length) {
+                container.innerHTML = `<div class="text-center py-16 text-slate-400">
+                    <div class="text-5xl mb-4">${currentFilter === 'all' ? '📂' : '🔍'}</div>
+                    <p class="font-semibold text-slate-600">${currentFilter === 'all' ? 'No applications yet.' : 'No applications with this status.'}</p>
+                    ${currentFilter === 'all' ? `<p class="text-sm mt-1">Start applying for jobs from the dashboard.</p><a href="/dashboard" class="inline-block mt-6 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition text-sm">Find Jobs</a>` : ''}
                 </div>`;
                 return;
             }
-            container.innerHTML = apps.map(app => {
-                const interview = interviewMap[app.jobTitle + app.company];
+            container.innerHTML = filtered.map((app, idx) => {
+                const interview = app._interview;
+                const statusColors = { 'Applied':'bg-indigo-50 text-indigo-600', 'Under Review':'bg-blue-50 text-blue-600', 'Interview':'bg-purple-50 text-purple-600', 'Offer':'bg-green-50 text-green-600', 'Rejected':'bg-red-50 text-red-500' };
                 const interviewSection = interview ? `
                     <div class="mt-4 p-4 bg-purple-50 border border-purple-100 rounded-2xl">
                         <div class="flex items-center gap-2 mb-2">
@@ -135,13 +161,15 @@
                         ${interview.meetingLink ? `<a href="${interview.meetingLink}" target="_blank" class="text-xs text-indigo-600 font-semibold hover:underline mt-1 block">🔗 Join Meeting</a>` : ''}
                         ${interview.notes ? `<p class="text-xs text-purple-500 mt-1">📝 ${interview.notes}</p>` : ''}
                     </div>` : '';
-                return `
-                <div class="app-card p-6 fade-in">
+                return `<div class="app-card p-6 fade-in" style="animation-delay:${idx*40}ms" data-id="${app.id}">
                     <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-2xl flex items-center justify-center text-white text-xl shrink-0 shadow-md shadow-indigo-100">📄</div>
                             <div>
-                                <h4 class="font-bold text-slate-900 text-base">${app.jobTitle}</h4>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="font-bold text-slate-900 text-base">${app.jobTitle}</h4>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColors[app.status] || 'bg-slate-100 text-slate-500'}">${app.status}</span>
+                                </div>
                                 <p class="text-slate-500 text-sm font-medium">${app.company}</p>
                                 <p class="text-xs text-slate-400 mt-0.5">Applied ${new Date(app.appliedAt).toLocaleDateString('en-PH', {year:'numeric',month:'short',day:'numeric'})}</p>
                             </div>
@@ -154,13 +182,38 @@
             }).join('');
         }
 
+        async function loadApplications() {
+            const [apps, interviews] = await Promise.all([
+                apiGet('/applications'),
+                apiGet('/interviews/mine').catch(() => [])
+            ]);
+            const interviewMap = {};
+            interviews.forEach(i => { interviewMap[i.jobTitle + i.company] = i; });
+            allApps = apps.map(a => ({ ...a, _interview: interviewMap[a.jobTitle + a.company] || null }));
+
+            // Update stats
+            document.getElementById('stat-total').innerText = apps.length;
+            document.getElementById('stat-applied').innerText = apps.filter(a => a.status === 'Applied').length;
+            document.getElementById('stat-review').innerText = apps.filter(a => a.status === 'Under Review').length;
+            document.getElementById('stat-interview').innerText = apps.filter(a => a.status === 'Interview').length;
+            document.getElementById('stat-offer').innerText = apps.filter(a => a.status === 'Offer').length;
+
+            renderApps();
+        }
+
         async function withdraw(id, btn) {
             showConfirm('This will remove your application. This cannot be undone.', async () => {
                 const data = await apiDelete('/applications/' + id);
                 if (data.message) {
-                    btn.closest('.card, .bg-white').remove();
+                    allApps = allApps.filter(a => a.id !== id);
+                    renderApps();
+                    // Refresh stats
+                    document.getElementById('stat-total').innerText = allApps.length;
+                    document.getElementById('stat-applied').innerText = allApps.filter(a => a.status === 'Applied').length;
+                    document.getElementById('stat-review').innerText = allApps.filter(a => a.status === 'Under Review').length;
+                    document.getElementById('stat-interview').innerText = allApps.filter(a => a.status === 'Interview').length;
+                    document.getElementById('stat-offer').innerText = allApps.filter(a => a.status === 'Offer').length;
                     toast('Application withdrawn.', 'info');
-                    if (!document.querySelector('#apps-container .bg-white, #apps-container .card')) loadApplications();
                 } else toast(data.error || 'Something went wrong.', 'error');
             });
         }
@@ -176,18 +229,6 @@
         window.onload = () => { loadNotificationBell(); loadApplications(); };
     </script>
 
-    
 <nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item active"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
