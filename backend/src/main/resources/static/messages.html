@@ -13,6 +13,23 @@
         .convo-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem; border-radius:1rem; cursor:pointer; transition:all 0.15s; }
         .convo-item:hover { background:#f5f3ff; }
         .convo-item.active { background:#eef2ff; border-left:3px solid #4f46e5; padding-left:calc(0.75rem - 3px); }
+        body.dark { background: #0f172a !important; color: #e2e8f0; }
+        body.dark aside { background: #1e293b !important; border-color: #334155 !important; }
+        body.dark .nav-link:hover { background: #334155; color: #818cf8; }
+        body.dark main { background: #0f172a !important; }
+        body.dark .bg-white { background: #1e293b !important; border-color: #334155 !important; }
+        body.dark .convo-item:hover { background: #334155; }
+        body.dark .convo-item.active { background: #312e81; }
+        body.dark .msg-bubble-other { background: #334155 !important; color: #e2e8f0 !important; border-color: #475569 !important; }
+        body.dark .text-slate-900 { color: #f1f5f9 !important; }
+        body.dark .text-slate-700 { color: #cbd5e1 !important; }
+        body.dark .text-slate-600 { color: #94a3b8 !important; }
+        body.dark .text-slate-500 { color: #64748b !important; }
+        body.dark .bg-slate-50 { background: #0f172a !important; }
+        body.dark .bg-slate-100 { background: #1e293b !important; }
+        body.dark .border-slate-100 { border-color: #334155 !important; }
+        body.dark input { background: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+        body.dark header { background: #1e293b !important; border-color: #334155 !important; }
         #chat-messages { scroll-behavior: smooth; }
         .typing-indicator span { display:inline-block; width:6px; height:6px; background:#94a3b8; border-radius:50%; animation:bounce 1.2s infinite; }
         .typing-indicator span:nth-child(2) { animation-delay:0.2s; }
@@ -43,7 +60,6 @@
                 <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
                 <div>
                     <span class="font-bold text-base tracking-tight block leading-tight">TrabaHanap</span>
-                    <span style="font-size:9px;color:#94a3b8;font-weight:600">Online Job Application System</span>
                 </div>
             </div>
             <div class="flex items-center gap-1">
@@ -51,7 +67,7 @@
                     <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
                         🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
-                    <div id="notif-panel" class="hidden absolute left-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50" style="max-height:320px;overflow-y:auto">
+                    <div id="notif-panel" class="hidden absolute left-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100" style="max-height:320px;overflow-y:auto;z-index:9999;position:absolute">
                         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white">
                             <span class="font-bold text-slate-800 text-sm">Notifications</span>
                             <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">✕</button>
@@ -59,6 +75,7 @@
                         <div id="notif-list" class="p-2"></div>
                     </div>
                 </div>
+                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
                 <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
         </div>
@@ -280,6 +297,12 @@
 
         function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = '/login'; }
 
+        function toggleDark() {
+            const isDark = document.body.classList.toggle('dark');
+            localStorage.setItem('jc_dark', isDark ? '1' : '');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
+        }
+
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
@@ -287,7 +310,13 @@
             if (notifOpen) loadNotificationDropdown();
         }
 
-        window.onload = () => { loadNotificationBell(); loadConversations(); };
+        window.onload = () => {
+            if (localStorage.getItem('jc_dark')) {
+                document.body.classList.add('dark');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
+            }
+            loadNotificationBell(); loadConversations();
+        };
     </script>
 
 <nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item active"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
