@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -39,8 +39,8 @@
             <div><span class="font-bold text-sm block leading-tight">TrabaHanap</span></div>
         </div>
         <div class="flex items-center gap-1">
-        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
-        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
+        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">ðŸ””</button>
+        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">ðŸŒ™</button>
         </div>
     </header>
 
@@ -55,19 +55,19 @@
             <div class="flex items-center gap-1">
                 <div class="relative">
                     <button id="notif-btn" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
-                        🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                        ðŸ””<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
                 </div>
-                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
-                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
+                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">ðŸŒ™</button>
+                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">ðŸšª</button>
             </div>
         </div>
         <nav class="space-y-1 flex-1">
-            <a href="/dashboard" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🏠</span><span class="text-sm">Find Jobs</span></a>
-            <a href="/saved" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🔖</span><span class="text-sm">Saved Jobs</span></a>
-            <a href="/applications" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>📂</span><span class="text-sm">Applications</span></a>
-            <a href="/messages" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>💬</span><span class="text-sm">Messages</span></a>
-            <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
+            <a href="/dashboard" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ </span><span class="text-sm">Find Jobs</span></a>
+            <a href="/saved" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ”–</span><span class="text-sm">Saved Jobs</span></a>
+            <a href="/applications" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ“‚</span><span class="text-sm">Applications</span></a>
+            <a href="/messages" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ’¬</span><span class="text-sm">Messages</span></a>
+            <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ‘¤</span><span class="text-sm">Profile</span></a>
         </nav>
     </aside>
 
@@ -76,7 +76,7 @@
             <div class="flex items-center justify-between flex-wrap gap-3">
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900">Saved Jobs</h1>
-                    <p class="text-slate-400 text-sm mt-1">Jobs you've bookmarked for later — <span id="saved-count" class="font-semibold text-slate-600">0</span> saved</p>
+                    <p class="text-slate-400 text-sm mt-1">Jobs you've bookmarked for later â€” <span id="saved-count" class="font-semibold text-slate-600">0</span> saved</p>
                 </div>
                 <a href="/dashboard" class="btn btn-secondary btn-sm h-9">+ Find More Jobs</a>
             </div>
@@ -85,14 +85,14 @@
         <!-- Search + Sort -->
         <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-5 flex flex-col sm:flex-row gap-3 items-center">
             <div class="relative flex-1 w-full">
-                <span class="absolute left-3 top-2.5 text-slate-400 text-sm">🔍</span>
+                <span class="absolute left-3 top-2.5 text-slate-400 text-sm">ðŸ”</span>
                 <input type="text" id="search-saved" oninput="renderSaved()" placeholder="Search saved jobs..."
                     class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 transition text-sm">
             </div>
             <div class="flex gap-2 shrink-0">
-                <button class="sort-btn active" onclick="setSort('saved', this)">🕐 Recent</button>
-                <button class="sort-btn" onclick="setSort('title', this)">🔤 Title</button>
-                <button class="sort-btn" onclick="setSort('company', this)">🏢 Company</button>
+                <button class="sort-btn active" onclick="setSort('saved', this)">ðŸ• Recent</button>
+                <button class="sort-btn" onclick="setSort('title', this)">ðŸ”¤ Title</button>
+                <button class="sort-btn" onclick="setSort('company', this)">ðŸ¢ Company</button>
             </div>
         </div>
 
@@ -125,7 +125,7 @@
             const grid = document.getElementById('saved-grid');
             if (!jobs.length) {
                 grid.innerHTML = `<div class="text-center py-20 text-slate-400">
-                    <div class="text-5xl mb-4">🔖</div>
+                    <div class="text-5xl mb-4">ðŸ”–</div>
                     <p class="font-semibold text-slate-600">${q ? 'No results for "' + q + '"' : 'No saved jobs yet.'}</p>
                     <p class="text-sm mt-1">${q ? 'Try a different search term.' : 'Browse jobs and click the heart to save them here.'}</p>
                     ${!q ? `<a href="/dashboard" class="inline-block mt-6 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition text-sm">Browse Jobs</a>` : ''}
@@ -135,10 +135,10 @@
             grid.innerHTML = jobs.map((job, i) => `
                 <div class="saved-card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 fade-in" style="animation-delay:${i*40}ms" data-id="${job.id}">
                     <div class="flex items-center gap-4 flex-1 min-w-0">
-                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon || '💼'}</div>
+                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon || 'ðŸ’¼'}</div>
                         <div class="min-w-0">
                             <h4 class="text-sm font-bold text-slate-900 truncate">${job.title}</h4>
-                            <p class="text-slate-500 text-xs mt-0.5">${job.company} • ${job.location}</p>
+                            <p class="text-slate-500 text-xs mt-0.5">${job.company} â€¢ ${job.location}</p>
                             <div class="flex flex-wrap gap-1.5 mt-1.5">
                                 <span class="badge badge-indigo">${job.type}</span>
                                 <span class="badge badge-slate">${job.experience}</span>
@@ -147,8 +147,8 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0 self-end md:self-auto">
-                        <button onclick="unsave(${job.id}, this)" class="btn btn-secondary btn-sm h-9 hover:border-red-200 hover:text-red-500">🗑 Remove</button>
-                        <button onclick="apply('${job.title.replace(/'/g,"\\'")}', '${job.company.replace(/'/g,"\\'")}', ${job.id})" class="btn btn-primary btn-sm h-9">⚡ Apply</button>
+                        <button onclick="unsave(${job.id}, this)" class="btn btn-secondary btn-sm h-9 hover:border-red-200 hover:text-red-500">ðŸ—‘ Remove</button>
+                        <button onclick="apply('${job.title.replace(/'/g,"\\'")}', '${job.company.replace(/'/g,"\\'")}', ${job.id})" class="btn btn-primary btn-sm h-9">âš¡ Apply</button>
                     </div>
                 </div>`).join('');
         }
@@ -177,45 +177,49 @@
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('jc_dark', isDark ? '1' : '');
-            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? 'â˜€ï¸' : 'ðŸŒ™');
         }
 
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
             const panel = document.getElementById('notif-panel');
-            panel.classList.toggle('hidden', !notifOpen);
             if (notifOpen) {
                 const btn = document.getElementById('notif-btn');
                 const rect = btn.getBoundingClientRect();
                 panel.style.top = (rect.bottom + 8) + 'px';
                 panel.style.left = Math.min(rect.left, window.innerWidth - 316) + 'px';
+                panel.style.display = 'flex';
                 loadNotificationDropdown();
+            } else {
+                panel.style.display = 'none';
             }
         }
         document.addEventListener('click', e => {
             if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn')) {
                 notifOpen = false;
-                document.getElementById('notif-panel')?.classList.add('hidden');
+                document.getElementById('notif-panel').style.display = 'none';
             }
         });
 
         window.onload = () => {
             if (localStorage.getItem('jc_dark')) {
                 document.body.classList.add('dark');
-                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = 'â˜€ï¸');
             }
             loadNotificationBell(); loadSaved();
         };
     </script>
 
-    <div id="notif-panel" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;display:flex;flex-direction:column;z-index:99999">
+    <div id="notif-panel" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;flex-direction:column;z-index:99999;display:none">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white rounded-t-2xl flex-shrink-0">
             <span class="font-bold text-slate-800 text-sm">Notifications</span>
-            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
+            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">âœ•</button>
         </div>
         <div id="notif-list" class="p-2 overflow-y-auto flex-1"></div>
     </div>
-<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item active"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
+<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>ðŸ </span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item active"><span>ðŸ”–</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>ðŸ“‚</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>ðŸ’¬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>ðŸ‘¤</span><span>Profile</span></a></nav>
 </body>
 </html>
+
+

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -47,11 +47,11 @@
     <!-- Mobile Header -->
     <header class="mobile-header hidden">
         <div class="flex items-center gap-2">
-            <button id="back-btn" onclick="showConvoList()" class="hidden w-8 h-8 items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">←</button>
+            <button id="back-btn" onclick="showConvoList()" class="hidden w-8 h-8 items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">â†</button>
             <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-black text-xs">T</span></div>
             <div><span class="font-bold text-sm block leading-tight" id="mobile-title">Messages</span></div>
         </div>
-        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
+        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">ðŸ””</button>
     </header>
 
     <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
@@ -65,19 +65,19 @@
             <div class="flex items-center gap-1">
                 <div class="relative">
                     <button id="notif-btn" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
-                        🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                        ðŸ””<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
                 </div>
-                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
-                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
+                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">ðŸŒ™</button>
+                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">ðŸšª</button>
             </div>
         </div>
         <nav class="space-y-1 flex-1">
-            <a href="/dashboard" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🏠</span><span class="text-sm">Find Jobs</span></a>
-            <a href="/saved" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🔖</span><span class="text-sm">Saved Jobs</span></a>
-            <a href="/applications" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>📂</span><span class="text-sm">Applications</span></a>
-            <a href="/messages" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>💬</span><span class="text-sm">Messages</span></a>
-            <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
+            <a href="/dashboard" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ </span><span class="text-sm">Find Jobs</span></a>
+            <a href="/saved" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ”–</span><span class="text-sm">Saved Jobs</span></a>
+            <a href="/applications" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ“‚</span><span class="text-sm">Applications</span></a>
+            <a href="/messages" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ’¬</span><span class="text-sm">Messages</span></a>
+            <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ‘¤</span><span class="text-sm">Profile</span></a>
         </nav>
     </aside>
 
@@ -87,10 +87,10 @@
             <div class="p-4 border-b border-slate-100">
                 <div class="flex items-center justify-between mb-3">
                     <h1 class="text-lg font-bold text-slate-900">Messages</h1>
-                    <button onclick="openNewMsg()" class="w-8 h-8 bg-indigo-600 text-white rounded-xl flex items-center justify-center hover:bg-indigo-700 transition text-lg font-bold" title="New message">✏️</button>
+                    <button onclick="openNewMsg()" class="w-8 h-8 bg-indigo-600 text-white rounded-xl flex items-center justify-center hover:bg-indigo-700 transition text-lg font-bold" title="New message">âœï¸</button>
                 </div>
                 <div class="relative">
-                    <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+                    <span class="absolute left-3 top-2.5 text-slate-400 text-xs">ðŸ”</span>
                     <input type="text" id="search-convo" oninput="filterConvos()" placeholder="Search conversations..."
                         class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 transition text-xs">
                 </div>
@@ -104,10 +104,10 @@
         <div id="chat-panel" class="chat-panel flex-1 flex flex-col hidden md:flex">
             <div id="chat-empty" class="flex-1 flex items-center justify-center text-slate-400">
                 <div class="text-center">
-                    <div class="text-6xl mb-4">💬</div>
+                    <div class="text-6xl mb-4">ðŸ’¬</div>
                     <p class="font-bold text-slate-600 text-lg">Your messages</p>
                     <p class="text-sm mt-1 text-slate-400">Select a conversation or start a new one</p>
-                    <button onclick="openNewMsg()" class="mt-5 btn btn-primary btn-sm h-9 px-5">✏️ New Message</button>
+                    <button onclick="openNewMsg()" class="mt-5 btn btn-primary btn-sm h-9 px-5">âœï¸ New Message</button>
                 </div>
             </div>
             <div id="chat-header" class="p-4 border-b border-slate-100 bg-white hidden">
@@ -122,14 +122,14 @@
             <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-3 hidden bg-slate-50"></div>
             <div id="chat-input" class="p-4 border-t border-slate-100 bg-white hidden">
                 <div class="flex gap-2 items-end">
-                    <textarea id="msg-input" rows="1" placeholder="Type a message…"
+                    <textarea id="msg-input" rows="1" placeholder="Type a messageâ€¦"
                         class="input flex-1 resize-none text-sm"
                         style="max-height:120px;overflow-y:auto"
                         oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
                         onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
                     <button onclick="sendMessage()" class="btn btn-primary h-10 px-4 shrink-0">Send</button>
                 </div>
-                <p class="text-[10px] text-slate-400 mt-1">Enter to send · Shift+Enter for new line</p>
+                <p class="text-[10px] text-slate-400 mt-1">Enter to send Â· Shift+Enter for new line</p>
             </div>
         </div>
     </main>
@@ -139,7 +139,7 @@
         <div class="modal-box bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-8">
             <div class="flex items-center justify-between mb-5">
                 <h3 class="text-lg font-bold">New Message</h3>
-                <button onclick="closeNewMsg()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition">✕</button>
+                <button onclick="closeNewMsg()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition">âœ•</button>
             </div>
             <div class="space-y-4">
                 <div>
@@ -152,7 +152,7 @@
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Message</label>
-                    <textarea id="new-content" rows="4" placeholder="Write your message…" class="input mt-1 resize-none"></textarea>
+                    <textarea id="new-content" rows="4" placeholder="Write your messageâ€¦" class="input mt-1 resize-none"></textarea>
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button onclick="closeNewMsg()" class="btn btn-secondary flex-1 h-11">Cancel</button>
@@ -226,7 +226,7 @@
             const msgs = await apiGet('/messages/conversation/' + username);
             const container = document.getElementById('chat-messages');
             if (!msgs.length) {
-                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">No messages yet. Say hello! 👋</p>';
+                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">No messages yet. Say hello! ðŸ‘‹</p>';
             } else {
                 let lastDate = null;
                 container.innerHTML = msgs.map(m => {
@@ -293,45 +293,49 @@
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('jc_dark', isDark ? '1' : '');
-            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? 'â˜€ï¸' : 'ðŸŒ™');
         }
 
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
             const panel = document.getElementById('notif-panel');
-            panel.classList.toggle('hidden', !notifOpen);
             if (notifOpen) {
                 const btn = document.getElementById('notif-btn');
                 const rect = btn.getBoundingClientRect();
                 panel.style.top = (rect.bottom + 8) + 'px';
                 panel.style.left = Math.min(rect.left, window.innerWidth - 316) + 'px';
+                panel.style.display = 'flex';
                 loadNotificationDropdown();
+            } else {
+                panel.style.display = 'none';
             }
         }
         document.addEventListener('click', e => {
             if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn')) {
                 notifOpen = false;
-                document.getElementById('notif-panel')?.classList.add('hidden');
+                document.getElementById('notif-panel').style.display = 'none';
             }
         });
 
         window.onload = () => {
             if (localStorage.getItem('jc_dark')) {
                 document.body.classList.add('dark');
-                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = 'â˜€ï¸');
             }
             loadNotificationBell(); loadConversations();
         };
     </script>
 
-    <div id="notif-panel" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;display:flex;flex-direction:column;z-index:99999">
+    <div id="notif-panel" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;flex-direction:column;z-index:99999;display:none">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white rounded-t-2xl flex-shrink-0">
             <span class="font-bold text-slate-800 text-sm">Notifications</span>
-            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
+            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">âœ•</button>
         </div>
         <div id="notif-list" class="p-2 overflow-y-auto flex-1"></div>
     </div>
-<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item active"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
+<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>ðŸ </span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>ðŸ”–</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>ðŸ“‚</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item active"><span>ðŸ’¬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>ðŸ‘¤</span><span>Profile</span></a></nav>
 </body>
 </html>
+
+
