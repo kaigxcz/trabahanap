@@ -64,16 +64,9 @@
             </div>
             <div class="flex items-center gap-1">
                 <div class="relative">
-                    <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                    <button id="notif-btn" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
                         🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
-                    <div id="notif-panel" class="hidden absolute left-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100" style="max-height:320px;overflow-y:auto;z-index:9999;position:absolute">
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white">
-                            <span class="font-bold text-slate-800 text-sm">Notifications</span>
-                            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">✕</button>
-                        </div>
-                        <div id="notif-list" class="p-2"></div>
-                    </div>
                 </div>
                 <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
                 <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
@@ -306,9 +299,22 @@
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
-            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
-            if (notifOpen) loadNotificationDropdown();
+            const panel = document.getElementById('notif-panel');
+            panel.classList.toggle('hidden', !notifOpen);
+            if (notifOpen) {
+                const btn = document.getElementById('notif-btn');
+                const rect = btn.getBoundingClientRect();
+                panel.style.top = (rect.bottom + 8) + 'px';
+                panel.style.left = Math.min(rect.left, window.innerWidth - 316) + 'px';
+                loadNotificationDropdown();
+            }
         }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn')) {
+                notifOpen = false;
+                document.getElementById('notif-panel')?.classList.add('hidden');
+            }
+        });
 
         window.onload = () => {
             if (localStorage.getItem('jc_dark')) {
@@ -319,6 +325,13 @@
         };
     </script>
 
+    <div id="notif-panel" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;overflow-y:auto;z-index:99999">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white">
+            <span class="font-bold text-slate-800 text-sm">Notifications</span>
+            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">✕</button>
+        </div>
+        <div id="notif-list" class="p-2"></div>
+    </div>
 <nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item active"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
 </body>
 </html>
