@@ -46,7 +46,7 @@
         <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
             ðŸ””<span id="notif-badge-mobile" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
         </button>
-        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">ðŸŒ™</button>
+        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
         </div>
     </header>
 
@@ -64,7 +64,7 @@
                         ðŸ””<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
                 </div>
-                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">ðŸŒ™</button>
+                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
                 <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">ðŸšª</button>
             </div>
         </div>
@@ -89,7 +89,7 @@
             <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Applied</p><p id="stat-applied" class="text-2xl font-black text-indigo-600">â€”</p></div>
             <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">In Review</p><p id="stat-review" class="text-2xl font-black text-blue-500">â€”</p></div>
             <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interview</p><p id="stat-interview" class="text-2xl font-black text-purple-600">â€”</p></div>
-            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Offer ðŸŽ‰</p><p id="stat-offer" class="text-2xl font-black text-green-600">â€”</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Offer 🎉</p><p id="stat-offer" class="text-2xl font-black text-green-600">â€”</p></div>
         </div>
 
         <!-- Filter Tabs -->
@@ -97,9 +97,9 @@
             <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
             <button class="filter-tab" onclick="setFilter('Applied', this)">ðŸ“¤ Applied</button>
             <button class="filter-tab" onclick="setFilter('Under Review', this)">ðŸ” Under Review</button>
-            <button class="filter-tab" onclick="setFilter('Interview', this)">ðŸ—£ï¸ Interview</button>
-            <button class="filter-tab" onclick="setFilter('Offer', this)">ðŸŽ‰ Offer</button>
-            <button class="filter-tab" onclick="setFilter('Rejected', this)">âœ• Rejected</button>
+            <button class="filter-tab" onclick="setFilter('Interview', this)">🗣️ Interview</button>
+            <button class="filter-tab" onclick="setFilter('Offer', this)">🎉 Offer</button>
+            <button class="filter-tab" onclick="setFilter('Rejected', this)">✕ Rejected</button>
         </div>
 
         <div id="apps-container" class="space-y-4">
@@ -113,7 +113,7 @@
         if (!localStorage.getItem('jc_token')) window.location.href = 'index.html';
 
         const STEPS = ['Applied', 'Under Review', 'Interview', 'Offer'];
-        const STEP_ICONS = ['ðŸ“¤', 'ðŸ”', 'ðŸ—£ï¸', 'ðŸŽ‰'];
+        const STEP_ICONS = ['ðŸ“¤', 'ðŸ”', '🗣️', '🎉'];
         let allApps = [], currentFilter = 'all';
 
         function setFilter(filter, btn) {
@@ -126,7 +126,7 @@
         function buildTimeline(currentStatus) {
             if (currentStatus === 'Rejected') {
                 return `<div class="flex items-center gap-3 mt-4 p-3 bg-red-50 rounded-2xl border border-red-100">
-                    <div class="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center text-red-500 text-lg shrink-0">âœ•</div>
+                    <div class="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center text-red-500 text-lg shrink-0">✕</div>
                     <div><p class="text-sm font-bold text-red-600">Application Rejected</p><p class="text-xs text-red-400 mt-0.5">This application was not successful.</p></div>
                 </div>`;
             }
@@ -257,13 +257,13 @@
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('jc_dark', isDark ? '1' : '');
-            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? 'â˜€ï¸' : 'ðŸŒ™');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
         }
 
         window.onload = () => {
             if (localStorage.getItem('jc_dark')) {
                 document.body.classList.add('dark');
-                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = 'â˜€ï¸');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
             }
             loadNotificationBell(); loadApplications();
         };
@@ -272,7 +272,7 @@
     <div id="notif-panel" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;flex-direction:column;z-index:99999;display:none">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white rounded-t-2xl flex-shrink-0">
             <span class="font-bold text-slate-800 text-sm">Notifications</span>
-            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">âœ•</button>
+            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
         </div>
         <div id="notif-list" class="p-2 overflow-y-auto flex-1"></div>
     </div>

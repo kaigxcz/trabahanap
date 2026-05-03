@@ -40,7 +40,7 @@
         </div>
         <div class="flex items-center gap-1">
         <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">ðŸ””</button>
-        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">ðŸŒ™</button>
+        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
         </div>
     </header>
 
@@ -58,7 +58,7 @@
                         ðŸ””<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
                 </div>
-                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">ðŸŒ™</button>
+                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
                 <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">ðŸšª</button>
             </div>
         </div>
@@ -177,7 +177,7 @@
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('jc_dark', isDark ? '1' : '');
-            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? 'â˜€ï¸' : 'ðŸŒ™');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
         }
 
         let notifOpen = false;
@@ -205,7 +205,7 @@
         window.onload = () => {
             if (localStorage.getItem('jc_dark')) {
                 document.body.classList.add('dark');
-                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = 'â˜€ï¸');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
             }
             loadNotificationBell(); loadSaved();
         };
@@ -214,7 +214,7 @@
     <div id="notif-panel" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;flex-direction:column;z-index:99999;display:none">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white rounded-t-2xl flex-shrink-0">
             <span class="font-bold text-slate-800 text-sm">Notifications</span>
-            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">âœ•</button>
+            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
         </div>
         <div id="notif-list" class="p-2 overflow-y-auto flex-1"></div>
     </div>
