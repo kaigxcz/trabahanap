@@ -1,14 +1,18 @@
 package com.jobconnect.controller;
 
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.jobconnect.model.User;
 import com.jobconnect.repository.UserRepository;
 import com.jobconnect.security.JwtUtil;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -81,6 +85,7 @@ public class AuthController {
             "location", user.getLocation() != null ? user.getLocation() : "",
             "email", user.getEmail() != null ? user.getEmail() : "",
             "jobTitle", user.getJobTitle() != null ? user.getJobTitle() : "",
+            "skills", user.getSkills() != null ? user.getSkills() : "",
             "role", user.getRole() != null ? user.getRole() : "CANDIDATE"
         ));
     }

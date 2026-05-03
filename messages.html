@@ -34,30 +34,23 @@
             <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-black text-xs">T</span></div>
             <div><span class="font-bold text-sm block leading-tight" id="mobile-title">Messages</span></div>
         </div>
-        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
+        <button id="notif-btn-mobile" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
+        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
     </header>
 
     <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
         <div class="flex items-center justify-between mb-10">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 cursor-pointer select-none" id="logo-btn" onclick="toggleLogoDropdown()">
                 <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
                 <div>
-                    <span class="font-bold text-base tracking-tight block leading-tight">TrabaHanap</span>
+                    <span class="font-bold text-lg tracking-tight block leading-tight">TrabaHanap</span>
                 </div>
             </div>
             <div class="flex items-center gap-1">
-                <div class="relative">
-                    <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
-                        🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
-                    </button>
-                    <div id="notif-panel" class="hidden absolute right-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50" style="max-height:360px;overflow-y:auto">
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white rounded-t-2xl">
-                            <span class="font-bold text-slate-800 text-sm">Notifications</span>
-                            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">✕</button>
-                        </div>
-                        <div id="notif-list" class="p-2"></div>
-                    </div>
-                </div>
+                <button id="notif-btn" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                    🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                </button>
+                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
                 <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
         </div>
@@ -133,7 +126,9 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">To (Username)</label>
-                    <input type="text" id="new-receiver" placeholder="Enter username" class="input mt-1">
+                    <div class="mt-1">
+                        <input type="text" id="new-receiver" placeholder="Type a name or @username..." class="input w-full" oninput="searchUsers(this.value)" autocomplete="off">
+                    </div>
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Subject <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
@@ -219,7 +214,7 @@
             } else {
                 let lastDate = null;
                 container.innerHTML = msgs.map(m => {
-                    const msgDate = new Date(m.sentAt).toLocaleDateString('en-PH', {month:'short',day:'numeric'});
+                    const msgDate = new Date((m.sentAt.endsWith('Z') ? m.sentAt : m.sentAt + 'Z')).toLocaleDateString('en-PH', {month:'short',day:'numeric'});
                     const dateSep = msgDate !== lastDate ? `<div class="flex items-center gap-3 my-3"><div class="flex-1 h-px bg-slate-200"></div><span class="text-[10px] text-slate-400 font-semibold">${msgDate}</span><div class="flex-1 h-px bg-slate-200"></div></div>` : '';
                     lastDate = msgDate;
                     return `${dateSep}<div class="flex ${m.isMine ? 'justify-end' : 'justify-start'} mb-1">
@@ -259,7 +254,54 @@
             document.getElementById('new-receiver').value = '';
             document.getElementById('new-subject').value = '';
             document.getElementById('new-content').value = '';
+            document.getElementById('user-suggestions').style.display = 'none';
         }
+
+        let userSearchTimer = null;
+        async function searchUsers(q) {
+            const box = document.getElementById('user-suggestions');
+            const val = q.startsWith('@') ? q.slice(1) : q;
+            if (!val || val.length < 1) { box.style.display = 'none'; return; }
+            clearTimeout(userSearchTimer);
+            userSearchTimer = setTimeout(async () => {
+                try {
+                    const results = await apiGet('/messages/search-users?q=' + encodeURIComponent(val));
+                    if (!results.length) { box.style.display = 'none'; return; }
+                    // Position below the input
+                    const input = document.getElementById('new-receiver');
+                    const rect = input.getBoundingClientRect();
+                    box.style.top = (rect.bottom + 4) + 'px';
+                    box.style.left = rect.left + 'px';
+                    box.style.width = rect.width + 'px';
+                    box.style.display = 'block';
+                    box.innerHTML = results.map(u => `
+                        <div onclick="selectUser('${u.username}')"
+                            style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background 0.1s;border-bottom:1px solid #f1f5f9"
+                            onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='white'">
+                            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px;flex-shrink:0">
+                                ${u.fullName ? u.fullName[0].toUpperCase() : u.username[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <p style="font-size:13px;font-weight:600;color:#1e293b;margin:0">${u.fullName || u.username}</p>
+                                <p style="font-size:11px;color:#94a3b8;margin:0">@${u.username} · ${u.role === 'CANDIDATE' ? 'Job Seeker' : u.role === 'EMPLOYER' ? 'Employer' : u.role}</p>
+                            </div>
+                        </div>`).join('');
+                } catch(e) { box.style.display = 'none'; }
+            }, 200);
+        }
+
+        function selectUser(username) {
+            document.getElementById('new-receiver').value = username;
+            document.getElementById('user-suggestions').style.display = 'none';
+            document.getElementById('new-subject').focus();
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#new-receiver') && !e.target.closest('#user-suggestions')) {
+                const box = document.getElementById('user-suggestions');
+                if (box) box.style.display = 'none';
+            }
+        });
 
         async function sendNewMessage() {
             const receiver = document.getElementById('new-receiver').value.trim();
@@ -277,17 +319,84 @@
             openConvo(receiver, receiver);
         }
 
-        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = '/login'; }
+        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
+
+        let logoOpen = false;
+        function toggleLogoDropdown() {
+            logoOpen = !logoOpen;
+            const drop = document.getElementById('logo-dropdown');
+            if (logoOpen) {
+                const btn = document.getElementById('logo-btn');
+                const rect = btn.getBoundingClientRect();
+                drop.style.top = (rect.bottom + 8) + 'px';
+                drop.style.left = rect.left + 'px';
+                drop.classList.add('open');
+                const u = JSON.parse(localStorage.getItem('jc_user') || '{}');
+                document.getElementById('dropdown-name').innerText = u.fullName || u.username || 'User';
+                document.getElementById('dropdown-email').innerText = u.email || '';
+            } else { drop.classList.remove('open'); }
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#logo-dropdown') && !e.target.closest('#logo-btn')) {
+                logoOpen = false;
+                document.getElementById('logo-dropdown')?.classList.remove('open');
+            }
+        });
+
+        function toggleDark() {
+            const isDark = document.body.classList.toggle('dark');
+            localStorage.setItem('jc_dark', isDark ? '1' : '');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
+        }
 
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
-            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
-            if (notifOpen) loadNotificationDropdown();
+            const panel = document.getElementById('notif-panel');
+            if (notifOpen) {
+                const btn = document.getElementById('notif-btn') || document.getElementById('notif-btn-mobile');
+                const rect = btn.getBoundingClientRect();
+                panel.style.top = (rect.bottom + 8) + 'px';
+                panel.style.left = Math.min(rect.left, window.innerWidth - 316) + 'px';
+                panel.classList.add('open');
+                loadNotificationDropdown();
+            } else {
+                panel.classList.remove('open');
+            }
         }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn') && !e.target.closest('#notif-btn-mobile')) {
+                notifOpen = false;
+                document.getElementById('notif-panel')?.classList.remove('open');
+            }
+        });
 
-        window.onload = () => { loadNotificationBell(); loadConversations(); };
+        window.onload = () => {
+            if (localStorage.getItem('jc_dark')) {
+                document.body.classList.add('dark');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
+            }
+            loadNotificationBell(); loadConversations();
+        };
     </script>
+
+    <div id="user-suggestions" style="position:fixed;background:white;border:1px solid #e2e8f0;border-radius:0.875rem;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:999999;display:none;max-height:240px;overflow-y:auto;min-width:280px"></div>
+
+    <div id="logo-dropdown">
+        <div class="px-4 py-3 border-b border-slate-100">
+            <p class="text-xs font-bold text-slate-800" id="dropdown-name">Loading...</p>
+            <p class="text-xs text-slate-400" id="dropdown-email"></p>
+        </div>
+        <div class="logo-dropdown-item danger" onclick="logout()">🚪 Log Out</div>
+    </div>
+
+    <div id="notif-panel">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100" style="flex-shrink:0;background:inherit;border-radius:1rem 1rem 0 0">
+            <span class="font-bold text-slate-800 text-sm">Notifications</span>
+            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
+        </div>
+        <div id="notif-list" class="p-2" style="overflow-y:auto;flex:1"></div>
+    </div>
 
 <nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item active"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
 </body>

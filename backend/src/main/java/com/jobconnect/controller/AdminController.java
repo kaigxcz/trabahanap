@@ -19,6 +19,9 @@ import com.jobconnect.model.Job;
 import com.jobconnect.model.User;
 import com.jobconnect.repository.ApplicationRepository;
 import com.jobconnect.repository.JobRepository;
+import com.jobconnect.repository.MessageRepository;
+import com.jobconnect.repository.NotificationRepository;
+import com.jobconnect.repository.SavedJobRepository;
 import com.jobconnect.repository.UserRepository;
 
 @RestController
@@ -28,12 +31,21 @@ public class AdminController {
     private final UserRepository userRepository;
     private final JobRepository jobRepository;
     private final ApplicationRepository applicationRepository;
+    private final MessageRepository messageRepository;
+    private final NotificationRepository notificationRepository;
+    private final SavedJobRepository savedJobRepository;
 
     public AdminController(UserRepository userRepository, JobRepository jobRepository,
-                           ApplicationRepository applicationRepository) {
+                           ApplicationRepository applicationRepository,
+                           MessageRepository messageRepository,
+                           NotificationRepository notificationRepository,
+                           SavedJobRepository savedJobRepository) {
         this.userRepository = userRepository;
         this.jobRepository = jobRepository;
         this.applicationRepository = applicationRepository;
+        this.messageRepository = messageRepository;
+        this.notificationRepository = notificationRepository;
+        this.savedJobRepository = savedJobRepository;
     }
 
     private void requireAdmin() {
@@ -102,6 +114,11 @@ public class AdminController {
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         requireAdmin();
         return userRepository.findById(id).map(u -> {
+            // Cascade delete related data to avoid FK constraint errors
+            applicationRepository.deleteAll(applicationRepository.findByUser(u));
+            savedJobRepository.deleteAll(savedJobRepository.findByUser(u));
+            notificationRepository.deleteAll(notificationRepository.findByUserOrderByCreatedAtDesc(u));
+            messageRepository.deleteAll(messageRepository.findConversations(u));
             userRepository.delete(u);
             return ResponseEntity.ok(Map.of("message", "User deleted."));
         }).orElse(ResponseEntity.notFound().build());

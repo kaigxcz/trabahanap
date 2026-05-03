@@ -152,8 +152,10 @@
         }
 
         async function apply(jobTitle, company, jobId) {
-            const data = await apiPost('/applications', { jobTitle, company, jobId: String(jobId) }, true);
-            toast(data.message || data.error, data.error ? 'error' : 'success');
+            try {
+                const data = await apiPost('/applications', { jobTitle, company, jobId: String(jobId) }, true);
+                toast(data.message || data.error, data.error ? 'error' : 'success');
+            } catch(e) { toast('Failed to apply. Please try again.', 'error'); }
         }
 
         function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }

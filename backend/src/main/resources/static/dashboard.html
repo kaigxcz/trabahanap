@@ -263,9 +263,14 @@
             if (firstName) {
                 document.getElementById('greeting-name').innerText = firstName;
             }
-            savedIds = await apiGet('/saved/ids');
+            try {
+                const ids = await apiGet('/saved/ids');
+                savedIds = (ids || []).map(Number);
+            } catch(e) { savedIds = []; }
             loadNotificationBell();
-            allJobsCache = await apiGet('/jobs?keyword=&location=&category=all');
+            try {
+                allJobsCache = await apiGet('/jobs?keyword=&location=&category=all');
+            } catch(e) { allJobsCache = []; toast('Failed to load jobs. Please refresh.', 'error'); }
             renderRecommended();
             renderJobs(allJobsCache);
             loadRecentSearches();

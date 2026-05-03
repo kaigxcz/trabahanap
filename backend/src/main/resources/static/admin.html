@@ -377,7 +377,7 @@
 
         async function loadUsers() {
             allUsers = await apiGet('/admin/users');
-            allUsers.sort((a, b) => a.fullName.localeCompare(b.fullName));
+            allUsers.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
             renderUsers(allUsers);
         }
 

@@ -394,11 +394,16 @@
             const skills = document.getElementById('edit-skills').value;
             const btn = document.querySelector('#editModal button[onclick="saveProfile()"]');
             setLoading(btn, true, 'Saving...');
-            await apiPut('/profile', { jobTitle, location, skills });
-            setLoading(btn, false);
-            closeModal();
-            toast('Profile updated!', 'success');
-            updatePageData();
+            try {
+                await apiPut('/profile', { jobTitle, location, skills });
+                closeModal();
+                toast('Profile updated!', 'success');
+                updatePageData();
+            } catch(e) {
+                toast('Failed to save profile. Please try again.', 'error');
+            } finally {
+                setLoading(btn, false);
+            }
         }
 
         function logout() {

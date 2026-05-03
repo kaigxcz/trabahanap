@@ -1,5 +1,23 @@
 package com.jobconnect.controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.jobconnect.model.Application;
 import com.jobconnect.model.Job;
 import com.jobconnect.model.Notification;
@@ -8,12 +26,6 @@ import com.jobconnect.repository.ApplicationRepository;
 import com.jobconnect.repository.JobRepository;
 import com.jobconnect.repository.NotificationRepository;
 import com.jobconnect.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
-import java.util.LinkedHashMap;
 
 @RestController
 @RequestMapping("/api/employer")
@@ -117,10 +129,12 @@ public class EmployerController {
             if (blind) {
                 entry.put("name", "Candidate #" + app.getId());
                 entry.put("email", "hidden");
+                entry.put("candidateUsername", "hidden");
                 entry.put("location", candidate.getLocation() != null ? candidate.getLocation() : "");
             } else {
                 entry.put("name", candidate.getFirstName() + " " + candidate.getLastName());
                 entry.put("email", candidate.getEmail() != null ? candidate.getEmail() : "");
+                entry.put("candidateUsername", candidate.getUsername() != null ? candidate.getUsername() : "");
                 entry.put("location", candidate.getLocation() != null ? candidate.getLocation() : "");
             }
             entry.put("skills", candidate.getSkills() != null ? candidate.getSkills() : "");

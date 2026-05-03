@@ -10,9 +10,9 @@
     <style>
         body { background: #f1f5f9; }
         .tab-btn.active { background: #4f46e5; color: white; border-radius: 1rem; }
-        .stat-card { background:white; border-radius:1.5rem; border:1px solid #f1f5f9; box-shadow:0 2px 8px rgba(0,0,0,0.04); padding:1.5rem; transition:all 0.2s; }
-        .stat-card:hover { box-shadow:0 6px 20px rgba(0,0,0,0.07); }
-        .stat-icon { width:3rem; height:3rem; border-radius:1rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin-bottom:0.75rem; }
+        .stat-card { background:white; border-radius:1rem; border:1px solid #f1f5f9; box-shadow:0 1px 4px rgba(0,0,0,0.04); padding:1rem 1.25rem; transition:all 0.2s; display:flex; align-items:center; gap:0.875rem; }
+        .stat-card:hover { box-shadow:0 4px 12px rgba(0,0,0,0.07); }
+        .stat-icon { width:2.25rem; height:2.25rem; border-radius:0.625rem; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -30,6 +30,7 @@
             </div>
             <div class="flex items-center gap-1">
                 <span class="text-xs bg-red-100 text-red-700 font-bold px-2 py-1 rounded-lg">Admin</span>
+                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
                 <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
         </div>
@@ -40,8 +41,18 @@
             <button onclick="showTab('users')" id="tab-users" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
                 <span>👥</span><span>Users</span>
             </button>
+            <button onclick="showTab('jobseekers')" id="tab-jobseekers" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>🎯</span><span>Job Seekers</span>
+            </button>
+            <button onclick="showTab('employers')" id="tab-employers" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>🏢</span><span>Employers</span>
+            </button>
             <button onclick="showTab('jobs')" id="tab-jobs" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
                 <span>💼</span><span>Job Listings</span>
+            </button>
+            <button onclick="showTab('messages')" id="tab-messages" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>💬</span><span>Messages</span>
+                <span id="admin-msg-badge" class="ml-auto text-[10px] font-bold bg-red-500 text-white px-2 py-0.5 rounded-full hidden"></span>
             </button>
         </nav>
     </aside>
@@ -54,41 +65,35 @@
                 <h1 class="text-2xl font-bold text-slate-900">Platform Overview</h1>
                 <p class="text-slate-400 text-sm mt-1">Monitor the health of TrabaHanap.</p>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#eef2ff">👥</div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Users</p>
-                    <h3 id="s-users" class="text-3xl font-bold text-slate-900">—</h3>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Users</p><h3 id="s-users" class="text-xl font-bold text-slate-900">—</h3></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#eef2ff">🎯</div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Candidates</p>
-                    <h3 id="s-candidates" class="text-3xl font-bold text-indigo-600">—</h3>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Candidates</p><h3 id="s-candidates" class="text-xl font-bold text-indigo-600">—</h3></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#f0fdfa">🏢</div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Employers</p>
-                    <h3 id="s-employers" class="text-3xl font-bold text-teal-600">—</h3>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Employers</p><h3 id="s-employers" class="text-xl font-bold text-teal-600">—</h3></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#fefce8">💼</div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Jobs</p>
-                    <h3 id="s-jobs" class="text-3xl font-bold text-slate-900">—</h3>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Jobs</p><h3 id="s-jobs" class="text-xl font-bold text-slate-900">—</h3></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#f0fdf4">✅</div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Active Jobs</p>
-                    <h3 id="s-active" class="text-3xl font-bold text-green-600">—</h3>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Jobs</p><h3 id="s-active" class="text-xl font-bold text-green-600">—</h3></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#fffbeb">📋</div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Applications</p>
-                    <h3 id="s-apps" class="text-3xl font-bold text-amber-600">—</h3>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Applications</p><h3 id="s-apps" class="text-xl font-bold text-amber-600">—</h3></div>
                 </div>
             </div>
-            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+            <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm">
                 <h3 class="font-bold text-slate-800 mb-4">Platform Overview</h3>
-                <canvas id="adminChart" height="100"></canvas>
+                <canvas id="adminChart" height="80"></canvas>
             </div>
         </div>
 
@@ -99,7 +104,12 @@
                     <h1 class="text-2xl font-bold text-slate-900">User Management</h1>
                     <p class="text-slate-400 text-sm mt-1">View, change roles, or remove users.</p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <select id="users-sort" onchange="filterUsers()" class="h-9 px-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 bg-white outline-none focus:border-indigo-500 transition">
+                        <option value="alpha">A → Z (Name)</option>
+                        <option value="username">By Username</option>
+                        <option value="role">By Role</option>
+                    </select>
                     <div class="relative">
                         <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
                         <input type="text" id="user-search" oninput="filterUsers()" placeholder="Search users..."
@@ -116,10 +126,79 @@
                             <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Username</th>
                             <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Email</th>
                             <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Role</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Joined</th>
                             <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="users-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Job Seekers Tab -->
+        <div id="view-jobseekers" class="hidden">
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Job Seekers</h1>
+                    <p class="text-slate-400 text-sm mt-1">All registered job seekers and their details.</p>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <select id="seekers-sort" onchange="renderSeekers()" class="h-9 px-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 bg-white outline-none focus:border-indigo-500 transition">
+                        <option value="alpha">A → Z (Name)</option>
+                        <option value="username">By Username</option>
+                        <option value="location">By Location</option>
+                    </select>
+                    <input type="text" id="seekers-search" oninput="renderSeekers()" placeholder="Search..." class="h-9 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition w-44">
+                </div>
+            </div>
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Name</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Username</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Email</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Location</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Skills</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Joined</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="seekers-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Employers Tab -->
+        <div id="view-employers" class="hidden">
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Employers</h1>
+                    <p class="text-slate-400 text-sm mt-1">All registered employers and their details.</p>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <select id="employers-sort" onchange="renderEmployers()" class="h-9 px-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 bg-white outline-none focus:border-indigo-500 transition">
+                        <option value="alpha">A → Z (Name)</option>
+                        <option value="username">By Username</option>
+                        <option value="location">By Location</option>
+                    </select>
+                    <input type="text" id="employers-search" oninput="renderEmployers()" placeholder="Search..." class="h-9 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition w-44">
+                </div>
+            </div>
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Name</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Username</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Email</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Location</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Job Title</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Joined</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employers-table"></tbody>
                 </table>
             </div>
         </div>
@@ -131,9 +210,110 @@
                     <h1 class="text-2xl font-bold text-slate-900">Job Listings</h1>
                     <p class="text-slate-400 text-sm mt-1">Monitor and manage all job postings.</p>
                 </div>
-                <a href="/api/admin/export/jobs" class="h-9 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-sm font-semibold transition flex items-center gap-1">⬇ Export CSV</a>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <select id="jobs-sort" onchange="renderJobsList()" class="h-9 px-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 bg-white outline-none focus:border-indigo-500 transition">
+                        <option value="alpha">A → Z (Title)</option>
+                        <option value="date">Newest First</option>
+                        <option value="city">By City</option>
+                        <option value="company">By Company</option>
+                    </select>
+                    <input type="text" id="jobs-search" oninput="renderJobsList()" placeholder="Search jobs..." class="h-9 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition w-44">
+                    <a href="/api/admin/export/jobs" class="h-9 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-sm font-semibold transition flex items-center gap-1">⬇ Export CSV</a>
+                </div>
             </div>
             <div id="admin-jobs-list" class="space-y-4"></div>
+        </div>
+
+        <!-- Messages Tab -->
+        <div id="view-messages" class="hidden" style="height:calc(100vh - 5rem);display:none">
+            <style>
+                .admin-convo-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem; border-radius:1rem; cursor:pointer; transition:all 0.15s; }
+                .admin-convo-item:hover { background:#f5f3ff; }
+                .admin-convo-item.active { background:#eef2ff; border-left:3px solid #4f46e5; padding-left:calc(0.75rem - 3px); }
+                .admin-msg-mine { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white; border-radius:1.25rem 1.25rem 0.25rem 1.25rem; }
+                .admin-msg-other { background:white; color:#1e293b; border:1px solid #f1f5f9; border-radius:1.25rem 1.25rem 1.25rem 0.25rem; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+                #admin-chat-messages { scroll-behavior:smooth; }
+            </style>
+            <div class="flex h-full bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                <!-- Conversation list -->
+                <div class="w-80 border-r border-slate-100 flex flex-col shrink-0">
+                    <div class="p-4 border-b border-slate-100">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-slate-900">Messages</h2>
+                            <button onclick="openAdminNewMsg()" class="w-8 h-8 bg-indigo-600 text-white rounded-xl flex items-center justify-center hover:bg-indigo-700 transition font-bold" title="New message">✏️</button>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+                            <input type="text" id="admin-search-convo" oninput="adminFilterConvos()" placeholder="Search conversations..."
+                                class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 transition text-xs">
+                        </div>
+                    </div>
+                    <div id="admin-convo-list" class="flex-1 overflow-y-auto p-3 space-y-1">
+                        <p class="text-slate-400 text-sm text-center py-8">Loading...</p>
+                    </div>
+                </div>
+                <!-- Chat area -->
+                <div class="flex-1 flex flex-col min-w-0">
+                    <div id="admin-chat-empty" class="flex-1 flex items-center justify-center text-slate-400">
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">💬</div>
+                            <p class="font-bold text-slate-600 text-lg">Your messages</p>
+                            <p class="text-sm mt-1 text-slate-400">Select a conversation or start a new one</p>
+                            <button onclick="openAdminNewMsg()" class="mt-5 btn btn-primary btn-sm h-9 px-5">✏️ New Message</button>
+                        </div>
+                    </div>
+                    <div id="admin-chat-header" class="p-4 border-b border-slate-100 bg-white hidden">
+                        <div class="flex items-center gap-3">
+                            <div id="admin-chat-avatar" class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">?</div>
+                            <div>
+                                <h2 id="admin-chat-name" class="font-bold text-slate-900 text-sm"></h2>
+                                <p id="admin-chat-username" class="text-xs text-slate-400"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="admin-chat-messages" class="flex-1 overflow-y-auto p-5 space-y-3 hidden bg-slate-50"></div>
+                    <div id="admin-chat-input" class="p-4 border-t border-slate-100 bg-white hidden">
+                        <div class="flex gap-2 items-end">
+                            <textarea id="admin-msg-input" rows="1" placeholder="Type a message…"
+                                class="input flex-1 resize-none text-sm" style="max-height:120px;overflow-y:auto"
+                                oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminSendMessage();}"></textarea>
+                            <button onclick="adminSendMessage()" class="btn btn-primary h-10 px-4 shrink-0">Send</button>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1">Enter to send · Shift+Enter for new line</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin New Message Modal -->
+        <div id="adminNewMsgModal" class="modal p-4">
+            <div class="modal-box bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-8">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-lg font-bold">New Message</h3>
+                    <button onclick="closeAdminNewMsg()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition">✕</button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">To (Username)</label>
+                        <div class="mt-1">
+                            <input type="text" id="admin-new-receiver" placeholder="Type a name or @username..." class="input w-full" oninput="adminSearchUsers(this.value)" autocomplete="off">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Subject <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                        <input type="text" id="admin-new-subject" placeholder="e.g. Regarding your application" class="input mt-1">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Message</label>
+                        <textarea id="admin-new-content" rows="4" placeholder="Write your message…" class="input mt-1 resize-none"></textarea>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button onclick="closeAdminNewMsg()" class="btn btn-secondary flex-1 h-11">Cancel</button>
+                        <button onclick="adminSendNewMessage()" class="btn btn-primary flex-1 h-11">Send Message</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </main>
@@ -146,61 +326,78 @@
         const roleColors = { ADMIN: 'bg-red-50 text-red-600', EMPLOYER: 'bg-indigo-50 text-indigo-600', CANDIDATE: 'bg-teal-50 text-teal-600' };
 
         function showTab(tab) {
-            ['dashboard','users','jobs'].forEach(t => {
-                document.getElementById('view-' + t).classList.add('hidden');
+            ['dashboard','users','jobseekers','employers','jobs','messages'].forEach(t => {
+                const el = document.getElementById('view-' + t);
+                if (el) el.style.display = 'none';
                 document.getElementById('tab-' + t).classList.remove('active');
             });
-            document.getElementById('view-' + tab).classList.remove('hidden');
+            const view = document.getElementById('view-' + tab);
+            if (view) view.style.display = tab === 'messages' ? 'flex' : 'block';
             document.getElementById('tab-' + tab).classList.add('active');
             if (tab === 'dashboard') loadStats();
             if (tab === 'users') loadUsers();
             if (tab === 'jobs') loadJobs();
+            if (tab === 'jobseekers') loadSeekers();
+            if (tab === 'employers') loadEmployers();
+            if (tab === 'messages') loadAdminConversations();
         }
 
         async function loadStats() {
-            const s = await apiGet('/admin/stats');
-            document.getElementById('s-users').innerText = s.totalUsers;
-            document.getElementById('s-candidates').innerText = s.candidates;
-            document.getElementById('s-employers').innerText = s.employers;
-            document.getElementById('s-jobs').innerText = s.totalJobs;
-            document.getElementById('s-active').innerText = s.activeJobs;
-            document.getElementById('s-apps').innerText = s.totalApplications;
+            try {
+                const s = await apiGet('/admin/stats');
+                document.getElementById('s-users').innerText = s.totalUsers;
+                document.getElementById('s-candidates').innerText = s.candidates;
+                document.getElementById('s-employers').innerText = s.employers;
+                document.getElementById('s-jobs').innerText = s.totalJobs;
+                document.getElementById('s-active').innerText = s.activeJobs;
+                document.getElementById('s-apps').innerText = s.totalApplications;
 
-            // Chart
-            if (window._adminChart) window._adminChart.destroy();
-            window._adminChart = new Chart(document.getElementById('adminChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['Total Users', 'Candidates', 'Employers', 'Total Jobs', 'Active Jobs', 'Applications'],
-                    datasets: [{
-                        label: 'Count',
-                        data: [s.totalUsers, s.candidates, s.employers, s.totalJobs, s.activeJobs, s.totalApplications],
-                        backgroundColor: ['#6366f1','#6366f1','#14b8a6','#f59e0b','#22c55e','#8b5cf6'],
-                        borderRadius: 8
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
+                // Chart
+                if (window._adminChart) window._adminChart.destroy();
+                window._adminChart = new Chart(document.getElementById('adminChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Total Users', 'Candidates', 'Employers', 'Total Jobs', 'Active Jobs', 'Applications'],
+                        datasets: [{
+                            label: 'Count',
+                            data: [s.totalUsers, s.candidates, s.employers, s.totalJobs, s.activeJobs, s.totalApplications],
+                            backgroundColor: ['#6366f1','#6366f1','#14b8a6','#f59e0b','#22c55e','#8b5cf6'],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                });
+            } catch(e) {
+                console.error('loadStats error:', e);
+                toast('Failed to load stats: ' + e.message, 'error');
+            }
         }
 
         let allUsers = [];
 
         async function loadUsers() {
             allUsers = await apiGet('/admin/users');
+            allUsers.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
             renderUsers(allUsers);
         }
 
         function filterUsers() {
             const q = document.getElementById('user-search').value.toLowerCase();
-            renderUsers(q ? allUsers.filter(u =>
+            const sort = document.getElementById('users-sort')?.value || 'alpha';
+            let users = q ? allUsers.filter(u =>
                 u.fullName.toLowerCase().includes(q) ||
                 u.username.toLowerCase().includes(q) ||
                 (u.email || '').toLowerCase().includes(q) ||
                 u.role.toLowerCase().includes(q)
-            ) : allUsers);
+            ) : [...allUsers];
+            if (sort === 'alpha') users.sort((a, b) => a.fullName.localeCompare(b.fullName));
+            else if (sort === 'username') users.sort((a, b) => a.username.localeCompare(b.username));
+            else if (sort === 'role') users.sort((a, b) => a.role.localeCompare(b.role));
+            renderUsers(users);
         }
 
         function renderUsers(users) {
+            const currentUsername = JSON.parse(localStorage.getItem('jc_user') || '{}').username;
             document.getElementById('users-table').innerHTML = users.map(u => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
                     <td class="px-6 py-4 text-sm font-semibold text-slate-800">${u.fullName}</td>
@@ -209,12 +406,13 @@
                     <td class="px-6 py-4">
                         <span class="text-[11px] font-bold px-3 py-1 rounded-full uppercase ${roleColors[u.role] || 'bg-slate-100 text-slate-500'}">${u.role}</span>
                     </td>
+                    <td class="px-6 py-4 text-xs text-slate-400 whitespace-nowrap">${u.joinedAt || '—'}</td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-2">
-                            <select onchange="changeRole(${u.id}, this.value)" class="text-xs p-1.5 border border-slate-200 rounded-lg outline-none bg-white">
+                            <select onchange="changeRole(${u.id}, this.value)" class="text-xs p-1.5 border border-slate-200 rounded-lg outline-none bg-white" ${u.username === currentUsername ? 'disabled' : ''}>
                                 ${['CANDIDATE','EMPLOYER','ADMIN'].map(r => `<option ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}
                             </select>
-                            <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
+                            ${u.username !== currentUsername && u.role !== 'ADMIN' ? `<button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>` : ''}
                         </div>
                     </td>
                 </tr>`).join('');
@@ -235,9 +433,91 @@
             });
         }
 
+        let allSeekers = [], allEmployersList = [];
+
+        async function loadSeekers() {
+            if (!allUsers.length) allUsers = await apiGet('/admin/users');
+            allSeekers = allUsers.filter(u => u.role === 'CANDIDATE');
+            renderSeekers();
+        }
+
+        function renderSeekers() {
+            const sort = document.getElementById('seekers-sort')?.value || 'alpha';
+            const q = (document.getElementById('seekers-search')?.value || '').toLowerCase();
+            let list = allSeekers.filter(u => !q ||
+                u.fullName.toLowerCase().includes(q) ||
+                u.username.toLowerCase().includes(q) ||
+                (u.email || '').toLowerCase().includes(q) ||
+                (u.location || '').toLowerCase().includes(q)
+            );
+            if (sort === 'alpha') list.sort((a, b) => a.fullName.localeCompare(b.fullName));
+            else if (sort === 'username') list.sort((a, b) => a.username.localeCompare(b.username));
+            else if (sort === 'location') list.sort((a, b) => (a.location || '').localeCompare(b.location || ''));
+            document.getElementById('seekers-table').innerHTML = list.length ? list.map(u => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-5 py-3 text-sm font-semibold text-slate-800">${u.fullName}</td>
+                    <td class="px-5 py-3 text-sm text-slate-500">@${u.username}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400">${u.email || '—'}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400">${u.location || '—'}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400 max-w-xs truncate">${u.skills || '—'}</td>
+                    <td class="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">${u.joinedAt || '—'}</td>
+                    <td class="px-5 py-3">
+                        <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
+                    </td>
+                </tr>`).join('') : '<tr><td colspan="7" class="px-5 py-10 text-center text-slate-400">No job seekers found.</td></tr>';
+        }
+
+        async function loadEmployers() {
+            if (!allUsers.length) allUsers = await apiGet('/admin/users');
+            allEmployersList = allUsers.filter(u => u.role === 'EMPLOYER');
+            renderEmployers();
+        }
+
+        function renderEmployers() {
+            const sort = document.getElementById('employers-sort')?.value || 'alpha';
+            const q = (document.getElementById('employers-search')?.value || '').toLowerCase();
+            let list = allEmployersList.filter(u => !q ||
+                u.fullName.toLowerCase().includes(q) ||
+                u.username.toLowerCase().includes(q) ||
+                (u.email || '').toLowerCase().includes(q) ||
+                (u.location || '').toLowerCase().includes(q)
+            );
+            if (sort === 'alpha') list.sort((a, b) => a.fullName.localeCompare(b.fullName));
+            else if (sort === 'username') list.sort((a, b) => a.username.localeCompare(b.username));
+            else if (sort === 'location') list.sort((a, b) => (a.location || '').localeCompare(b.location || ''));
+            document.getElementById('employers-table').innerHTML = list.length ? list.map(u => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-5 py-3 text-sm font-semibold text-slate-800">${u.fullName}</td>
+                    <td class="px-5 py-3 text-sm text-slate-500">@${u.username}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400">${u.email || '—'}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400">${u.location || '—'}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400">${u.jobTitle || '—'}</td>
+                    <td class="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">${u.joinedAt || '—'}</td>
+                    <td class="px-5 py-3">
+                        <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
+                    </td>
+                </tr>`).join('') : '<tr><td colspan="7" class="px-5 py-10 text-center text-slate-400">No employers found.</td></tr>';
+        }
+
+        let allJobsCache = [];
+
         async function loadJobs() {
-            const jobs = await apiGet('/admin/jobs');
-            document.getElementById('admin-jobs-list').innerHTML = jobs.map(job => `
+            allJobsCache = await apiGet('/admin/jobs');
+            renderJobsList();
+        }
+
+        function renderJobsList() {
+            const sort = document.getElementById('jobs-sort')?.value || 'alpha';
+            const q = (document.getElementById('jobs-search')?.value || '').toLowerCase();
+            let jobs = allJobsCache.filter(j =>
+                !q || j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q) || (j.location || '').toLowerCase().includes(q)
+            );
+            if (sort === 'alpha') jobs = [...jobs].sort((a, b) => a.title.localeCompare(b.title));
+            else if (sort === 'date') jobs = [...jobs].sort((a, b) => new Date(b.postedAt || 0) - new Date(a.postedAt || 0));
+            else if (sort === 'city') jobs = [...jobs].sort((a, b) => (a.location || '').localeCompare(b.location || ''));
+            else if (sort === 'company') jobs = [...jobs].sort((a, b) => (a.company || '').localeCompare(b.company || ''));
+
+            document.getElementById('admin-jobs-list').innerHTML = jobs.length ? jobs.map(job => `
                 <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition hover:shadow-md hover:border-indigo-100">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
@@ -251,6 +531,7 @@
                                 <span class="text-xs ${job.active ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-400'} font-semibold px-2 py-0.5 rounded-full">${job.active ? '● Active' : '○ Inactive'}</span>
                                 ${job.postedBy ? `<span class="text-xs bg-indigo-50 text-indigo-500 font-medium px-2 py-0.5 rounded-full">by @${job.postedBy}</span>` : ''}
                                 <span class="text-xs bg-slate-50 text-slate-400 font-medium px-2 py-0.5 rounded-full">${job.type}</span>
+                                ${job.postedAt ? `<span class="text-xs bg-slate-50 text-slate-400 font-medium px-2 py-0.5 rounded-full">🕐 ${job.postedAt}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -259,7 +540,7 @@
                         <button onclick="toggleJob(${job.id})" class="h-9 px-4 border border-slate-200 text-slate-500 hover:border-amber-400 hover:text-amber-600 rounded-xl text-sm font-medium transition">${job.active ? 'Deactivate' : 'Activate'}</button>
                         <button onclick="deleteJob(${job.id})" class="h-9 px-4 border border-red-100 text-red-400 hover:bg-red-50 rounded-xl text-sm font-medium transition">Delete</button>
                     </div>
-                </div>`).join('');
+                </div>`).join('') : '<p class="text-slate-400 text-center py-12">No jobs found.</p>';
         }
 
         async function toggleJob(id) {
@@ -289,8 +570,172 @@
             window.location.href = 'index.html';
         }
 
-        window.onload = loadStats;
+        function toggleDark() {
+            const isDark = document.body.classList.toggle('dark');
+            localStorage.setItem('jc_dark', isDark ? '1' : '');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
+        }
+
+        // ── Admin Messaging ──
+        let adminCurrentConvo = null, adminAllConvos = [];
+
+        async function loadAdminConversations() {
+            const msgs = await apiGet('/messages/inbox');
+            const seen = new Set();
+            adminAllConvos = [];
+            msgs.forEach(m => {
+                const other = m.isMine ? m.receiverUsername : m.senderUsername;
+                const name = m.isMine ? m.receiverUsername : m.senderName;
+                if (!seen.has(other)) { seen.add(other); adminAllConvos.push({ username: other, name, last: m }); }
+            });
+            adminRenderConvos(adminAllConvos);
+            const unread = msgs.filter(m => !m.isRead && !m.isMine).length;
+            const badge = document.getElementById('admin-msg-badge');
+            if (unread > 0) { badge.innerText = unread; badge.classList.remove('hidden'); }
+            else badge.classList.add('hidden');
+        }
+
+        function adminFilterConvos() {
+            const q = document.getElementById('admin-search-convo').value.toLowerCase();
+            adminRenderConvos(q ? adminAllConvos.filter(c => c.name.toLowerCase().includes(q) || c.username.toLowerCase().includes(q)) : adminAllConvos);
+        }
+
+        function adminRenderConvos(convos) {
+            const list = document.getElementById('admin-convo-list');
+            if (!convos.length) { list.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No conversations yet.</p>'; return; }
+            list.innerHTML = convos.map(c => `
+                <div onclick="adminOpenConvo('${c.username}','${c.name.replace(/'/g,"\\'")}' )" class="admin-convo-item ${adminCurrentConvo===c.username?'active':''}">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">${c.name[0].toUpperCase()}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-semibold text-slate-800 truncate">${c.name}</p>
+                            <p class="text-[10px] text-slate-400 shrink-0 ml-2">${timeAgo(c.last.sentAt)}</p>
+                        </div>
+                        <p class="text-xs text-slate-400 truncate mt-0.5">${c.last.isMine?'You: ':''}${c.last.content}</p>
+                    </div>
+                    ${!c.last.isRead&&!c.last.isMine?'<span class="w-2.5 h-2.5 bg-indigo-500 rounded-full shrink-0 ml-1"></span>':''}
+                </div>`).join('');
+        }
+
+        async function adminOpenConvo(username, name) {
+            adminCurrentConvo = username;
+            adminRenderConvos(adminAllConvos);
+            document.getElementById('admin-chat-empty').classList.add('hidden');
+            document.getElementById('admin-chat-header').classList.remove('hidden');
+            document.getElementById('admin-chat-messages').classList.remove('hidden');
+            document.getElementById('admin-chat-input').classList.remove('hidden');
+            document.getElementById('admin-chat-name').innerText = name;
+            document.getElementById('admin-chat-username').innerText = '@' + username;
+            document.getElementById('admin-chat-avatar').innerText = name[0].toUpperCase();
+            const msgs = await apiGet('/messages/conversation/' + username);
+            const container = document.getElementById('admin-chat-messages');
+            if (!msgs.length) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">No messages yet. Say hello! 👋</p>';
+            } else {
+                let lastDate = null;
+                container.innerHTML = msgs.map(m => {
+                    const d = new Date((m.sentAt.endsWith('Z')?m.sentAt:m.sentAt+'Z')).toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+                    const sep = d !== lastDate ? `<div class="flex items-center gap-3 my-3"><div class="flex-1 h-px bg-slate-200"></div><span class="text-[10px] text-slate-400 font-semibold">${d}</span><div class="flex-1 h-px bg-slate-200"></div></div>` : '';
+                    lastDate = d;
+                    return `${sep}<div class="flex ${m.isMine?'justify-end':'justify-start'} mb-1">
+                        <div class="max-w-xs lg:max-w-md px-4 py-2.5 text-sm ${m.isMine?'admin-msg-mine':'admin-msg-other'}">
+                            <p>${m.content}</p>
+                            <p class="text-[10px] mt-1 ${m.isMine?'text-indigo-200':'text-slate-400'}">${timeAgo(m.sentAt)}</p>
+                        </div></div>`;
+                }).join('');
+            }
+            container.scrollTop = container.scrollHeight;
+            document.getElementById('admin-msg-input').focus();
+        }
+
+        async function adminSendMessage() {
+            if (!adminCurrentConvo) return;
+            const input = document.getElementById('admin-msg-input');
+            const content = input.value.trim();
+            if (!content) return;
+            input.value = ''; input.style.height = 'auto';
+            await apiPost('/messages', { receiverUsername: adminCurrentConvo, content }, true);
+            adminOpenConvo(adminCurrentConvo, document.getElementById('admin-chat-name').innerText);
+            loadAdminConversations();
+        }
+
+        function openAdminNewMsg() { document.getElementById('adminNewMsgModal').classList.add('active'); }
+        function closeAdminNewMsg() {
+            document.getElementById('adminNewMsgModal').classList.remove('active');
+            document.getElementById('admin-new-receiver').value = '';
+            document.getElementById('admin-new-subject').value = '';
+            document.getElementById('admin-new-content').value = '';
+            const box = document.getElementById('admin-user-suggestions');
+            if (box) box.style.display = 'none';
+        }
+
+        let adminUserSearchTimer = null;
+        async function adminSearchUsers(q) {
+            const box = document.getElementById('admin-user-suggestions');
+            const val = q.startsWith('@') ? q.slice(1) : q;
+            if (!val) { box.style.display = 'none'; return; }
+            clearTimeout(adminUserSearchTimer);
+            adminUserSearchTimer = setTimeout(async () => {
+                try {
+                    const results = await apiGet('/messages/search-users?q=' + encodeURIComponent(val));
+                    if (!results.length) { box.style.display = 'none'; return; }
+                    const input = document.getElementById('admin-new-receiver');
+                    const rect = input.getBoundingClientRect();
+                    box.style.top = (rect.bottom + 4) + 'px';
+                    box.style.left = rect.left + 'px';
+                    box.style.width = rect.width + 'px';
+                    box.style.display = 'block';
+                    box.innerHTML = results.map(u => `
+                        <div onclick="adminSelectUser('${u.username}')"
+                            style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background 0.1s;border-bottom:1px solid #f1f5f9"
+                            onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='white'">
+                            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px;flex-shrink:0">
+                                ${u.fullName ? u.fullName[0].toUpperCase() : u.username[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <p style="font-size:13px;font-weight:600;color:#1e293b;margin:0">${u.fullName || u.username}</p>
+                                <p style="font-size:11px;color:#94a3b8;margin:0">@${u.username} · ${u.role === 'CANDIDATE' ? 'Job Seeker' : u.role === 'EMPLOYER' ? 'Employer' : u.role}</p>
+                            </div>
+                        </div>`).join('');
+                } catch(e) { box.style.display = 'none'; }
+            }, 200);
+        }
+
+        function adminSelectUser(username) {
+            document.getElementById('admin-new-receiver').value = username;
+            document.getElementById('admin-user-suggestions').style.display = 'none';
+            document.getElementById('admin-new-subject').focus();
+        }
+
+        async function adminSendNewMessage() {
+            const receiver = document.getElementById('admin-new-receiver').value.trim();
+            const subject = document.getElementById('admin-new-subject').value.trim();
+            const content = document.getElementById('admin-new-content').value.trim();
+            if (!receiver || !content) { toast('Please fill in recipient and message.', 'warning'); return; }
+            const btn = document.querySelector('#adminNewMsgModal .btn-primary');
+            setLoading(btn, true, 'Sending...');
+            const data = await apiPost('/messages', { receiverUsername: receiver, subject, content }, true);
+            setLoading(btn, false);
+            if (data.error) { toast(data.error, 'error'); return; }
+            toast('Message sent!', 'success');
+            closeAdminNewMsg();
+            await loadAdminConversations();
+            adminOpenConvo(receiver, receiver);
+        }
+
+        window.onload = () => {
+            if (localStorage.getItem('jc_dark')) {
+                document.body.classList.add('dark');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
+            }
+            loadStats();
+            apiGet('/messages/unread-count').then(d => {
+                if (d.count > 0) { const b = document.getElementById('admin-msg-badge'); b.innerText = d.count; b.classList.remove('hidden'); }
+            }).catch(()=>{});
+        };
     </script>
+
+    <div id="admin-user-suggestions" style="position:fixed;background:white;border:1px solid #e2e8f0;border-radius:0.875rem;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:999999;display:none;max-height:240px;overflow-y:auto;min-width:280px"></div>
 </body>
 </html>
 
