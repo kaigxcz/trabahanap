@@ -100,7 +100,12 @@
                     <h1 class="text-2xl font-bold text-slate-900">User Management</h1>
                     <p class="text-slate-400 text-sm mt-1">View, change roles, or remove users.</p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <select id="users-sort" onchange="filterUsers()" class="h-9 px-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 bg-white outline-none focus:border-indigo-500 transition">
+                        <option value="alpha">A → Z (Name)</option>
+                        <option value="username">By Username</option>
+                        <option value="role">By Role</option>
+                    </select>
                     <div class="relative">
                         <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
                         <input type="text" id="user-search" oninput="filterUsers()" placeholder="Search users..."
@@ -197,17 +202,23 @@
 
         async function loadUsers() {
             allUsers = await apiGet('/admin/users');
+            allUsers.sort((a, b) => a.fullName.localeCompare(b.fullName));
             renderUsers(allUsers);
         }
 
         function filterUsers() {
             const q = document.getElementById('user-search').value.toLowerCase();
-            renderUsers(q ? allUsers.filter(u =>
+            const sort = document.getElementById('users-sort')?.value || 'alpha';
+            let users = q ? allUsers.filter(u =>
                 u.fullName.toLowerCase().includes(q) ||
                 u.username.toLowerCase().includes(q) ||
                 (u.email || '').toLowerCase().includes(q) ||
                 u.role.toLowerCase().includes(q)
-            ) : allUsers);
+            ) : [...allUsers];
+            if (sort === 'alpha') users.sort((a, b) => a.fullName.localeCompare(b.fullName));
+            else if (sort === 'username') users.sort((a, b) => a.username.localeCompare(b.username));
+            else if (sort === 'role') users.sort((a, b) => a.role.localeCompare(b.role));
+            renderUsers(users);
         }
 
         function renderUsers(users) {
