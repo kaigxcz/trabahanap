@@ -30,7 +30,7 @@
 
     <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
         <div class="flex items-center justify-between mb-10">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 cursor-pointer select-none" id="logo-btn" onclick="toggleLogoDropdown()">
                 <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
                 <div>
                     <span class="font-bold text-lg tracking-tight block leading-tight">TrabaHanap</span>
@@ -55,7 +55,7 @@
         </nav>
     </aside>
 
-    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto page-transition">
         <header class="mb-6">
             <div class="flex items-center justify-between flex-wrap gap-3">
                 <div>
@@ -158,6 +158,28 @@
 
         function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
 
+        let logoOpen = false;
+        function toggleLogoDropdown() {
+            logoOpen = !logoOpen;
+            const drop = document.getElementById('logo-dropdown');
+            if (logoOpen) {
+                const btn = document.getElementById('logo-btn');
+                const rect = btn.getBoundingClientRect();
+                drop.style.top = (rect.bottom + 8) + 'px';
+                drop.style.left = rect.left + 'px';
+                drop.classList.add('open');
+                const u = JSON.parse(localStorage.getItem('jc_user') || '{}');
+                document.getElementById('dropdown-name').innerText = u.fullName || u.username || 'User';
+                document.getElementById('dropdown-email').innerText = u.email || '';
+            } else { drop.classList.remove('open'); }
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#logo-dropdown') && !e.target.closest('#logo-btn')) {
+                logoOpen = false;
+                document.getElementById('logo-dropdown')?.classList.remove('open');
+            }
+        });
+
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('jc_dark', isDark ? '1' : '');
@@ -194,6 +216,18 @@
             loadNotificationBell(); loadSaved();
         };
     </script>
+
+    <div id="logo-dropdown">
+        <div class="px-4 py-3 border-b border-slate-100">
+            <p class="text-xs font-bold text-slate-800" id="dropdown-name">Loading...</p>
+            <p class="text-xs text-slate-400" id="dropdown-email"></p>
+        </div>
+        <a href="/profile" class="logo-dropdown-item">👤 My Profile</a>
+        <a href="/dashboard" class="logo-dropdown-item">🏠 Find Jobs</a>
+        <a href="/applications" class="logo-dropdown-item">📂 Applications</a>
+        <div style="border-top:1px solid #f1f5f9;margin:4px 0"></div>
+        <div class="logo-dropdown-item danger" onclick="logout()">🚪 Log Out</div>
+    </div>
 
     <div id="notif-panel">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100" style="flex-shrink:0;background:inherit;border-radius:1rem 1rem 0 0">
