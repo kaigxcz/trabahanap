@@ -383,11 +383,12 @@
             document.getElementById('edit-title').value = p.jobTitle || '';
             document.getElementById('edit-location').value = p.location || '';
             document.getElementById('edit-skills').value = p.skills || '';
-            // Reset map state
-            document.getElementById('profile-map-wrap').classList.add('hidden');
+            // Reset map state then auto-open map
             document.getElementById('profile-loc-suggestions').classList.add('hidden');
             profileMapOpen = false;
             document.getElementById('editModal').classList.add('active');
+            // Auto-show map after modal opens
+            setTimeout(() => toggleMapProfile(), 200);
         }
 
         function closeModal() {
