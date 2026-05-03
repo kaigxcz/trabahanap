@@ -304,29 +304,34 @@
         }
 
         async function loadStats() {
-            const s = await apiGet('/admin/stats');
-            document.getElementById('s-users').innerText = s.totalUsers;
-            document.getElementById('s-candidates').innerText = s.candidates;
-            document.getElementById('s-employers').innerText = s.employers;
-            document.getElementById('s-jobs').innerText = s.totalJobs;
-            document.getElementById('s-active').innerText = s.activeJobs;
-            document.getElementById('s-apps').innerText = s.totalApplications;
+            try {
+                const s = await apiGet('/admin/stats');
+                document.getElementById('s-users').innerText = s.totalUsers;
+                document.getElementById('s-candidates').innerText = s.candidates;
+                document.getElementById('s-employers').innerText = s.employers;
+                document.getElementById('s-jobs').innerText = s.totalJobs;
+                document.getElementById('s-active').innerText = s.activeJobs;
+                document.getElementById('s-apps').innerText = s.totalApplications;
 
-            // Chart
-            if (window._adminChart) window._adminChart.destroy();
-            window._adminChart = new Chart(document.getElementById('adminChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['Total Users', 'Candidates', 'Employers', 'Total Jobs', 'Active Jobs', 'Applications'],
-                    datasets: [{
-                        label: 'Count',
-                        data: [s.totalUsers, s.candidates, s.employers, s.totalJobs, s.activeJobs, s.totalApplications],
-                        backgroundColor: ['#6366f1','#6366f1','#14b8a6','#f59e0b','#22c55e','#8b5cf6'],
-                        borderRadius: 8
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
+                // Chart
+                if (window._adminChart) window._adminChart.destroy();
+                window._adminChart = new Chart(document.getElementById('adminChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Total Users', 'Candidates', 'Employers', 'Total Jobs', 'Active Jobs', 'Applications'],
+                        datasets: [{
+                            label: 'Count',
+                            data: [s.totalUsers, s.candidates, s.employers, s.totalJobs, s.activeJobs, s.totalApplications],
+                            backgroundColor: ['#6366f1','#6366f1','#14b8a6','#f59e0b','#22c55e','#8b5cf6'],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                });
+            } catch(e) {
+                console.error('loadStats error:', e);
+                toast('Failed to load stats: ' + e.message, 'error');
+            }
         }
 
         let allUsers = [];

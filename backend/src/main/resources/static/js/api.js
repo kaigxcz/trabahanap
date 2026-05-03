@@ -19,6 +19,7 @@ async function apiPost(path, body, auth = false) {
 
 async function apiGet(path) {
     const res = await fetch(API + path, { headers: getHeaders() });
+    if (!res.ok) throw new Error('API error ' + res.status + ' on ' + path);
     return res.json();
 }
 
