@@ -225,18 +225,23 @@
         </div>
 
         <!-- Messages Tab -->
-        <div id="view-messages" class="hidden" style="height:calc(100vh - 2rem)">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Messages</h1>
-                    <p class="text-slate-400 text-sm mt-1">Conversations with job seekers and employers.</p>
-                </div>
-                <button onclick="openAdminNewMsg()" class="h-9 px-4 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">✏️ New Message</button>
-            </div>
-            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex" style="height:calc(100% - 80px)">
+        <div id="view-messages" class="hidden" style="height:calc(100vh - 5rem);display:none">
+            <style>
+                .admin-convo-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem; border-radius:1rem; cursor:pointer; transition:all 0.15s; }
+                .admin-convo-item:hover { background:#f5f3ff; }
+                .admin-convo-item.active { background:#eef2ff; border-left:3px solid #4f46e5; padding-left:calc(0.75rem - 3px); }
+                .admin-msg-mine { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white; border-radius:1.25rem 1.25rem 0.25rem 1.25rem; }
+                .admin-msg-other { background:white; color:#1e293b; border:1px solid #f1f5f9; border-radius:1.25rem 1.25rem 1.25rem 0.25rem; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+                #admin-chat-messages { scroll-behavior:smooth; }
+            </style>
+            <div class="flex h-full bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
                 <!-- Conversation list -->
                 <div class="w-80 border-r border-slate-100 flex flex-col shrink-0">
                     <div class="p-4 border-b border-slate-100">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-slate-900">Messages</h2>
+                            <button onclick="openAdminNewMsg()" class="w-8 h-8 bg-indigo-600 text-white rounded-xl flex items-center justify-center hover:bg-indigo-700 transition font-bold" title="New message">✏️</button>
+                        </div>
                         <div class="relative">
                             <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
                             <input type="text" id="admin-search-convo" oninput="adminFilterConvos()" placeholder="Search conversations..."
@@ -248,17 +253,18 @@
                     </div>
                 </div>
                 <!-- Chat area -->
-                <div class="flex-1 flex flex-col">
+                <div class="flex-1 flex flex-col min-w-0">
                     <div id="admin-chat-empty" class="flex-1 flex items-center justify-center text-slate-400">
                         <div class="text-center">
-                            <div class="text-5xl mb-3">💬</div>
-                            <p class="font-bold text-slate-600">Select a conversation</p>
-                            <p class="text-sm mt-1 text-slate-400">or start a new one</p>
+                            <div class="text-6xl mb-4">💬</div>
+                            <p class="font-bold text-slate-600 text-lg">Your messages</p>
+                            <p class="text-sm mt-1 text-slate-400">Select a conversation or start a new one</p>
+                            <button onclick="openAdminNewMsg()" class="mt-5 btn btn-primary btn-sm h-9 px-5">✏️ New Message</button>
                         </div>
                     </div>
-                    <div id="admin-chat-header" class="p-4 border-b border-slate-100 hidden">
+                    <div id="admin-chat-header" class="p-4 border-b border-slate-100 bg-white hidden">
                         <div class="flex items-center gap-3">
-                            <div id="admin-chat-avatar" class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">?</div>
+                            <div id="admin-chat-avatar" class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">?</div>
                             <div>
                                 <h2 id="admin-chat-name" class="font-bold text-slate-900 text-sm"></h2>
                                 <p id="admin-chat-username" class="text-xs text-slate-400"></p>
@@ -266,14 +272,45 @@
                         </div>
                     </div>
                     <div id="admin-chat-messages" class="flex-1 overflow-y-auto p-5 space-y-3 hidden bg-slate-50"></div>
-                    <div id="admin-chat-input" class="p-4 border-t border-slate-100 hidden">
+                    <div id="admin-chat-input" class="p-4 border-t border-slate-100 bg-white hidden">
                         <div class="flex gap-2 items-end">
                             <textarea id="admin-msg-input" rows="1" placeholder="Type a message…"
-                                class="input flex-1 resize-none text-sm" style="max-height:100px;overflow-y:auto"
+                                class="input flex-1 resize-none text-sm" style="max-height:120px;overflow-y:auto"
                                 oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
                                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminSendMessage();}"></textarea>
                             <button onclick="adminSendMessage()" class="btn btn-primary h-10 px-4 shrink-0">Send</button>
                         </div>
+                        <p class="text-[10px] text-slate-400 mt-1">Enter to send · Shift+Enter for new line</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin New Message Modal -->
+        <div id="adminNewMsgModal" class="modal p-4">
+            <div class="modal-box bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-8">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-lg font-bold">New Message</h3>
+                    <button onclick="closeAdminNewMsg()" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 transition">✕</button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">To (Username)</label>
+                        <div class="mt-1">
+                            <input type="text" id="admin-new-receiver" placeholder="Type a name or @username..." class="input w-full" oninput="adminSearchUsers(this.value)" autocomplete="off">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Subject <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                        <input type="text" id="admin-new-subject" placeholder="e.g. Regarding your application" class="input mt-1">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Message</label>
+                        <textarea id="admin-new-content" rows="4" placeholder="Write your message…" class="input mt-1 resize-none"></textarea>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button onclick="closeAdminNewMsg()" class="btn btn-secondary flex-1 h-11">Cancel</button>
+                        <button onclick="adminSendNewMessage()" class="btn btn-primary flex-1 h-11">Send Message</button>
                     </div>
                 </div>
             </div>
@@ -290,10 +327,12 @@
 
         function showTab(tab) {
             ['dashboard','users','jobseekers','employers','jobs','messages'].forEach(t => {
-                document.getElementById('view-' + t).classList.add('hidden');
+                const el = document.getElementById('view-' + t);
+                if (el) el.style.display = 'none';
                 document.getElementById('tab-' + t).classList.remove('active');
             });
-            document.getElementById('view-' + tab).classList.remove('hidden');
+            const view = document.getElementById('view-' + tab);
+            if (view) view.style.display = tab === 'messages' ? 'flex' : 'block';
             document.getElementById('tab-' + tab).classList.add('active');
             if (tab === 'dashboard') loadStats();
             if (tab === 'users') loadUsers();
@@ -550,7 +589,6 @@
                 if (!seen.has(other)) { seen.add(other); adminAllConvos.push({ username: other, name, last: m }); }
             });
             adminRenderConvos(adminAllConvos);
-            // Update badge
             const unread = msgs.filter(m => !m.isRead && !m.isMine).length;
             const badge = document.getElementById('admin-msg-badge');
             if (unread > 0) { badge.innerText = unread; badge.classList.remove('hidden'); }
@@ -566,17 +604,16 @@
             const list = document.getElementById('admin-convo-list');
             if (!convos.length) { list.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No conversations yet.</p>'; return; }
             list.innerHTML = convos.map(c => `
-                <div onclick="adminOpenConvo('${c.username}','${c.name}')"
-                    style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;cursor:pointer;transition:background 0.15s;${adminCurrentConvo===c.username?'background:#eef2ff;':''}">
-                    <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;flex-shrink:0">${c.name[0].toUpperCase()}</div>
-                    <div style="flex:1;min-width:0">
-                        <div style="display:flex;justify-content:space-between;align-items:center">
-                            <p style="font-size:13px;font-weight:600;color:#1e293b;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</p>
-                            <p style="font-size:10px;color:#94a3b8;margin:0;flex-shrink:0;margin-left:6px">${timeAgo(c.last.sentAt)}</p>
+                <div onclick="adminOpenConvo('${c.username}','${c.name.replace(/'/g,"\\'")}' )" class="admin-convo-item ${adminCurrentConvo===c.username?'active':''}">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">${c.name[0].toUpperCase()}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-semibold text-slate-800 truncate">${c.name}</p>
+                            <p class="text-[10px] text-slate-400 shrink-0 ml-2">${timeAgo(c.last.sentAt)}</p>
                         </div>
-                        <p style="font-size:11px;color:#94a3b8;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.last.isMine?'You: ':''}${c.last.content}</p>
+                        <p class="text-xs text-slate-400 truncate mt-0.5">${c.last.isMine?'You: ':''}${c.last.content}</p>
                     </div>
-                    ${!c.last.isRead&&!c.last.isMine?'<span style="width:8px;height:8px;background:#4f46e5;border-radius:50%;flex-shrink:0"></span>':''}
+                    ${!c.last.isRead&&!c.last.isMine?'<span class="w-2.5 h-2.5 bg-indigo-500 rounded-full shrink-0 ml-1"></span>':''}
                 </div>`).join('');
         }
 
@@ -592,18 +629,23 @@
             document.getElementById('admin-chat-avatar').innerText = name[0].toUpperCase();
             const msgs = await apiGet('/messages/conversation/' + username);
             const container = document.getElementById('admin-chat-messages');
-            let lastDate = null;
-            container.innerHTML = msgs.map(m => {
-                const d = new Date((m.sentAt.endsWith('Z')?m.sentAt:m.sentAt+'Z')).toLocaleDateString('en-PH',{month:'short',day:'numeric'});
-                const sep = d !== lastDate ? `<div style="text-align:center;margin:8px 0"><span style="font-size:10px;color:#94a3b8;font-weight:600">${d}</span></div>` : '';
-                lastDate = d;
-                return sep + `<div style="display:flex;justify-content:${m.isMine?'flex-end':'flex-start'}">
-                    <div style="max-width:70%;padding:10px 14px;border-radius:${m.isMine?'18px 18px 4px 18px':'18px 18px 18px 4px'};background:${m.isMine?'linear-gradient(135deg,#4f46e5,#7c3aed)':'white'};color:${m.isMine?'white':'#1e293b'};border:${m.isMine?'none':'1px solid #f1f5f9'};box-shadow:0 1px 4px rgba(0,0,0,0.06)">
-                        <p style="font-size:13px;margin:0">${m.content}</p>
-                        <p style="font-size:10px;margin:4px 0 0;color:${m.isMine?'rgba(255,255,255,0.7)':'#94a3b8'}">${timeAgo(m.sentAt)}</p>
-                    </div></div>`;
-            }).join('');
+            if (!msgs.length) {
+                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">No messages yet. Say hello! 👋</p>';
+            } else {
+                let lastDate = null;
+                container.innerHTML = msgs.map(m => {
+                    const d = new Date((m.sentAt.endsWith('Z')?m.sentAt:m.sentAt+'Z')).toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+                    const sep = d !== lastDate ? `<div class="flex items-center gap-3 my-3"><div class="flex-1 h-px bg-slate-200"></div><span class="text-[10px] text-slate-400 font-semibold">${d}</span><div class="flex-1 h-px bg-slate-200"></div></div>` : '';
+                    lastDate = d;
+                    return `${sep}<div class="flex ${m.isMine?'justify-end':'justify-start'} mb-1">
+                        <div class="max-w-xs lg:max-w-md px-4 py-2.5 text-sm ${m.isMine?'admin-msg-mine':'admin-msg-other'}">
+                            <p>${m.content}</p>
+                            <p class="text-[10px] mt-1 ${m.isMine?'text-indigo-200':'text-slate-400'}">${timeAgo(m.sentAt)}</p>
+                        </div></div>`;
+                }).join('');
+            }
             container.scrollTop = container.scrollHeight;
+            document.getElementById('admin-msg-input').focus();
         }
 
         async function adminSendMessage() {
@@ -612,13 +654,73 @@
             const content = input.value.trim();
             if (!content) return;
             input.value = ''; input.style.height = 'auto';
-            await apiPost('/messages', { receiverUsername: adminCurrentConvo, subject: '', content }, true);
+            await apiPost('/messages', { receiverUsername: adminCurrentConvo, content }, true);
             adminOpenConvo(adminCurrentConvo, document.getElementById('admin-chat-name').innerText);
+            loadAdminConversations();
         }
 
-        function openAdminNewMsg() {
-            const username = prompt('Enter username to message:');
-            if (username) adminOpenConvo(username.replace('@',''), username.replace('@',''));
+        function openAdminNewMsg() { document.getElementById('adminNewMsgModal').classList.add('active'); }
+        function closeAdminNewMsg() {
+            document.getElementById('adminNewMsgModal').classList.remove('active');
+            document.getElementById('admin-new-receiver').value = '';
+            document.getElementById('admin-new-subject').value = '';
+            document.getElementById('admin-new-content').value = '';
+            const box = document.getElementById('admin-user-suggestions');
+            if (box) box.style.display = 'none';
+        }
+
+        let adminUserSearchTimer = null;
+        async function adminSearchUsers(q) {
+            const box = document.getElementById('admin-user-suggestions');
+            const val = q.startsWith('@') ? q.slice(1) : q;
+            if (!val) { box.style.display = 'none'; return; }
+            clearTimeout(adminUserSearchTimer);
+            adminUserSearchTimer = setTimeout(async () => {
+                try {
+                    const results = await apiGet('/messages/search-users?q=' + encodeURIComponent(val));
+                    if (!results.length) { box.style.display = 'none'; return; }
+                    const input = document.getElementById('admin-new-receiver');
+                    const rect = input.getBoundingClientRect();
+                    box.style.top = (rect.bottom + 4) + 'px';
+                    box.style.left = rect.left + 'px';
+                    box.style.width = rect.width + 'px';
+                    box.style.display = 'block';
+                    box.innerHTML = results.map(u => `
+                        <div onclick="adminSelectUser('${u.username}')"
+                            style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background 0.1s;border-bottom:1px solid #f1f5f9"
+                            onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='white'">
+                            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px;flex-shrink:0">
+                                ${u.fullName ? u.fullName[0].toUpperCase() : u.username[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <p style="font-size:13px;font-weight:600;color:#1e293b;margin:0">${u.fullName || u.username}</p>
+                                <p style="font-size:11px;color:#94a3b8;margin:0">@${u.username} · ${u.role === 'CANDIDATE' ? 'Job Seeker' : u.role === 'EMPLOYER' ? 'Employer' : u.role}</p>
+                            </div>
+                        </div>`).join('');
+                } catch(e) { box.style.display = 'none'; }
+            }, 200);
+        }
+
+        function adminSelectUser(username) {
+            document.getElementById('admin-new-receiver').value = username;
+            document.getElementById('admin-user-suggestions').style.display = 'none';
+            document.getElementById('admin-new-subject').focus();
+        }
+
+        async function adminSendNewMessage() {
+            const receiver = document.getElementById('admin-new-receiver').value.trim();
+            const subject = document.getElementById('admin-new-subject').value.trim();
+            const content = document.getElementById('admin-new-content').value.trim();
+            if (!receiver || !content) { toast('Please fill in recipient and message.', 'warning'); return; }
+            const btn = document.querySelector('#adminNewMsgModal .btn-primary');
+            setLoading(btn, true, 'Sending...');
+            const data = await apiPost('/messages', { receiverUsername: receiver, subject, content }, true);
+            setLoading(btn, false);
+            if (data.error) { toast(data.error, 'error'); return; }
+            toast('Message sent!', 'success');
+            closeAdminNewMsg();
+            await loadAdminConversations();
+            adminOpenConvo(receiver, receiver);
         }
 
         window.onload = () => {
@@ -627,12 +729,13 @@
                 document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
             }
             loadStats();
-            // Load unread badge
             apiGet('/messages/unread-count').then(d => {
                 if (d.count > 0) { const b = document.getElementById('admin-msg-badge'); b.innerText = d.count; b.classList.remove('hidden'); }
             }).catch(()=>{});
         };
     </script>
+
+    <div id="admin-user-suggestions" style="position:fixed;background:white;border:1px solid #e2e8f0;border-radius:0.875rem;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:999999;display:none;max-height:240px;overflow-y:auto;min-width:280px"></div>
 </body>
 </html>
 
