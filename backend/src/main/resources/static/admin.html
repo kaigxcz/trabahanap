@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -17,7 +17,20 @@
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
-    <aside class="w-full md:w-72 bg-white border-r border-slate-100 p-8 flex flex-col">
+    <!-- Mobile Header -->
+    <header class="mobile-header hidden">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center"><span class="text-white font-bold text-xs">A</span></div>
+            <span class="font-bold text-sm">Admin Panel</span>
+            <span class="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-lg ml-1">Admin</span>
+        </div>
+        <div class="flex items-center gap-1">
+            <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
+            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition">🚪</button>
+        </div>
+    </header>
+
+    <aside class="desktop-sidebar w-full md:w-72 bg-white border-r border-slate-100 p-8 flex flex-col">
         <div class="flex items-center justify-between mb-12">
             <div class="flex items-center space-x-3">
                 <div class="w-8 h-8 bg-red-600 rounded-xl shadow-lg flex items-center justify-center">
@@ -329,10 +342,14 @@
                 const el = document.getElementById('view-' + t);
                 if (el) el.style.display = 'none';
                 document.getElementById('tab-' + t).classList.remove('active');
+                const mob = document.getElementById('mob-' + t);
+                if (mob) mob.classList.remove('active');
             });
             const view = document.getElementById('view-' + tab);
             if (view) view.style.display = tab === 'messages' ? 'flex' : 'block';
             document.getElementById('tab-' + tab).classList.add('active');
+            const mob = document.getElementById('mob-' + tab);
+            if (mob) mob.classList.add('active');
             if (tab === 'dashboard') loadStats();
             if (tab === 'users') loadUsers();
             if (tab === 'jobs') loadJobs();
@@ -764,7 +781,14 @@
     </script>
 
     <div id="admin-user-suggestions" style="position:fixed;background:white;border:1px solid #e2e8f0;border-radius:0.875rem;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:999999;display:none;max-height:240px;overflow-y:auto;min-width:280px"></div>
-</body>
+
+<nav class="mobile-bottom-nav hidden">
+    <button onclick="showTab('dashboard')" class="mobile-nav-item active" id="mob-dashboard"><span>&#128202;</span><span>Dashboard</span></button>
+    <button onclick="showTab('users')" class="mobile-nav-item" id="mob-users"><span>&#128101;</span><span>Users</span></button>
+    <button onclick="showTab('jobs')" class="mobile-nav-item" id="mob-jobs"><span>&#128188;</span><span>Jobs</span></button>
+    <button onclick="showTab('jobseekers')" class="mobile-nav-item" id="mob-jobseekers"><span>&#127919;</span><span>Seekers</span></button>
+    <button onclick="showTab('messages')" class="mobile-nav-item" id="mob-messages"><span>&#128172;</span><span>Messages</span></button>
+</nav></body>
 </html>
 
 

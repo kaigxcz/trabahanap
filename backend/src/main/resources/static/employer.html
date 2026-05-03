@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -21,6 +21,19 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
+
+<!-- Mobile Header -->
+<header class="mobile-header hidden">
+    <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-bold text-xs">T</span></div>
+        <span class="font-bold text-sm">TrabaHanap</span>
+        <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-lg ml-1">Employer</span>
+    </div>
+    <div class="flex items-center gap-1">
+        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">&#127769;</button>
+        <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition">&#128682;</button>
+    </div>
+</header>
 <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
     <div class="flex items-center justify-between mb-10">
         <div class="flex items-center gap-2 cursor-pointer select-none" id="logo-btn" onclick="toggleLogoDropdown()">
@@ -120,9 +133,13 @@ function showTab(tab){
     ['overview','jobs','applicants','analytics','messages'].forEach(t=>{
         document.getElementById('view-'+t).classList.add('hidden');
         document.getElementById('tab-'+t).classList.remove('active');
+        const mob=document.getElementById('mob-'+t);
+        if(mob) mob.classList.remove('active');
     });
     document.getElementById('view-'+tab).classList.remove('hidden');
     document.getElementById('tab-'+tab).classList.add('active');
+    const mob=document.getElementById('mob-'+tab);
+    if(mob) mob.classList.add('active');
     if(tab==='overview')loadStats();
     if(tab==='jobs')loadMyJobs();
     if(tab==='applicants')loadJobFilter();
