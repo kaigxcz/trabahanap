@@ -322,6 +322,9 @@
     <script>
         const user = JSON.parse(localStorage.getItem('jc_user') || '{}');
         if (!localStorage.getItem('jc_token') || user.role !== 'ADMIN') window.location.replace('index.html');
+        // Prevent back button from returning to login
+        history.pushState(null, '', location.href);
+        window.addEventListener('popstate', () => history.pushState(null, '', location.href));
 
         const roleColors = { ADMIN: 'bg-red-50 text-red-600', EMPLOYER: 'bg-indigo-50 text-indigo-600', CANDIDATE: 'bg-teal-50 text-teal-600' };
 

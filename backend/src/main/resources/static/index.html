@@ -216,9 +216,9 @@
             document.getElementById('fields-employer').style.display = role === 'EMPLOYER' ? 'block' : 'none';
         }
         function redirectByRole(role) {
-            if (role === 'ADMIN') window.location.href = '/admin';
-            else if (role === 'EMPLOYER') window.location.href = '/employer';
-            else window.location.href = '/dashboard';
+            if (role === 'ADMIN') window.location.replace('/admin');
+            else if (role === 'EMPLOYER') window.location.replace('/employer');
+            else window.location.replace('/dashboard');
         }
 
         // Google Sign In

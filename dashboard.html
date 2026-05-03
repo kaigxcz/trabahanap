@@ -254,6 +254,9 @@
         const currentUser = JSON.parse(localStorage.getItem('jc_user') || '{}');
         if (currentUser.role === 'EMPLOYER') { window.location.replace('employer.html'); }
         if (currentUser.role === 'ADMIN') { window.location.replace('admin.html'); }
+        // Prevent back button from returning to login
+        history.pushState(null, '', location.href);
+        window.addEventListener('popstate', () => history.pushState(null, '', location.href));
 
         let currentCategory = 'all', savedIds = [], allJobsCache = [], currentModalJob = null;
         let activeTypeFilters = [], activeExpFilters = [], activeWorkFilters = [];

@@ -95,6 +95,9 @@
     <script src="js/api.js"></script>
     <script>
         if (!localStorage.getItem('jc_token')) window.location.replace('index.html');
+        // Prevent back button from returning to login
+        history.pushState(null, '', location.href);
+        window.addEventListener('popstate', () => history.pushState(null, '', location.href));
 
         const STEPS = ['Applied', 'Under Review', 'Interview', 'Offer'];
         const STEP_ICONS = ['📤', '🔍', '🗣️', '🎉'];
