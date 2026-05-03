@@ -214,13 +214,6 @@
             });
         }
 
-        let notifOpen = false;
-        function toggleNotifPanel() {
-            notifOpen = !notifOpen;
-            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
-            if (notifOpen) loadNotificationDropdown();
-        }
-
         function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
 
         function toggleDark() {
