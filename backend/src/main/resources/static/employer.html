@@ -39,6 +39,7 @@
             </div>
             <div class="flex items-center gap-1">
                 <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded-lg">Employer</span>
+                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
                 <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
         </div>
@@ -536,6 +537,22 @@
             window.location.href = 'index.html';
         }
 
+        function toggleDark() {
+            const isDark = document.body.classList.toggle('dark');
+            localStorage.setItem('jc_dark', isDark ? '1' : '');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
+        }
+
+        window.onload = () => {
+            if (localStorage.getItem('jc_dark')) {
+                document.body.classList.add('dark');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
+            }
+            loadStats();
+        };
+            window.location.href = 'index.html';
+        }
+
         document.getElementById('postModal').addEventListener('click', e => { if (e.target === document.getElementById('postModal')) closePostModal(); });
 
         // Interview scheduling
@@ -750,7 +767,6 @@
             }
         }
 
-        window.onload = loadStats;
     </script>
 </body>
 </html>
