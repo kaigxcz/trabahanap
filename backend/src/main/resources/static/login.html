@@ -136,7 +136,7 @@
                     </div>
 
                     <!-- Employer Fields -->
-                    <div id="fields-employer" class="hidden">
+                    <div id="fields-employer" style="display:none">
                         <div class="grid grid-cols-2 gap-3 mb-3">
                             <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="emp-fname" placeholder="Maria" class="input-field mt-1"></div>
                             <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="emp-lname" placeholder="Santos" class="input-field mt-1"></div>
@@ -212,8 +212,8 @@
             selectedRole = role;
             document.getElementById('role-candidate').classList.toggle('selected', role === 'CANDIDATE');
             document.getElementById('role-employer').classList.toggle('selected', role === 'EMPLOYER');
-            document.getElementById('fields-candidate').classList.toggle('hidden', role !== 'CANDIDATE');
-            document.getElementById('fields-employer').classList.toggle('hidden', role !== 'EMPLOYER');
+            document.getElementById('fields-candidate').style.display = role === 'CANDIDATE' ? 'block' : 'none';
+            document.getElementById('fields-employer').style.display = role === 'EMPLOYER' ? 'block' : 'none';
         }
         function redirectByRole(role) {
             if (role === 'ADMIN') window.location.href = '/admin';
@@ -243,7 +243,13 @@
             } catch(e) { alert('Google sign in failed. Please try email login.'); }
         }
 
-        window.addEventListener('load', initGoogleSignIn);
+        window.addEventListener('load', () => {
+            initGoogleSignIn();
+            if (sessionStorage.getItem('mode') === 'register') {
+                sessionStorage.removeItem('mode');
+                switchMode('register');
+            }
+        });
         async function handleLogin() {
             const username = document.getElementById('login-user').value.trim();
             const password = document.getElementById('login-pass').value;
