@@ -293,6 +293,7 @@
         }
 
         function renderUsers(users) {
+            const currentUsername = JSON.parse(localStorage.getItem('jc_user') || '{}').username;
             document.getElementById('users-table').innerHTML = users.map(u => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
                     <td class="px-6 py-4 text-sm font-semibold text-slate-800">${u.fullName}</td>
@@ -304,10 +305,10 @@
                     <td class="px-6 py-4 text-xs text-slate-400 whitespace-nowrap">${u.joinedAt || '—'}</td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-2">
-                            <select onchange="changeRole(${u.id}, this.value)" class="text-xs p-1.5 border border-slate-200 rounded-lg outline-none bg-white">
+                            <select onchange="changeRole(${u.id}, this.value)" class="text-xs p-1.5 border border-slate-200 rounded-lg outline-none bg-white" ${u.username === currentUsername ? 'disabled' : ''}>
                                 ${['CANDIDATE','EMPLOYER','ADMIN'].map(r => `<option ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}
                             </select>
-                            <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
+                            ${u.username !== currentUsername && u.role !== 'ADMIN' ? `<button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>` : ''}
                         </div>
                     </td>
                 </tr>`).join('');
