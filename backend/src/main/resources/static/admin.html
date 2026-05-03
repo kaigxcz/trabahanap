@@ -321,7 +321,7 @@
     <script src="js/api.js"></script>
     <script>
         const user = JSON.parse(localStorage.getItem('jc_user') || '{}');
-        if (!localStorage.getItem('jc_token') || user.role !== 'ADMIN') window.location.href = 'index.html';
+        if (!localStorage.getItem('jc_token') || user.role !== 'ADMIN') window.location.replace('index.html');
 
         const roleColors = { ADMIN: 'bg-red-50 text-red-600', EMPLOYER: 'bg-indigo-50 text-indigo-600', CANDIDATE: 'bg-teal-50 text-teal-600' };
 
@@ -567,8 +567,9 @@
         function logout() {
             localStorage.removeItem('jc_token');
             localStorage.removeItem('jc_user');
-            window.location.href = 'index.html';
+            window.location.replace('index.html');
         }
+        window.addEventListener('pageshow', e => { if (!localStorage.getItem('jc_token')) window.location.replace('index.html'); });
 
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');

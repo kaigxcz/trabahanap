@@ -26,12 +26,17 @@
             <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-black text-xs">T</span></div>
             <div><span class="font-bold text-sm block leading-tight">TrabaHanap</span></div>
         </div>
-        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
+        <div class="flex items-center gap-1">
+            <button id="notif-btn-mobile" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                🔔<span id="notif-badge-mobile" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+            </button>
+            <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
+        </div>
     </header>
 
     <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
         <div class="flex items-center justify-between mb-10">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 cursor-pointer select-none" id="logo-btn" onclick="toggleLogoDropdown()">
                 <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-black text-xs">T</span></div>
                 <div>
                     <span class="font-bold text-lg tracking-tight block leading-tight">TrabaHanap</span>
@@ -39,17 +44,11 @@
             </div>
             <div class="flex items-center gap-1">
                 <div class="relative">
-                    <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                    <button id="notif-btn" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
                         🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
-                    <div id="notif-panel" class="hidden absolute right-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50" style="max-height:360px;overflow-y:auto">
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white rounded-t-2xl">
-                            <span class="font-bold text-slate-800 text-sm">Notifications</span>
-                            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">✕</button>
-                        </div>
-                        <div id="notif-list" class="p-2"></div>
-                    </div>
                 </div>
+                <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
                 <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
         </div>
@@ -62,19 +61,19 @@
         </nav>
     </aside>
 
-    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto page-transition">
         <header class="mb-6">
             <h1 class="text-2xl font-bold text-slate-900">My Applications</h1>
             <p class="text-slate-400 text-sm mt-1">Track every step of your job search journey.</p>
         </header>
 
         <!-- Stats Row -->
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-            <div class="stat-pill cursor-pointer hover:border-slate-300 transition" onclick="setFilter('all', document.querySelector('.filter-tab'))"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total</p><p id="stat-total" class="text-2xl font-black text-slate-900">—</p></div>
-            <div class="stat-pill cursor-pointer hover:border-indigo-200 transition" onclick="setFilter('Applied', document.querySelectorAll('.filter-tab')[1])"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Applied</p><p id="stat-applied" class="text-2xl font-black text-indigo-600">—</p></div>
-            <div class="stat-pill cursor-pointer hover:border-blue-200 transition" onclick="setFilter('Under Review', document.querySelectorAll('.filter-tab')[2])"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">In Review</p><p id="stat-review" class="text-2xl font-black text-blue-500">—</p></div>
-            <div class="stat-pill cursor-pointer hover:border-purple-200 transition" onclick="setFilter('Interview', document.querySelectorAll('.filter-tab')[3])"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interview</p><p id="stat-interview" class="text-2xl font-black text-purple-600">—</p></div>
-            <div class="stat-pill cursor-pointer hover:border-green-200 transition" onclick="setFilter('Offer', document.querySelectorAll('.filter-tab')[4])"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Offer 🎉</p><p id="stat-offer" class="text-2xl font-black text-green-600">—</p></div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6" id="stats-row">
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total</p><p id="stat-total" class="text-2xl font-black text-slate-900">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Applied</p><p id="stat-applied" class="text-2xl font-black text-indigo-600">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">In Review</p><p id="stat-review" class="text-2xl font-black text-blue-500">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interview</p><p id="stat-interview" class="text-2xl font-black text-purple-600">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Offer 🎉</p><p id="stat-offer" class="text-2xl font-black text-green-600">—</p></div>
         </div>
 
         <!-- Filter Tabs -->
@@ -95,7 +94,7 @@
 
     <script src="js/api.js"></script>
     <script>
-        if (!localStorage.getItem('jc_token')) window.location.href = 'index.html';
+        if (!localStorage.getItem('jc_token')) window.location.replace('index.html');
 
         const STEPS = ['Applied', 'Under Review', 'Interview', 'Offer'];
         const STEP_ICONS = ['📤', '🔍', '🗣️', '🎉'];
@@ -132,24 +131,6 @@
             </div>`;
         }
 
-        function updateStats() {
-            document.getElementById('stat-total').innerText = allApps.length;
-            document.getElementById('stat-applied').innerText = allApps.filter(a => a.status === 'Applied').length;
-            document.getElementById('stat-review').innerText = allApps.filter(a => a.status === 'Under Review').length;
-            document.getElementById('stat-interview').innerText = allApps.filter(a => a.status === 'Interview').length;
-            document.getElementById('stat-offer').innerText = allApps.filter(a => a.status === 'Offer').length;
-        }
-        const NEXT_STEPS = {
-            'Applied':      { icon: '⏳', text: 'Wait for the employer to review your application. Follow up after 5–7 business days if no response.', color: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
-            'Under Review': { icon: '🔍', text: 'Your application is being reviewed! Prepare for a possible interview by researching the company.', color: 'bg-blue-50 text-blue-700 border-blue-100' },
-            'Interview':    { icon: '🗓️', text: 'Interview scheduled! Research the company, prepare your answers, and dress professionally.', color: 'bg-purple-50 text-purple-700 border-purple-100' },
-            'Offer':        { icon: '🎉', text: "You got an offer! Review the terms carefully, consider negotiating salary, and respond within the deadline.", color: 'bg-green-50 text-green-700 border-green-100' },
-            'Rejected':     { icon: '💪', text: 'Keep going! Ask for feedback if possible, and use it to improve your next application.', color: 'bg-slate-50 text-slate-600 border-slate-200' },
-        };
-
-        function getNote(appId) { return localStorage.getItem('app_note_' + appId) || ''; }
-        function saveNote(appId, val) { localStorage.setItem('app_note_' + appId, val); }
-
         function renderApps() {
             const filtered = currentFilter === 'all' ? allApps : allApps.filter(a => a.status === currentFilter);
             const container = document.getElementById('apps-container');
@@ -161,11 +142,9 @@
                 </div>`;
                 return;
             }
-            const statusColors = { 'Applied':'bg-indigo-50 text-indigo-600', 'Under Review':'bg-blue-50 text-blue-600', 'Interview':'bg-purple-50 text-purple-600', 'Offer':'bg-green-50 text-green-600', 'Rejected':'bg-red-50 text-red-500' };
             container.innerHTML = filtered.map((app, idx) => {
                 const interview = app._interview;
-                const next = NEXT_STEPS[app.status] || NEXT_STEPS['Applied'];
-                const note = getNote(app.id);
+                const statusColors = { 'Applied':'bg-indigo-50 text-indigo-600', 'Under Review':'bg-blue-50 text-blue-600', 'Interview':'bg-purple-50 text-purple-600', 'Offer':'bg-green-50 text-green-600', 'Rejected':'bg-red-50 text-red-500' };
                 const interviewSection = interview ? `
                     <div class="mt-4 p-4 bg-purple-50 border border-purple-100 rounded-2xl">
                         <div class="flex items-center gap-2 mb-2">
@@ -191,27 +170,10 @@
                                 <p class="text-xs text-slate-400 mt-0.5">Applied ${new Date(app.appliedAt).toLocaleDateString('en-PH', {year:'numeric',month:'short',day:'numeric'})}</p>
                             </div>
                         </div>
-                        <button onclick="withdraw(${app.id})" class="inline-flex items-center h-8 text-xs text-slate-400 hover:text-red-500 border border-slate-200 hover:border-red-200 px-3 rounded-xl transition font-medium shrink-0 self-start">Withdraw</button>
+                        <button onclick="withdraw(${app.id}, this)" class="inline-flex items-center h-8 text-xs text-slate-400 hover:text-red-500 border border-slate-200 hover:border-red-200 px-3 rounded-xl transition font-medium shrink-0 self-start">Withdraw</button>
                     </div>
                     ${buildTimeline(app.status)}
                     ${interviewSection}
-                    <!-- What's Next -->
-                    <div class="mt-4 flex items-start gap-3 p-3 rounded-2xl border ${next.color}">
-                        <span class="text-lg shrink-0 mt-0.5">${next.icon}</span>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs font-bold uppercase tracking-wider mb-0.5 opacity-70">What's Next</p>
-                            <p class="text-xs leading-relaxed">${next.text}</p>
-                        </div>
-                    </div>
-                    <!-- Personal Notes -->
-                    <div class="mt-3">
-                        <textarea
-                            class="w-full text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-indigo-400 resize-none transition placeholder-slate-300"
-                            rows="2"
-                            placeholder="📝 Add a personal note (e.g. contact name, salary discussed, follow-up date)..."
-                            oninput="saveNote(${app.id}, this.value)"
-                        >${note}</textarea>
-                    </div>
                 </div>`;
             }).join('');
         }
@@ -224,34 +186,111 @@
             const interviewMap = {};
             interviews.forEach(i => { interviewMap[i.jobTitle + i.company] = i; });
             allApps = apps.map(a => ({ ...a, _interview: interviewMap[a.jobTitle + a.company] || null }));
-            updateStats();
+
+            // Update stats
+            document.getElementById('stat-total').innerText = apps.length;
+            document.getElementById('stat-applied').innerText = apps.filter(a => a.status === 'Applied').length;
+            document.getElementById('stat-review').innerText = apps.filter(a => a.status === 'Under Review').length;
+            document.getElementById('stat-interview').innerText = apps.filter(a => a.status === 'Interview').length;
+            document.getElementById('stat-offer').innerText = apps.filter(a => a.status === 'Offer').length;
+
             renderApps();
         }
 
-        async function withdraw(id) {
+        async function withdraw(id, btn) {
             showConfirm('This will remove your application. This cannot be undone.', async () => {
                 const data = await apiDelete('/applications/' + id);
                 if (data.message) {
                     allApps = allApps.filter(a => a.id !== id);
-                    updateStats();
                     renderApps();
+                    // Refresh stats
+                    document.getElementById('stat-total').innerText = allApps.length;
+                    document.getElementById('stat-applied').innerText = allApps.filter(a => a.status === 'Applied').length;
+                    document.getElementById('stat-review').innerText = allApps.filter(a => a.status === 'Under Review').length;
+                    document.getElementById('stat-interview').innerText = allApps.filter(a => a.status === 'Interview').length;
+                    document.getElementById('stat-offer').innerText = allApps.filter(a => a.status === 'Offer').length;
                     toast('Application withdrawn.', 'info');
-                } else {
-                    toast(data.error || 'Something went wrong.', 'error');
-                }
+                } else toast(data.error || 'Something went wrong.', 'error');
             });
+        }
+
+        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.replace('index.html'); }
+        window.addEventListener('pageshow', e => { if (!localStorage.getItem('jc_token')) window.location.replace('index.html'); });
+
+        let logoOpen = false;
+        function toggleLogoDropdown() {
+            logoOpen = !logoOpen;
+            const drop = document.getElementById('logo-dropdown');
+            if (logoOpen) {
+                const btn = document.getElementById('logo-btn');
+                const rect = btn.getBoundingClientRect();
+                drop.style.top = (rect.bottom + 8) + 'px';
+                drop.style.left = rect.left + 'px';
+                drop.classList.add('open');
+                const u = JSON.parse(localStorage.getItem('jc_user') || '{}');
+                document.getElementById('dropdown-name').innerText = u.fullName || u.username || 'User';
+                document.getElementById('dropdown-email').innerText = u.email || '';
+            } else { drop.classList.remove('open'); }
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#logo-dropdown') && !e.target.closest('#logo-btn')) {
+                logoOpen = false;
+                document.getElementById('logo-dropdown')?.classList.remove('open');
+            }
+        });
+
+        function toggleDark() {
+            const isDark = document.body.classList.toggle('dark');
+            localStorage.setItem('jc_dark', isDark ? '1' : '');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
         }
 
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
-            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
-            if (notifOpen) loadNotificationDropdown();
+            const panel = document.getElementById('notif-panel');
+            if (notifOpen) {
+                const btn = document.getElementById('notif-btn') || document.getElementById('notif-btn-mobile');
+                const rect = btn.getBoundingClientRect();
+                panel.style.top = (rect.bottom + 8) + 'px';
+                panel.style.left = Math.min(rect.left, window.innerWidth - 316) + 'px';
+                panel.classList.add('open');
+                loadNotificationDropdown();
+            } else {
+                panel.classList.remove('open');
+            }
         }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn') && !e.target.closest('#notif-btn-mobile')) {
+                notifOpen = false;
+                document.getElementById('notif-panel')?.classList.remove('open');
+            }
+        });
 
-        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
-        window.onload = () => { loadNotificationBell(); loadApplications(); };
+        window.onload = () => {
+            if (localStorage.getItem('jc_dark')) {
+                document.body.classList.add('dark');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
+            }
+            loadNotificationBell(); loadApplications();
+        };
     </script>
+
+    <div id="logo-dropdown">
+        <div class="px-4 py-3 border-b border-slate-100">
+            <p class="text-xs font-bold text-slate-800" id="dropdown-name">Loading...</p>
+            <p class="text-xs text-slate-400" id="dropdown-email"></p>
+        </div>
+        <div class="logo-dropdown-item danger" onclick="logout()">🚪 Log Out</div>
+    </div>
+
+    <div id="notif-panel">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100" style="flex-shrink:0;background:inherit;border-radius:1rem 1rem 0 0">
+            <span class="font-bold text-slate-800 text-sm">Notifications</span>
+            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
+        </div>
+        <div id="notif-list" class="p-2" style="overflow-y:auto;flex:1"></div>
+    </div>
 
 <nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item active"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
 </body>

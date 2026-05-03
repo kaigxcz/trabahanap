@@ -112,7 +112,7 @@
 ﻿<script src="js/api.js"></script>
 <script>
 const user=JSON.parse(localStorage.getItem('jc_user')||'{}');
-if(!localStorage.getItem('jc_token')||user.role!=='EMPLOYER')window.location.href='index.html';
+if(!localStorage.getItem('jc_token')||user.role!=='EMPLOYER')window.location.replace('index.html');
 document.getElementById('employer-name').innerText=(user.fullName||'').split(' ')[0]||'Employer';
 let myJobs=[],allApplicants=[];
 function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -233,7 +233,8 @@ function editJob(id){const job=myJobs.find(j=>j.id===id);if(job)openPostModal(jo
 function viewApplicantsForJob(jobId){showTab('applicants');setTimeout(()=>{const sel=document.getElementById('job-filter');if(sel){sel.value=jobId;loadApplicants();}},150);}
 async function toggleJobActive(id,current){try{await apiPut('/employer/jobs/'+id,{active:String(!current)});loadMyJobs();}catch(e){toast('Failed to update job.','error');}}
 async function deleteJob(id){showConfirm('This will permanently delete this job posting.',async()=>{try{await apiDelete('/employer/jobs/'+id);toast('Job deleted.','info');loadMyJobs();loadStats();}catch(e){toast('Failed to delete job.','error');}});}
-function logout(){localStorage.removeItem('jc_token');localStorage.removeItem('jc_user');window.location.href='index.html';}
+function logout(){localStorage.removeItem('jc_token');localStorage.removeItem('jc_user');window.location.replace('index.html');}
+window.addEventListener('pageshow',e=>{if(!localStorage.getItem('jc_token'))window.location.replace('index.html');});
 let logoOpen=false;
 function toggleLogoDropdown(){logoOpen=!logoOpen;const drop=document.getElementById('logo-dropdown');if(logoOpen){const rect=document.getElementById('logo-btn').getBoundingClientRect();drop.style.top=(rect.bottom+8)+'px';drop.style.left=rect.left+'px';drop.classList.add('open');const u=JSON.parse(localStorage.getItem('jc_user')||'{}');document.getElementById('dropdown-name').innerText=u.fullName||u.username||'User';document.getElementById('dropdown-email').innerText=u.email||'';}else{drop.classList.remove('open');}}
 document.addEventListener('click',e=>{if(!e.target.closest('#logo-dropdown')&&!e.target.closest('#logo-btn')){logoOpen=false;const d=document.getElementById('logo-dropdown');if(d)d.classList.remove('open');}});
