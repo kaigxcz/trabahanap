@@ -214,7 +214,7 @@
             } else {
                 let lastDate = null;
                 container.innerHTML = msgs.map(m => {
-                    const msgDate = new Date(m.sentAt).toLocaleDateString('en-PH', {month:'short',day:'numeric'});
+                    const msgDate = new Date((m.sentAt.endsWith('Z') ? m.sentAt : m.sentAt + 'Z')).toLocaleDateString('en-PH', {month:'short',day:'numeric'});
                     const dateSep = msgDate !== lastDate ? `<div class="flex items-center gap-3 my-3"><div class="flex-1 h-px bg-slate-200"></div><span class="text-[10px] text-slate-400 font-semibold">${msgDate}</span><div class="flex-1 h-px bg-slate-200"></div></div>` : '';
                     lastDate = msgDate;
                     return `${dateSep}<div class="flex ${m.isMine ? 'justify-end' : 'justify-start'} mb-1">

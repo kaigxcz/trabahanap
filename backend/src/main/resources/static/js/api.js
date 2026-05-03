@@ -81,8 +81,11 @@ async function loadNotificationDropdown() {
 }
 
 function timeAgo(dateStr) {
-    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-    if (diff < 60) return 'just now';
+    // Ensure UTC parsing — append Z if no timezone info present
+    const normalized = dateStr && !dateStr.endsWith('Z') && !dateStr.includes('+') ? dateStr + 'Z' : dateStr;
+    const diff = Math.floor((Date.now() - new Date(normalized)) / 1000);
+    if (diff < 5) return 'just now';
+    if (diff < 60) return diff + 's ago';
     if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
     if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
     return Math.floor(diff / 86400) + 'd ago';
