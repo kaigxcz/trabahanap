@@ -41,6 +41,12 @@
             <button onclick="showTab('users')" id="tab-users" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
                 <span>👥</span><span>Users</span>
             </button>
+            <button onclick="showTab('jobseekers')" id="tab-jobseekers" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>🎯</span><span>Job Seekers</span>
+            </button>
+            <button onclick="showTab('employers')" id="tab-employers" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>🏢</span><span>Employers</span>
+            </button>
             <button onclick="showTab('jobs')" id="tab-jobs" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
                 <span>💼</span><span>Job Listings</span>
             </button>
@@ -124,6 +130,72 @@
             </div>
         </div>
 
+        <!-- Job Seekers Tab -->
+        <div id="view-jobseekers" class="hidden">
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Job Seekers</h1>
+                    <p class="text-slate-400 text-sm mt-1">All registered job seekers and their details.</p>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <select id="seekers-sort" onchange="renderSeekers()" class="h-9 px-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 bg-white outline-none focus:border-indigo-500 transition">
+                        <option value="alpha">A → Z (Name)</option>
+                        <option value="username">By Username</option>
+                        <option value="location">By Location</option>
+                    </select>
+                    <input type="text" id="seekers-search" oninput="renderSeekers()" placeholder="Search..." class="h-9 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition w-44">
+                </div>
+            </div>
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Name</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Username</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Email</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Location</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Skills</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="seekers-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Employers Tab -->
+        <div id="view-employers" class="hidden">
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Employers</h1>
+                    <p class="text-slate-400 text-sm mt-1">All registered employers and their details.</p>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <select id="employers-sort" onchange="renderEmployers()" class="h-9 px-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 bg-white outline-none focus:border-indigo-500 transition">
+                        <option value="alpha">A → Z (Name)</option>
+                        <option value="username">By Username</option>
+                        <option value="location">By Location</option>
+                    </select>
+                    <input type="text" id="employers-search" oninput="renderEmployers()" placeholder="Search..." class="h-9 px-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition w-44">
+                </div>
+            </div>
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Name</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Username</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Email</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Location</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Job Title</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employers-table"></tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Jobs Tab -->
         <div id="view-jobs" class="hidden">
             <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -155,7 +227,7 @@
         const roleColors = { ADMIN: 'bg-red-50 text-red-600', EMPLOYER: 'bg-indigo-50 text-indigo-600', CANDIDATE: 'bg-teal-50 text-teal-600' };
 
         function showTab(tab) {
-            ['dashboard','users','jobs'].forEach(t => {
+            ['dashboard','users','jobseekers','employers','jobs'].forEach(t => {
                 document.getElementById('view-' + t).classList.add('hidden');
                 document.getElementById('tab-' + t).classList.remove('active');
             });
@@ -164,6 +236,8 @@
             if (tab === 'dashboard') loadStats();
             if (tab === 'users') loadUsers();
             if (tab === 'jobs') loadJobs();
+            if (tab === 'jobseekers') loadSeekers();
+            if (tab === 'employers') loadEmployers();
         }
 
         async function loadStats() {
@@ -248,6 +322,70 @@
                 filterUsers();
                 loadStats();
             });
+        }
+
+        let allSeekers = [], allEmployersList = [];
+
+        async function loadSeekers() {
+            if (!allUsers.length) allUsers = await apiGet('/admin/users');
+            allSeekers = allUsers.filter(u => u.role === 'CANDIDATE');
+            renderSeekers();
+        }
+
+        function renderSeekers() {
+            const sort = document.getElementById('seekers-sort')?.value || 'alpha';
+            const q = (document.getElementById('seekers-search')?.value || '').toLowerCase();
+            let list = allSeekers.filter(u => !q ||
+                u.fullName.toLowerCase().includes(q) ||
+                u.username.toLowerCase().includes(q) ||
+                (u.email || '').toLowerCase().includes(q) ||
+                (u.location || '').toLowerCase().includes(q)
+            );
+            if (sort === 'alpha') list.sort((a, b) => a.fullName.localeCompare(b.fullName));
+            else if (sort === 'username') list.sort((a, b) => a.username.localeCompare(b.username));
+            else if (sort === 'location') list.sort((a, b) => (a.location || '').localeCompare(b.location || ''));
+            document.getElementById('seekers-table').innerHTML = list.length ? list.map(u => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-5 py-3 text-sm font-semibold text-slate-800">${u.fullName}</td>
+                    <td class="px-5 py-3 text-sm text-slate-500">@${u.username}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400">${u.email || '—'}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400">${u.location || '—'}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400 max-w-xs truncate">${u.skills || '—'}</td>
+                    <td class="px-5 py-3">
+                        <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
+                    </td>
+                </tr>`).join('') : '<tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">No job seekers found.</td></tr>';
+        }
+
+        async function loadEmployers() {
+            if (!allUsers.length) allUsers = await apiGet('/admin/users');
+            allEmployersList = allUsers.filter(u => u.role === 'EMPLOYER');
+            renderEmployers();
+        }
+
+        function renderEmployers() {
+            const sort = document.getElementById('employers-sort')?.value || 'alpha';
+            const q = (document.getElementById('employers-search')?.value || '').toLowerCase();
+            let list = allEmployersList.filter(u => !q ||
+                u.fullName.toLowerCase().includes(q) ||
+                u.username.toLowerCase().includes(q) ||
+                (u.email || '').toLowerCase().includes(q) ||
+                (u.location || '').toLowerCase().includes(q)
+            );
+            if (sort === 'alpha') list.sort((a, b) => a.fullName.localeCompare(b.fullName));
+            else if (sort === 'username') list.sort((a, b) => a.username.localeCompare(b.username));
+            else if (sort === 'location') list.sort((a, b) => (a.location || '').localeCompare(b.location || ''));
+            document.getElementById('employers-table').innerHTML = list.length ? list.map(u => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-5 py-3 text-sm font-semibold text-slate-800">${u.fullName}</td>
+                    <td class="px-5 py-3 text-sm text-slate-500">@${u.username}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400">${u.email || '—'}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400">${u.location || '—'}</td>
+                    <td class="px-5 py-3 text-sm text-slate-400">${u.jobTitle || '—'}</td>
+                    <td class="px-5 py-3">
+                        <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
+                    </td>
+                </tr>`).join('') : '<tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">No employers found.</td></tr>';
         }
 
         let allJobsCache = [];
