@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -25,12 +25,10 @@
         body.dark .app-card { background: #1e293b !important; border-color: #334155 !important; }
         body.dark .stat-pill { background: #1e293b !important; border-color: #334155 !important; }
         body.dark .text-slate-900 { color: #f1f5f9 !important; }
-        body.dark .text-slate-700 { color: #cbd5e1 !important; }
         body.dark .text-slate-600 { color: #94a3b8 !important; }
         body.dark .text-slate-500 { color: #64748b !important; }
         body.dark .bg-slate-50 { background: #0f172a !important; }
         body.dark .border-slate-100 { border-color: #334155 !important; }
-        body.dark .border-slate-200 { border-color: #334155 !important; }
         body.dark header { background: #1e293b !important; border-color: #334155 !important; }
     </style>
 </head>
@@ -43,10 +41,10 @@
             <div><span class="font-bold text-sm block leading-tight">TrabaHanap</span></div>
         </div>
         <div class="flex items-center gap-1">
-        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
-            ðŸ””<span id="notif-badge-mobile" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
-        </button>
-        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
+            <button id="notif-btn-mobile" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                🔔<span id="notif-badge-mobile" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+            </button>
+            <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
         </div>
     </header>
 
@@ -61,19 +59,19 @@
             <div class="flex items-center gap-1">
                 <div class="relative">
                     <button id="notif-btn" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
-                        ðŸ””<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                        🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
                 </div>
                 <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
-                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">ðŸšª</button>
+                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
         </div>
         <nav class="space-y-1 flex-1">
-            <a href="/dashboard" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ </span><span class="text-sm">Find Jobs</span></a>
-            <a href="/saved" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ”–</span><span class="text-sm">Saved Jobs</span></a>
-            <a href="/applications" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ“‚</span><span class="text-sm">Applications</span></a>
-            <a href="/messages" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ’¬</span><span class="text-sm">Messages</span></a>
-            <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>ðŸ‘¤</span><span class="text-sm">Profile</span></a>
+            <a href="/dashboard" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🏠</span><span class="text-sm">Find Jobs</span></a>
+            <a href="/saved" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>🔖</span><span class="text-sm">Saved Jobs</span></a>
+            <a href="/applications" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>📂</span><span class="text-sm">Applications</span></a>
+            <a href="/messages" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>💬</span><span class="text-sm">Messages</span></a>
+            <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
         </nav>
     </aside>
 
@@ -85,19 +83,19 @@
 
         <!-- Stats Row -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6" id="stats-row">
-            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total</p><p id="stat-total" class="text-2xl font-black text-slate-900">â€”</p></div>
-            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Applied</p><p id="stat-applied" class="text-2xl font-black text-indigo-600">â€”</p></div>
-            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">In Review</p><p id="stat-review" class="text-2xl font-black text-blue-500">â€”</p></div>
-            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interview</p><p id="stat-interview" class="text-2xl font-black text-purple-600">â€”</p></div>
-            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Offer 🎉</p><p id="stat-offer" class="text-2xl font-black text-green-600">â€”</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total</p><p id="stat-total" class="text-2xl font-black text-slate-900">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Applied</p><p id="stat-applied" class="text-2xl font-black text-indigo-600">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">In Review</p><p id="stat-review" class="text-2xl font-black text-blue-500">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interview</p><p id="stat-interview" class="text-2xl font-black text-purple-600">—</p></div>
+            <div class="stat-pill"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Offer 🎉</p><p id="stat-offer" class="text-2xl font-black text-green-600">—</p></div>
         </div>
 
         <!-- Filter Tabs -->
         <div class="flex flex-wrap gap-2 mb-6">
             <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
-            <button class="filter-tab" onclick="setFilter('Applied', this)">ðŸ“¤ Applied</button>
-            <button class="filter-tab" onclick="setFilter('Under Review', this)">ðŸ” Under Review</button>
-            <button class="filter-tab" onclick="setFilter('Interview', this)">🗣️ Interview</button>
+            <button class="filter-tab" onclick="setFilter('Applied', this)">📤 Applied</button>
+            <button class="filter-tab" onclick="setFilter('Under Review', this)">🔍 Under Review</button>
+            <button class="filter-tab" onclick="setFilter('Interview', this)">🗣️ Interview</button>
             <button class="filter-tab" onclick="setFilter('Offer', this)">🎉 Offer</button>
             <button class="filter-tab" onclick="setFilter('Rejected', this)">✕ Rejected</button>
         </div>
@@ -113,7 +111,7 @@
         if (!localStorage.getItem('jc_token')) window.location.href = 'index.html';
 
         const STEPS = ['Applied', 'Under Review', 'Interview', 'Offer'];
-        const STEP_ICONS = ['ðŸ“¤', 'ðŸ”', '🗣️', '🎉'];
+        const STEP_ICONS = ['📤', '🔍', '🗣️', '🎉'];
         let allApps = [], currentFilter = 'all';
 
         function setFilter(filter, btn) {
@@ -139,7 +137,7 @@
                     const lineColor = done ? 'background:#4f46e5' : 'background:#e2e8f0';
                     const labelColor = active ? 'color:#4f46e5;font-weight:700' : done ? 'color:#64748b;font-weight:600' : 'color:#cbd5e1;font-weight:500';
                     return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-                            <div class="step-dot" style="${dotBg};${dotColor}">${done ? 'âœ“' : STEP_ICONS[i]}</div>
+                            <div class="step-dot" style="${dotBg};${dotColor}">${done ? '✓' : STEP_ICONS[i]}</div>
                             <p style="font-size:9px;${labelColor};white-space:nowrap">${step}</p>
                         </div>
                         ${i < STEPS.length - 1 ? `<div class="step-line" style="${lineColor}"></div>` : ''}`;
@@ -152,7 +150,7 @@
             const container = document.getElementById('apps-container');
             if (!filtered.length) {
                 container.innerHTML = `<div class="text-center py-16 text-slate-400">
-                    <div class="text-5xl mb-4">${currentFilter === 'all' ? 'ðŸ“‚' : 'ðŸ”'}</div>
+                    <div class="text-5xl mb-4">${currentFilter === 'all' ? '📂' : '🔍'}</div>
                     <p class="font-semibold text-slate-600">${currentFilter === 'all' ? 'No applications yet.' : 'No applications with this status.'}</p>
                     ${currentFilter === 'all' ? `<p class="text-sm mt-1">Start applying for jobs from the dashboard.</p><a href="/dashboard" class="inline-block mt-6 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition text-sm">Find Jobs</a>` : ''}
                 </div>`;
@@ -164,19 +162,19 @@
                 const interviewSection = interview ? `
                     <div class="mt-4 p-4 bg-purple-50 border border-purple-100 rounded-2xl">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="text-purple-600 text-lg">ðŸ—“ï¸</span>
+                            <span class="text-purple-600 text-lg">🗓️</span>
                             <p class="text-sm font-bold text-purple-800">Interview Scheduled</p>
                             <span class="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${interview.status === 'SCHEDULED' ? 'bg-purple-100 text-purple-600' : interview.status === 'COMPLETED' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}">${interview.status}</span>
                         </div>
                         <p class="text-sm text-purple-700 font-semibold">${new Date(interview.scheduledAt).toLocaleString('en-PH', {dateStyle:'medium', timeStyle:'short'})}</p>
-                        <p class="text-xs text-purple-500 mt-0.5">ðŸ“ ${interview.location}</p>
-                        ${interview.meetingLink ? `<a href="${interview.meetingLink}" target="_blank" class="text-xs text-indigo-600 font-semibold hover:underline mt-1 block">ðŸ”— Join Meeting</a>` : ''}
-                        ${interview.notes ? `<p class="text-xs text-purple-500 mt-1">ðŸ“ ${interview.notes}</p>` : ''}
+                        <p class="text-xs text-purple-500 mt-0.5">📍 ${interview.location}</p>
+                        ${interview.meetingLink ? `<a href="${interview.meetingLink}" target="_blank" class="text-xs text-indigo-600 font-semibold hover:underline mt-1 block">🔗 Join Meeting</a>` : ''}
+                        ${interview.notes ? `<p class="text-xs text-purple-500 mt-1">📝 ${interview.notes}</p>` : ''}
                     </div>` : '';
                 return `<div class="app-card p-6 fade-in" style="animation-delay:${idx*40}ms" data-id="${app.id}">
                     <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-2xl flex items-center justify-center text-white text-xl shrink-0 shadow-md shadow-indigo-100">ðŸ“„</div>
+                            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-2xl flex items-center justify-center text-white text-xl shrink-0 shadow-md shadow-indigo-100">📄</div>
                             <div>
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <h4 class="font-bold text-slate-900 text-base">${app.jobTitle}</h4>
@@ -233,6 +231,21 @@
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
+            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
+            if (notifOpen) loadNotificationDropdown();
+        }
+
+        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
+
+        function toggleDark() {
+            const isDark = document.body.classList.toggle('dark');
+            localStorage.setItem('jc_dark', isDark ? '1' : '');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
+        }
+
+        let notifOpen = false;
+        function toggleNotifPanel() {
+            notifOpen = !notifOpen;
             const panel = document.getElementById('notif-panel');
             if (notifOpen) {
                 const btn = document.getElementById('notif-btn');
@@ -246,38 +259,29 @@
             }
         }
         document.addEventListener('click', e => {
-            if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn')) {
+            if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn') && !e.target.closest('#notif-btn-mobile')) {
                 notifOpen = false;
-                document.getElementById('notif-panel').style.display = 'none';
+                const p = document.getElementById('notif-panel');
+                if (p) p.style.display = 'none';
             }
         });
-
-        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
-
-        function toggleDark() {
-            const isDark = document.body.classList.toggle('dark');
-            localStorage.setItem('jc_dark', isDark ? '1' : '');
-            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
-        }
 
         window.onload = () => {
             if (localStorage.getItem('jc_dark')) {
                 document.body.classList.add('dark');
-                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
             }
             loadNotificationBell(); loadApplications();
         };
     </script>
 
-    <div id="notif-panel" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;flex-direction:column;z-index:99999;display:none">
+    <div id="notif-panel" class="bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;flex-direction:column;z-index:99999;display:none">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white rounded-t-2xl flex-shrink-0">
             <span class="font-bold text-slate-800 text-sm">Notifications</span>
             <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
         </div>
         <div id="notif-list" class="p-2 overflow-y-auto flex-1"></div>
     </div>
-<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>ðŸ </span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>ðŸ”–</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item active"><span>ðŸ“‚</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>ðŸ’¬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>ðŸ‘¤</span><span>Profile</span></a></nav>
+<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item active"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item"><span>👤</span><span>Profile</span></a></nav>
 </body>
 </html>
-
-

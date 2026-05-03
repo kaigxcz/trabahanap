@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -17,17 +17,14 @@
         .loc-suggestion:hover { background: #f5f3ff; color: #4f46e5; }
         body.dark { background: #0f172a !important; color: #e2e8f0; }
         body.dark aside { background: #1e293b !important; border-color: #334155 !important; }
-        body.dark .nav-link:hover, body.dark a:hover { background: #334155; }
         body.dark main { background: #0f172a !important; }
         body.dark .bg-white { background: #1e293b !important; border-color: #334155 !important; }
         body.dark .text-slate-900 { color: #f1f5f9 !important; }
-        body.dark .text-slate-700 { color: #cbd5e1 !important; }
         body.dark .text-slate-600 { color: #94a3b8 !important; }
         body.dark .text-slate-500 { color: #64748b !important; }
         body.dark .bg-slate-50 { background: #0f172a !important; }
         body.dark .bg-slate-100 { background: #1e293b !important; }
         body.dark .border-slate-100 { border-color: #334155 !important; }
-        body.dark .border-slate-200 { border-color: #334155 !important; }
         body.dark input, body.dark textarea, body.dark select { background: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
         body.dark header { background: #1e293b !important; border-color: #334155 !important; }
     </style>
@@ -41,8 +38,8 @@
             <div><span class="font-bold text-sm block leading-tight">TrabaHanap</span></div>
         </div>
         <div class="flex items-center gap-1">
-        <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">ðŸ””</button>
-        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
+            <button id="notif-btn-mobile" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🔔</button>
+            <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
         </div>
     </header>
 
@@ -57,31 +54,31 @@
                 </div>
             </div>
             <div class="flex items-center gap-1">
-            <div class="relative">
-                <button id="notif-btn" onclick="toggleNotifPanel()" class="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-slate-500 text-lg">
-                    ðŸ””
-                    <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
-                </button>
-            </div>
+                <div class="relative">
+                    <button id="notif-btn" onclick="toggleNotifPanel()" class="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-slate-500 text-lg">
+                        🔔
+                        <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
+                    </button>
+                </div>
                 <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
-                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">ðŸšª</button>
+                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
         </div>
         <nav class="space-y-2 flex-1">
             <a href="/dashboard" class="flex items-center space-x-3 text-slate-400 hover:text-slate-600 px-4 py-3 rounded-2xl transition">
-                <span>ðŸ </span><span>Find Jobs</span>
+                <span>🏠</span><span>Find Jobs</span>
             </a>
             <a href="/saved" class="flex items-center space-x-3 text-slate-400 hover:text-slate-600 px-4 py-3 rounded-2xl transition">
-                <span>ðŸ”–</span><span>Saved Jobs</span>
+                <span>🔖</span><span>Saved Jobs</span>
             </a>
             <a href="/applications" class="flex items-center space-x-3 text-slate-400 hover:text-slate-600 px-4 py-3 rounded-2xl transition">
-                <span>ðŸ“‚</span><span>Applications</span>
+                <span>📂</span><span>Applications</span>
             </a>
             <a href="/messages" class="flex items-center space-x-3 text-slate-400 hover:text-slate-600 px-4 py-3 rounded-2xl transition">
-                <span>ðŸ’¬</span><span>Messages</span>
+                <span>💬</span><span>Messages</span>
             </a>
             <a href="/profile" class="flex items-center space-x-3 bg-indigo-50 text-indigo-600 px-4 py-3 rounded-2xl font-semibold">
-                <span>ðŸ‘¤</span><span>Profile</span>
+                <span>👤</span><span>Profile</span>
             </a>
         </nav>
     </aside>
@@ -103,8 +100,8 @@
                     <h2 id="display-full-name" class="text-2xl font-bold text-slate-900">User Name</h2>
                     <p id="display-title" class="text-indigo-600 font-medium text-sm mt-0.5">Not Specified</p>
                     <div class="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-slate-400 mt-2">
-                        <span>ðŸ“ <span id="display-location">Not Set</span></span>
-                        <span>ðŸ“§ <span id="display-email">Not Set</span></span>
+                        <span>📍 <span id="display-location">Not Set</span></span>
+                        <span>📧 <span id="display-email">Not Set</span></span>
                     </div>
                 </div>
                 <button onclick="openModal()" class="inline-flex items-center h-11 bg-slate-900 text-white px-6 rounded-2xl font-semibold hover:bg-indigo-600 transition shadow-lg shrink-0 self-center">Edit Profile</button>
@@ -158,7 +155,7 @@
                                 <circle id="score-circle" cx="18" cy="18" r="15.9" fill="none" stroke="#4f46e5" stroke-width="3" stroke-dasharray="0 100" stroke-linecap="round" style="transition:stroke-dasharray 1s ease"/>
                             </svg>
                             <div class="absolute inset-0 flex items-center justify-center">
-                                <span id="score-number" class="text-lg font-black text-slate-900">â€”</span>
+                                <span id="score-number" class="text-lg font-black text-slate-900">—</span>
                             </div>
                         </div>
                         <div>
@@ -188,7 +185,7 @@
                 </div>
                 <div id="resume-status" class="mb-4"></div>
                 <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition group">
-                    <span class="text-3xl mb-2 group-hover:scale-110 transition">ðŸ“„</span>
+                    <span class="text-3xl mb-2 group-hover:scale-110 transition">📄</span>
                     <span class="text-sm font-semibold text-slate-500 group-hover:text-indigo-600">Click to upload your resume</span>
                     <span class="text-xs text-slate-400 mt-1">PDF or DOCX only</span>
                     <input type="file" id="resume-file" accept=".pdf,.docx" class="hidden" onchange="uploadResume()">
@@ -208,15 +205,15 @@
                         <h3 class="font-bold text-slate-900">Resume Builder</h3>
                         <p class="text-xs text-slate-400 mt-0.5">Generate a professional resume from your profile</p>
                     </div>
-                    <button onclick="buildResume()" class="btn btn-primary btn-sm h-9 px-5">â¬‡ Download PDF</button>
+                    <button onclick="buildResume()" class="btn btn-primary btn-sm h-9 px-5">⬇ Download PDF</button>
                 </div>
                 <div id="resume-preview" class="border border-slate-200 rounded-2xl overflow-hidden">
                     <div class="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 text-white">
                         <h2 id="rb-name" class="text-2xl font-bold">Your Name</h2>
                         <p id="rb-title" class="text-indigo-200 text-sm mt-0.5">Job Title</p>
                         <div class="flex flex-wrap gap-4 mt-3 text-xs text-indigo-200">
-                            <span id="rb-email">ðŸ“§ email@example.com</span>
-                            <span id="rb-location">ðŸ“ Location</span>
+                            <span id="rb-email">📧 email@example.com</span>
+                            <span id="rb-location">📍 Location</span>
                         </div>
                     </div>
                     <div class="p-6 space-y-5 bg-slate-50">
@@ -254,7 +251,7 @@
                     <div class="relative mt-1">
                         <input type="text" id="edit-location" placeholder="e.g. Quezon City" class="w-full p-4 pr-12 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm" oninput="searchLocationProfile(this.value)">
                         <button type="button" onclick="toggleMapProfile()" title="Pick on map"
-                            class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">ðŸ“</button>
+                            class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">📍</button>
                     </div>
                     <!-- Search suggestions -->
                     <div id="profile-loc-suggestions" class="hidden mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden z-50 relative"></div>
@@ -270,7 +267,7 @@
                 <div>
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Skills <span class="text-slate-300 font-normal normal-case">(comma-separated)</span></label>
                     <input type="text" id="edit-skills" placeholder="e.g. React, Java, Figma, SQL" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 mt-1 text-sm">
-                    <p class="text-[10px] text-slate-400 mt-1 ml-1">Separate each skill with a comma Â· Add at least 5 for best results</p>
+                    <p class="text-[10px] text-slate-400 mt-1 ml-1">Separate each skill with a comma · Add at least 5 for best results</p>
                 </div>
                 <div class="flex items-stretch gap-3 pt-2">
                     <button onclick="closeModal()" class="flex-1 h-14 text-slate-400 font-bold hover:text-slate-600 border border-slate-200 rounded-2xl transition">Cancel</button>
@@ -297,13 +294,13 @@
 
                 document.getElementById('score-strengths').innerHTML = data.strengths.map(s =>
                     `<div class="flex items-center gap-2 text-xs text-green-700 bg-green-50 px-3 py-2 rounded-xl">
-                        <span class="text-green-500">âœ“</span> ${s}
+                        <span class="text-green-500">✓</span> ${s}
                     </div>`).join('');
 
                 document.getElementById('score-tips').innerHTML = data.tips.length ? `
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Improve your score</p>
                     ${data.tips.map(t => `<div class="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 px-3 py-2 rounded-xl cursor-pointer hover:bg-amber-100 transition" onclick="openModal()">
-                        <span class="text-amber-500">â†’</span> ${t}
+                        <span class="text-amber-500">→</span> ${t}
                     </div>`).join('')}` : '';
             } catch(e) { /* silent */ }
         }
@@ -339,10 +336,10 @@
             document.getElementById('checklist').innerHTML = checks.map(c => `
                 <div class="flex items-center gap-3 p-3 rounded-2xl ${c.done ? 'bg-green-50 border border-green-100' : 'bg-white border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50 cursor-pointer'} transition" ${!c.done ? `onclick="${c.action}"` : ''}>
                     <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-sm ${c.done ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-400'}">
-                        ${c.done ? 'âœ“' : 'â—‹'}
+                        ${c.done ? '✓' : '○'}
                     </div>
                     <span class="text-sm ${c.done ? 'text-green-700 line-through' : 'text-slate-700 font-medium'}">${c.label}</span>
-                    ${!c.done ? '<span class="ml-auto text-xs text-indigo-500 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full">Add â†’</span>' : '<span class="ml-auto text-xs text-green-500 font-semibold">Done âœ“</span>'}
+                    ${!c.done ? '<span class="ml-auto text-xs text-indigo-500 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full">Add →</span>' : '<span class="ml-auto text-xs text-green-500 font-semibold">Done ✓</span>'}
                 </div>`).join('');
 
             const skillsDiv = document.getElementById('skills-display');
@@ -360,7 +357,7 @@
             const resumeStatus = document.getElementById('resume-status');
             if (resumeInfo.hasResume) {
                 resumeStatus.innerHTML = `<div class="flex items-center gap-3 bg-green-50 border border-green-100 rounded-2xl px-4 py-3">
-                    <span class="text-green-500 text-xl">âœ…</span>
+                    <span class="text-green-500 text-xl">✅</span>
                     <div>
                         <p class="text-sm font-semibold text-green-700">Resume uploaded</p>
                         <p class="text-xs text-green-500">${resumeInfo.filename}</p>
@@ -368,7 +365,7 @@
                 </div>`;
             } else {
                 resumeStatus.innerHTML = `<div class="flex items-center gap-3 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3">
-                    <span class="text-amber-500 text-xl">âš ï¸</span>
+                    <span class="text-amber-500 text-xl">⚠️</span>
                     <p class="text-sm text-amber-700">No resume uploaded yet. Upload one to strengthen your profile.</p>
                 </div>`;
             }
@@ -436,14 +433,37 @@
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('jc_dark', isDark ? '1' : '');
-            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
         }
+
+        let notifOpen = false;
+        function toggleNotifPanel() {
+            notifOpen = !notifOpen;
+            const panel = document.getElementById('notif-panel');
+            if (notifOpen) {
+                const btn = document.getElementById('notif-btn');
+                const rect = btn.getBoundingClientRect();
+                panel.style.top = (rect.bottom + 8) + 'px';
+                panel.style.left = Math.min(rect.left, window.innerWidth - 316) + 'px';
+                panel.style.display = 'flex';
+                loadNotificationDropdown();
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn') && !e.target.closest('#notif-btn-mobile')) {
+                notifOpen = false;
+                const p = document.getElementById('notif-panel');
+                if (p) p.style.display = 'none';
+            }
+        });
 
         function updateResumePreview(profile) {
             document.getElementById('rb-name').innerText = profile.fullName || 'Your Name';
             document.getElementById('rb-title').innerText = profile.jobTitle || 'Job Title';
-            document.getElementById('rb-email').innerText = 'ðŸ“§ ' + (profile.email || 'email@example.com');
-            document.getElementById('rb-location').innerText = 'ðŸ“ ' + (profile.location || 'Location');
+            document.getElementById('rb-email').innerText = '📧 ' + (profile.email || 'email@example.com');
+            document.getElementById('rb-location').innerText = '📍 ' + (profile.location || 'Location');
             const skills = (profile.skills || '').split(',').map(s => s.trim()).filter(Boolean);
             document.getElementById('rb-skills').innerHTML = skills.map(s =>
                 `<span class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">${s}</span>`).join('');
@@ -487,26 +507,11 @@ Generated by TrabaHanap - Online Job Application System
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
-            const panel = document.getElementById('notif-panel');
-            if (notifOpen) {
-                const btn = document.getElementById('notif-btn');
-                const rect = btn.getBoundingClientRect();
-                panel.style.top = (rect.bottom + 8) + 'px';
-                panel.style.left = Math.min(rect.left, window.innerWidth - 316) + 'px';
-                panel.style.display = 'flex';
-                loadNotificationDropdown();
-            } else {
-                panel.style.display = 'none';
-            }
+            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
+            if (notifOpen) loadNotificationDropdown();
         }
-        document.addEventListener('click', e => {
-            if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn')) {
-                notifOpen = false;
-                document.getElementById('notif-panel').style.display = 'none';
-            }
-        });
 
-        // â”€â”€ Map picker (profile) â”€â”€
+        // ── Map picker (profile) ──
         let profileMap = null, profileMarker = null, profileMapOpen = false;
         let locSearchTimer = null;
 
@@ -527,7 +532,7 @@ Generated by TrabaHanap - Online Job Application System
             const defaultLat = 12.8797, defaultLng = 121.7740;
             profileMap = L.map('profile-map', { zoomControl: true }).setView([defaultLat, defaultLng], 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: 'Â© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                 maxZoom: 19
             }).addTo(profileMap);
 
@@ -622,13 +627,13 @@ Generated by TrabaHanap - Online Job Application System
         window.onload = () => {
             if (localStorage.getItem('jc_dark')) {
                 document.body.classList.add('dark');
-                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
             }
             loadNotificationBell(); updatePageData(); loadResumeScore();
         };
     </script>
 
-    <div id="notif-panel" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;flex-direction:column;z-index:99999;display:none">
+    <div id="notif-panel" class="bg-white rounded-2xl shadow-2xl border border-slate-100" style="position:fixed;width:300px;max-height:360px;flex-direction:column;z-index:99999;display:none">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white rounded-t-2xl flex-shrink-0">
             <span class="font-bold text-slate-800 text-sm">Notifications</span>
             <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
@@ -636,11 +641,9 @@ Generated by TrabaHanap - Online Job Application System
         <div id="notif-list" class="p-2 overflow-y-auto flex-1"></div>
     </div>
     
-<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>ðŸ </span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>ðŸ”–</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>ðŸ“‚</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>ðŸ’¬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item active"><span>ðŸ‘¤</span><span>Profile</span></a></nav>
+<nav class="mobile-bottom-nav hidden"><a href="/dashboard" class="mobile-nav-item"><span>🏠</span><span>Jobs</span></a><a href="/saved" class="mobile-nav-item"><span>🔖</span><span>Saved</span></a><a href="/applications" class="mobile-nav-item"><span>📂</span><span>Applied</span></a><a href="/messages" class="mobile-nav-item"><span>💬</span><span>Messages</span></a><a href="/profile" class="mobile-nav-item active"><span>👤</span><span>Profile</span></a></nav>
 </body>
 </html>
-
-
 
 
 
