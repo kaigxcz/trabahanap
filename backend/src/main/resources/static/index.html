@@ -6,6 +6,7 @@
     <title>TrabaHanap | Sign In</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Leaflet map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -20,10 +21,12 @@
         .social-btn:hover { border-color:#4f46e5; background:#f5f3ff; color:#4f46e5; }
         .role-card { flex:1; padding:1rem; border:2px solid #e2e8f0; border-radius:1rem; cursor:pointer; transition:all 0.2s; text-align:center; }
         .role-card.selected { border-color:#4f46e5; background:#f5f3ff; }
+        /* Map picker */
         .custom-pin { background:#4f46e5; border:3px solid white; border-radius:50% 50% 50% 0; width:28px; height:28px; transform:rotate(-45deg); box-shadow:0 4px 12px rgba(79,70,229,0.5); }
         .loc-suggestion { padding:0.6rem 1rem; font-size:0.8125rem; cursor:pointer; border-bottom:1px solid #f1f5f9; transition:background 0.1s; color:#374151; }
         .loc-suggestion:last-child { border-bottom:none; }
         .loc-suggestion:hover { background:#f5f3ff; color:#4f46e5; }
+        #reg-map-wrap { border-radius:1rem; overflow:hidden; border:1.5px solid #e2e8f0; }
         .leaflet-container { font-family:'Inter',sans-serif; }
     </style>
 </head>
@@ -48,7 +51,7 @@
         <div class="w-full max-w-md">
             <div class="flex items-center gap-2 mb-8 lg:hidden">
                 <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="font-black text-white text-sm">T</span></div>
-                <div><span class="font-bold text-xl text-white block leading-tight">TrabaHanap</span></div>
+                <div><span class="font-bold text-xl text-white block leading-tight">TrabaHanap</span><span style="font-size:9px;color:#a5b4fc;font-weight:600">Online Job Application System</span></div>
             </div>
             <div class="bg-white rounded-[2rem] shadow-2xl p-8">
                 <div class="flex bg-slate-100 rounded-xl p-1 mb-8">
@@ -79,6 +82,7 @@
                             <input type="password" id="login-pass" placeholder="..." class="input-field mt-1">
                         </div>
                         <button onclick="handleLogin()" id="login-btn" class="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg transition">Sign In</button>
+                        <p id="login-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2 text-center font-medium"></p>
                     </div>
                 </div>
                 <div id="register-panel" class="hidden">
@@ -96,40 +100,100 @@
                             <p class="text-xs text-slate-400 mt-0.5">Post jobs</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="reg-fname" placeholder="Juan" class="input-field mt-1"></div>
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="reg-lname" placeholder="Dela Cruz" class="input-field mt-1"></div>
-                    </div>
-                    <div class="space-y-3">
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email *</label><input type="email" id="reg-email" placeholder="juan@example.com" class="input-field mt-1"></div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
-                            <div class="flex gap-2 mt-1">
-                                <select class="input-field w-24 shrink-0"><option>+63</option><option>+1</option><option>+44</option></select>
-                                <input type="tel" id="reg-phone" placeholder="9XX XXX XXXX" class="input-field">
-                            </div>
+
+                    <!-- Job Seeker Fields -->
+                    <div id="fields-candidate">
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="reg-fname" placeholder="Juan" class="input-field mt-1"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="reg-lname" placeholder="Dela Cruz" class="input-field mt-1"></div>
                         </div>
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Location *</label>
-                            <div class="relative mt-1">
-                                <input type="text" id="reg-location" placeholder="e.g. Quezon City" class="input-field pr-12" oninput="searchRegLocation(this.value)">
-                                <button type="button" onclick="toggleRegMap()" title="Pick on map" class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">📍</button>
-                            </div>
-                            <div id="reg-loc-suggestions" class="hidden mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden" style="position:relative;z-index:50"></div>
-                            <div id="reg-map-wrap" class="hidden mt-2" style="height:200px;position:relative;border-radius:1rem;overflow:hidden;border:1.5px solid #e2e8f0">
-                                <div id="reg-map" style="height:100%;width:100%"></div>
-                                <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:999">
-                                    <span style="background:rgba(255,255,255,0.92);font-size:11px;font-weight:600;color:#475569;padding:4px 12px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">Drag the pin or click to set your location</span>
+                        <div class="space-y-3">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email *</label><input type="email" id="reg-email" placeholder="juan@example.com" class="input-field mt-1"></div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
+                                <div class="flex gap-2 mt-1">
+                                    <select class="input-field w-24 shrink-0"><option>+63</option><option>+1</option><option>+44</option></select>
+                                    <input type="tel" id="reg-phone" placeholder="9XX XXX XXXX" class="input-field">
                                 </div>
                             </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Location *</label>
+                                <div class="relative mt-1">
+                                    <input type="text" id="reg-location" placeholder="e.g. Quezon City" class="input-field pr-12" oninput="searchRegLocation(this.value)">
+                                    <button type="button" onclick="toggleRegMap()" title="Pick on map" class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">📍</button>
+                                </div>
+                                <div id="reg-loc-suggestions" class="hidden mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden" style="position:relative;z-index:50"></div>
+                                <div id="reg-map-wrap" class="hidden mt-2" style="height:200px;position:relative">
+                                    <div id="reg-map" style="height:100%;width:100%;border-radius:1rem"></div>
+                                    <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:999">
+                                        <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);font-size:11px;font-weight:600;color:#475569;padding:4px 12px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">Drag the pin or click to set your location</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label><input type="text" id="reg-user" placeholder="juandc99" class="input-field mt-1"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Password *</label><input type="password" id="reg-pass" placeholder="Min. 8 characters" class="input-field mt-1"></div>
                         </div>
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label><input type="text" id="reg-user" placeholder="juandc99" class="input-field mt-1"></div>
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Password *</label><input type="password" id="reg-pass" placeholder="Min. 8 characters" class="input-field mt-1"></div>
+                    </div>
+
+                    <!-- Employer Fields -->
+                    <div id="fields-employer" style="display:none">
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="emp-fname" placeholder="Maria" class="input-field mt-1"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="emp-lname" placeholder="Santos" class="input-field mt-1"></div>
+                        </div>
+                        <div class="space-y-3">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Company Name *</label><input type="text" id="emp-company" placeholder="e.g. TechStart Inc." class="input-field mt-1"></div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Industry *</label>
+                                <select id="emp-industry" class="input-field mt-1">
+                                    <option value="">Select industry...</option>
+                                    <option>Technology</option>
+                                    <option>Finance</option>
+                                    <option>Healthcare</option>
+                                    <option>Education</option>
+                                    <option>Marketing</option>
+                                    <option>Creative</option>
+                                    <option>Retail</option>
+                                    <option>Manufacturing</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Company Size</label>
+                                <select id="emp-size" class="input-field mt-1">
+                                    <option value="">Select size...</option>
+                                    <option>1–10 employees</option>
+                                    <option>11–50 employees</option>
+                                    <option>51–200 employees</option>
+                                    <option>201–500 employees</option>
+                                    <option>500+ employees</option>
+                                </select>
+                            </div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Work Email *</label><input type="email" id="emp-email" placeholder="hr@company.com" class="input-field mt-1"></div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Company Location *</label>
+                                <div class="relative mt-1">
+                                    <input type="text" id="emp-location" placeholder="e.g. Makati City" class="input-field pr-12" oninput="searchRegLocation(this.value, 'emp')">
+                                    <button type="button" onclick="toggleRegMap('emp')" title="Pick on map" class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">📍</button>
+                                </div>
+                                <div id="emp-loc-suggestions" class="hidden mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden" style="position:relative;z-index:50"></div>
+                                <div id="emp-map-wrap" class="hidden mt-2" style="height:200px;position:relative">
+                                    <div id="emp-reg-map" style="height:100%;width:100%;border-radius:1rem"></div>
+                                    <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:999">
+                                        <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);font-size:11px;font-weight:600;color:#475569;padding:4px 12px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">Drag the pin or click to set location</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label><input type="text" id="emp-user" placeholder="techstart_hr" class="input-field mt-1"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Password *</label><input type="password" id="emp-pass" placeholder="Min. 8 characters" class="input-field mt-1"></div>
+                        </div>
                     </div>
                     <div class="flex items-start gap-2 mt-4 mb-5">
                         <input type="checkbox" id="terms" class="mt-0.5 w-4 h-4 accent-indigo-600">
                         <label for="terms" class="text-xs text-slate-500">I agree to the <span class="text-indigo-600 font-semibold">Terms of Service</span> and <span class="text-indigo-600 font-semibold">Privacy Policy</span></label>
                     </div>
                     <button onclick="handleRegister()" id="register-btn" class="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg transition">Create Account</button>
+                    <p id="reg-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2 text-center font-medium mt-2"></p>
                 </div>
             </div>
         </div>
@@ -148,47 +212,107 @@
             selectedRole = role;
             document.getElementById('role-candidate').classList.toggle('selected', role === 'CANDIDATE');
             document.getElementById('role-employer').classList.toggle('selected', role === 'EMPLOYER');
+            document.getElementById('fields-candidate').style.display = role === 'CANDIDATE' ? 'block' : 'none';
+            document.getElementById('fields-employer').style.display = role === 'EMPLOYER' ? 'block' : 'none';
         }
         function redirectByRole(role) {
-            if (role === 'ADMIN') window.location.href = 'admin.html';
-            else if (role === 'EMPLOYER') window.location.href = 'employer.html';
-            else window.location.href = 'dashboard.html';
+            if (role === 'ADMIN') window.location.href = '/admin';
+            else if (role === 'EMPLOYER') window.location.href = '/employer';
+            else window.location.href = '/dashboard';
         }
+
+        // Google Sign In
+        function initGoogleSignIn() {
+            if (typeof google === 'undefined') { setTimeout(initGoogleSignIn, 300); return; }
+            google.accounts.id.initialize({
+                client_id: '958494351239-rlulqm9i9au07od88oshj85g19bri3rr.apps.googleusercontent.com',
+                callback: handleGoogleResponse
+            });
+            const btn = document.getElementById('google-signin-btn');
+            if (btn) google.accounts.id.renderButton(btn, { theme: 'outline', size: 'large', width: 380 });
+        }
+
+        async function handleGoogleResponse(response) {
+            try {
+                const role = selectedRole || 'CANDIDATE';
+                const data = await apiPost('/auth/google', { idToken: response.credential, role });
+                if (data.error) { alert(data.error); return; }
+                localStorage.setItem('jc_token', data.token);
+                localStorage.setItem('jc_user', JSON.stringify(data));
+                redirectByRole(data.role);
+            } catch(e) { alert('Google sign in failed. Please try email login.'); }
+        }
+
+        window.addEventListener('load', () => {
+            initGoogleSignIn();
+            if (sessionStorage.getItem('mode') === 'register') {
+                sessionStorage.removeItem('mode');
+                switchMode('register');
+            }
+        });
         async function handleLogin() {
             const username = document.getElementById('login-user').value.trim();
             const password = document.getElementById('login-pass').value;
-            if (!username || !password) { alert('Please enter your credentials.'); return; }
+            const errEl = document.getElementById('login-error');
+            errEl.classList.add('hidden');
+            if (!username || !password) { errEl.innerText = 'Please enter your username and password.'; errEl.classList.remove('hidden'); return; }
             const btn = document.getElementById('login-btn');
-            btn.disabled = true; btn.innerText = 'Signing in...';
+            setLoading(btn, true, 'Signing in...');
             try {
                 const data = await apiPost('/auth/login', { username, password });
-                if (data.error) { alert(data.error); return; }
+                if (data.error) { errEl.innerText = data.error; errEl.classList.remove('hidden'); return; }
                 localStorage.setItem('jc_token', data.token);
                 localStorage.setItem('jc_user', JSON.stringify(data));
                 redirectByRole(data.role);
-            } catch(e) { alert('Cannot connect to server. Make sure the backend is running on port 8080.'); }
-            finally { btn.disabled = false; btn.innerText = 'Sign In'; }
+            } catch(e) { errEl.innerText = 'Cannot connect to server. Make sure the backend is running.'; errEl.classList.remove('hidden'); }
+            finally { setLoading(btn, false); btn.innerText = 'Sign In'; }
         }
         async function handleRegister() {
-            const firstName = document.getElementById('reg-fname').value.trim();
-            const lastName = document.getElementById('reg-lname').value.trim();
-            const username = document.getElementById('reg-user').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const password = document.getElementById('reg-pass').value;
-            const location = document.getElementById('reg-location').value.trim();
-            const phone = document.getElementById('reg-phone').value.trim();
-            if (!firstName || !lastName || !username || !password || !location || !email) { alert('Please fill in all required fields.'); return; }
-            if (!document.getElementById('terms').checked) { alert('Please agree to the terms.'); return; }
+            const errEl = document.getElementById('reg-error');
+            errEl.classList.add('hidden');
+
+            let firstName, lastName, username, email, password, location, phone, company;
+
+            if (selectedRole === 'CANDIDATE') {
+                firstName = document.getElementById('reg-fname').value.trim();
+                lastName = document.getElementById('reg-lname').value.trim();
+                email = document.getElementById('reg-email').value.trim();
+                phone = document.getElementById('reg-phone').value.trim();
+                location = document.getElementById('reg-location').value.trim();
+                username = document.getElementById('reg-user').value.trim();
+                password = document.getElementById('reg-pass').value;
+            } else {
+                firstName = document.getElementById('emp-fname').value.trim();
+                lastName = document.getElementById('emp-lname').value.trim();
+                email = document.getElementById('emp-email').value.trim();
+                location = document.getElementById('emp-location').value.trim();
+                username = document.getElementById('emp-user').value.trim();
+                password = document.getElementById('emp-pass').value;
+                company = document.getElementById('emp-company').value.trim();
+                const industry = document.getElementById('emp-industry').value;
+                if (!company) { errEl.innerText = 'Please enter your company name.'; errEl.classList.remove('hidden'); return; }
+                if (!industry) { errEl.innerText = 'Please select your industry.'; errEl.classList.remove('hidden'); return; }
+            }
+
+            if (!firstName || !lastName || !username || !password || !location || !email) {
+                errEl.innerText = 'Please fill in all required fields.';
+                errEl.classList.remove('hidden'); return;
+            }
+            if (password.length < 6) { errEl.innerText = 'Password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
+            if (!document.getElementById('terms').checked) { errEl.innerText = 'Please agree to the terms to continue.'; errEl.classList.remove('hidden'); return; }
+
             const btn = document.getElementById('register-btn');
-            btn.disabled = true; btn.innerText = 'Creating account...';
+            setLoading(btn, true, 'Creating account...');
             try {
-                const data = await apiPost('/auth/register', { firstName, lastName, username, email, password, location, phone, role: selectedRole });
-                if (data.error) { alert(data.error); return; }
+                const payload = { firstName, lastName, username, email, password, location, phone: phone || '', role: selectedRole };
+                if (company) payload.company = company;
+                const data = await apiPost('/auth/register', payload);
+                if (data.error) { errEl.innerText = data.error; errEl.classList.remove('hidden'); return; }
                 localStorage.setItem('jc_token', data.token);
                 localStorage.setItem('jc_user', JSON.stringify(data));
                 redirectByRole(data.role);
-            } catch(e) { alert('Cannot connect to server. Make sure the backend is running on port 8080.'); }
-            finally { btn.disabled = false; btn.innerText = 'Create Account'; }
+            } catch(e) { errEl.innerText = 'Cannot connect to server. Make sure the backend is running.'; errEl.classList.remove('hidden'); }
+            finally { setLoading(btn, false); btn.innerText = 'Create Account'; }
         }
         document.addEventListener('keydown', e => {
             if (e.key !== 'Enter') return;
@@ -196,76 +320,101 @@
             else handleRegister();
         });
 
-        // ── Location map picker ──
+        // ── Location map picker (register) ──
         let regMap = null, regMarker = null, regMapOpen = false, regSuggestTimer = null;
+        let empRegMap = null, empRegMarker = null, empRegMapOpen = false;
 
-        function toggleRegMap() {
-            const wrap = document.getElementById('reg-map-wrap');
-            regMapOpen = !regMapOpen;
-            wrap.classList.toggle('hidden', !regMapOpen);
-            if (regMapOpen) setTimeout(() => { if (!regMap) initRegMap(); else regMap.invalidateSize(); }, 50);
+        function toggleRegMap(type) {
+            const isEmp = type === 'emp';
+            const wrapId = isEmp ? 'emp-map-wrap' : 'reg-map-wrap';
+            const wrap = document.getElementById(wrapId);
+            if (isEmp) {
+                empRegMapOpen = !empRegMapOpen;
+                wrap.classList.toggle('hidden', !empRegMapOpen);
+                if (empRegMapOpen) setTimeout(() => { if (!empRegMap) initRegMap('emp'); else empRegMap.invalidateSize(); }, 50);
+            } else {
+                regMapOpen = !regMapOpen;
+                wrap.classList.toggle('hidden', !regMapOpen);
+                if (regMapOpen) setTimeout(() => { if (!regMap) initRegMap('reg'); else regMap.invalidateSize(); }, 50);
+            }
         }
 
-        function initRegMap() {
-            regMap = L.map('reg-map').setView([12.8797, 121.7740], 6);
+        function initRegMap(type) {
+            const isEmp = type === 'emp';
+            const mapId = isEmp ? 'emp-reg-map' : 'reg-map';
+            const inputId = isEmp ? 'emp-location' : 'reg-location';
+            const lat = 12.8797, lng = 121.7740;
+            const map = L.map(mapId, { zoomControl: true }).setView([lat, lng], 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19
-            }).addTo(regMap);
-            const pinIcon = L.divIcon({ className: '', html: '<div class="custom-pin"></div>', iconSize: [28,28], iconAnchor: [14,28] });
-            regMarker = L.marker([12.8797, 121.7740], { icon: pinIcon, draggable: true }).addTo(regMap);
-            regMarker.on('dragend', () => { const p = regMarker.getLatLng(); reverseGeocodeReg(p.lat, p.lng); });
-            regMap.on('click', e => { regMarker.setLatLng(e.latlng); reverseGeocodeReg(e.latlng.lat, e.latlng.lng); });
-            const existing = document.getElementById('reg-location').value.trim();
-            if (existing) geocodeAndFlyReg(existing);
+            }).addTo(map);
+            const pinIcon = L.divIcon({ className: '', html: '<div class="custom-pin"></div>', iconSize: [28, 28], iconAnchor: [14, 28] });
+            const marker = L.marker([lat, lng], { icon: pinIcon, draggable: true }).addTo(map);
+            marker.on('dragend', () => { const p = marker.getLatLng(); reverseGeocodeReg(p.lat, p.lng, inputId); });
+            map.on('click', e => { marker.setLatLng(e.latlng); reverseGeocodeReg(e.latlng.lat, e.latlng.lng, inputId); });
+            const existing = document.getElementById(inputId).value.trim();
+            if (existing) geocodeAndFlyReg(existing, map, marker);
+            if (isEmp) { empRegMap = map; empRegMarker = marker; }
+            else { regMap = map; regMarker = marker; }
         }
 
-        async function reverseGeocodeReg(lat, lng) {
+        async function reverseGeocodeReg(lat, lng, inputId) {
             try {
-                const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: {'Accept-Language':'en'} });
-                const d = await r.json();
-                const a = d.address;
-                const city = a.city || a.town || a.municipality || a.county || a.state || d.display_name.split(',')[0];
-                const prov = a.state || '';
-                document.getElementById('reg-location').value = city + (prov && prov !== city ? ', ' + prov : '');
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: { 'Accept-Language': 'en' } });
+                const data = await res.json();
+                const a = data.address;
+                const city = a.city || a.town || a.municipality || a.county || a.state || data.display_name.split(',')[0];
+                const province = a.state || '';
+                document.getElementById(inputId).value = city + (province && province !== city ? ', ' + province : '');
             } catch(e) {}
         }
 
-        async function geocodeAndFlyReg(q) {
+        async function geocodeAndFlyReg(query, map, marker) {
             try {
-                const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=ph`, { headers: {'Accept-Language':'en'} });
-                const d = await r.json();
-                if (d.length) { regMap.setView([d[0].lat, d[0].lon], 13); regMarker.setLatLng([d[0].lat, d[0].lon]); }
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&countrycodes=ph`, { headers: { 'Accept-Language': 'en' } });
+                const data = await res.json();
+                if (data.length) { map.setView([data[0].lat, data[0].lon], 13); marker.setLatLng([data[0].lat, data[0].lon]); }
             } catch(e) {}
         }
 
-        async function searchRegLocation(q) {
+        async function searchRegLocation(query, type) {
             clearTimeout(regSuggestTimer);
-            const box = document.getElementById('reg-loc-suggestions');
-            if (!q || q.length < 3) { box.classList.add('hidden'); return; }
+            const isEmp = type === 'emp';
+            const boxId = isEmp ? 'emp-loc-suggestions' : 'reg-loc-suggestions';
+            const box = document.getElementById(boxId);
+            if (!query || query.length < 3) { box.classList.add('hidden'); return; }
             regSuggestTimer = setTimeout(async () => {
                 try {
-                    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&countrycodes=ph`, { headers: {'Accept-Language':'en'} });
-                    const results = await r.json();
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&countrycodes=ph`, { headers: { 'Accept-Language': 'en' } });
+                    const results = await res.json();
                     if (!results.length) { box.classList.add('hidden'); return; }
                     box.classList.remove('hidden');
                     box.innerHTML = results.map(r => {
-                        const label = r.display_name.split(',').slice(0,3).join(',');
-                        return `<div class="loc-suggestion" onclick="pickRegLocation('${r.display_name.replace(/'/g,"\\'")}',${r.lat},${r.lon})">📍 ${label}</div>`;
+                        const parts = r.display_name.split(',');
+                        const label = parts.slice(0, 3).join(',');
+                        return `<div class="loc-suggestion" onclick="pickRegLocation('${r.display_name.replace(/'/g,"\\'")}', ${r.lat}, ${r.lon}, '${type || 'reg'}')">📍 ${label}</div>`;
                     }).join('');
                 } catch(e) { box.classList.add('hidden'); }
             }, 350);
         }
 
-        function pickRegLocation(name, lat, lon) {
-            const parts = name.split(',');
-            document.getElementById('reg-location').value = parts[0].trim() + (parts[1] ? ', ' + parts[1].trim() : '');
-            document.getElementById('reg-loc-suggestions').classList.add('hidden');
-            if (regMap && regMarker) { regMap.setView([lat, lon], 13); regMarker.setLatLng([lat, lon]); }
+        function pickRegLocation(displayName, lat, lon, type) {
+            const isEmp = type === 'emp';
+            const inputId = isEmp ? 'emp-location' : 'reg-location';
+            const boxId = isEmp ? 'emp-loc-suggestions' : 'reg-loc-suggestions';
+            const parts = displayName.split(',');
+            document.getElementById(inputId).value = parts[0].trim() + (parts[1] ? ', ' + parts[1].trim() : '');
+            document.getElementById(boxId).classList.add('hidden');
+            const map = isEmp ? empRegMap : regMap;
+            const marker = isEmp ? empRegMarker : regMarker;
+            if (map && marker) { map.setView([lat, lon], 13); marker.setLatLng([lat, lon]); }
         }
 
         document.addEventListener('click', e => {
             if (!e.target.closest('#reg-location') && !e.target.closest('#reg-loc-suggestions'))
                 document.getElementById('reg-loc-suggestions')?.classList.add('hidden');
+            if (!e.target.closest('#emp-location') && !e.target.closest('#emp-loc-suggestions'))
+                document.getElementById('emp-loc-suggestions')?.classList.add('hidden');
         });
     </script>
 </body>
