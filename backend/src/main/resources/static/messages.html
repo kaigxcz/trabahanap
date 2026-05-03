@@ -126,9 +126,8 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">To (Username)</label>
-                    <div class="relative mt-1">
-                        <input type="text" id="new-receiver" placeholder="Type @ or a name to search..." class="input w-full" oninput="searchUsers(this.value)" autocomplete="off">
-                        <div id="user-suggestions" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #e2e8f0;border-radius:0.875rem;box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:9999;display:none;max-height:220px;overflow-y:auto;margin-top:4px"></div>
+                    <div class="mt-1">
+                        <input type="text" id="new-receiver" placeholder="Type a name or @username..." class="input w-full" oninput="searchUsers(this.value)" autocomplete="off">
                     </div>
                 </div>
                 <div>
@@ -268,6 +267,12 @@
                 try {
                     const results = await apiGet('/messages/search-users?q=' + encodeURIComponent(val));
                     if (!results.length) { box.style.display = 'none'; return; }
+                    // Position below the input
+                    const input = document.getElementById('new-receiver');
+                    const rect = input.getBoundingClientRect();
+                    box.style.top = (rect.bottom + 4) + 'px';
+                    box.style.left = rect.left + 'px';
+                    box.style.width = rect.width + 'px';
                     box.style.display = 'block';
                     box.innerHTML = results.map(u => `
                         <div onclick="selectUser('${u.username}')"
@@ -374,6 +379,8 @@
             loadNotificationBell(); loadConversations();
         };
     </script>
+
+    <div id="user-suggestions" style="position:fixed;background:white;border:1px solid #e2e8f0;border-radius:0.875rem;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:999999;display:none;max-height:240px;overflow-y:auto;min-width:280px"></div>
 
     <div id="logo-dropdown">
         <div class="px-4 py-3 border-b border-slate-100">
