@@ -126,7 +126,10 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">To (Username)</label>
-                    <input type="text" id="new-receiver" placeholder="Enter username" class="input mt-1">
+                    <div class="relative mt-1">
+                        <input type="text" id="new-receiver" placeholder="Type @ or a name to search..." class="input w-full" oninput="searchUsers(this.value)" autocomplete="off">
+                        <div id="user-suggestions" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #e2e8f0;border-radius:0.875rem;box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:9999;display:none;max-height:220px;overflow-y:auto;margin-top:4px"></div>
+                    </div>
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Subject <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
@@ -252,7 +255,48 @@
             document.getElementById('new-receiver').value = '';
             document.getElementById('new-subject').value = '';
             document.getElementById('new-content').value = '';
+            document.getElementById('user-suggestions').style.display = 'none';
         }
+
+        let userSearchTimer = null;
+        async function searchUsers(q) {
+            const box = document.getElementById('user-suggestions');
+            const val = q.startsWith('@') ? q.slice(1) : q;
+            if (!val || val.length < 1) { box.style.display = 'none'; return; }
+            clearTimeout(userSearchTimer);
+            userSearchTimer = setTimeout(async () => {
+                try {
+                    const results = await apiGet('/messages/search-users?q=' + encodeURIComponent(val));
+                    if (!results.length) { box.style.display = 'none'; return; }
+                    box.style.display = 'block';
+                    box.innerHTML = results.map(u => `
+                        <div onclick="selectUser('${u.username}')"
+                            style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background 0.1s;border-bottom:1px solid #f1f5f9"
+                            onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='white'">
+                            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px;flex-shrink:0">
+                                ${u.fullName ? u.fullName[0].toUpperCase() : u.username[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <p style="font-size:13px;font-weight:600;color:#1e293b;margin:0">${u.fullName || u.username}</p>
+                                <p style="font-size:11px;color:#94a3b8;margin:0">@${u.username} · ${u.role === 'CANDIDATE' ? 'Job Seeker' : u.role === 'EMPLOYER' ? 'Employer' : u.role}</p>
+                            </div>
+                        </div>`).join('');
+                } catch(e) { box.style.display = 'none'; }
+            }, 200);
+        }
+
+        function selectUser(username) {
+            document.getElementById('new-receiver').value = username;
+            document.getElementById('user-suggestions').style.display = 'none';
+            document.getElementById('new-subject').focus();
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#new-receiver') && !e.target.closest('#user-suggestions')) {
+                const box = document.getElementById('user-suggestions');
+                if (box) box.style.display = 'none';
+            }
+        });
 
         async function sendNewMessage() {
             const receiver = document.getElementById('new-receiver').value.trim();
