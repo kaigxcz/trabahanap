@@ -1,16 +1,23 @@
 package com.jobconnect.controller;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.jobconnect.model.Job;
 import com.jobconnect.model.User;
 import com.jobconnect.repository.ApplicationRepository;
 import com.jobconnect.repository.JobRepository;
 import com.jobconnect.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -55,19 +62,23 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers() {
         requireAdmin();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
         List<Map<String, Object>> users = userRepository.findAll().stream().map(u -> {
             String firstName = u.getFirstName() != null ? u.getFirstName() : "";
             String lastName  = u.getLastName()  != null ? u.getLastName()  : "";
             String fullName  = (firstName + " " + lastName).trim();
             if (fullName.isEmpty()) fullName = u.getUsername();
-            return Map.<String, Object>of(
-                "id",       u.getId(),
-                "username", u.getUsername(),
-                "fullName", fullName,
-                "email",    u.getEmail()    != null ? u.getEmail()    : "",
-                "role",     u.getRole()     != null ? u.getRole()     : "CANDIDATE",
-                "location", u.getLocation() != null ? u.getLocation() : ""
-            );
+            Map<String, Object> map = new HashMap<>();
+            map.put("id",        u.getId());
+            map.put("username",  u.getUsername());
+            map.put("fullName",  fullName);
+            map.put("email",     u.getEmail()    != null ? u.getEmail()    : "");
+            map.put("role",      u.getRole()     != null ? u.getRole()     : "CANDIDATE");
+            map.put("location",  u.getLocation() != null ? u.getLocation() : "");
+            map.put("jobTitle",  u.getJobTitle() != null ? u.getJobTitle() : "");
+            map.put("skills",    u.getSkills()   != null ? u.getSkills()   : "");
+            map.put("joinedAt",  u.getCreatedAt() != null ? u.getCreatedAt().format(fmt) : "—");
+            return map;
         }).toList();
         return ResponseEntity.ok(users);
     }

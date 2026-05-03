@@ -155,6 +155,7 @@
                             <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Email</th>
                             <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Location</th>
                             <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Skills</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Joined</th>
                             <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Actions</th>
                         </tr>
                     </thead>
@@ -188,6 +189,7 @@
                             <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Email</th>
                             <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Location</th>
                             <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Job Title</th>
+                            <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Joined</th>
                             <th class="px-5 py-3 text-xs font-bold text-slate-400 uppercase">Actions</th>
                         </tr>
                     </thead>
@@ -351,10 +353,11 @@
                     <td class="px-5 py-3 text-sm text-slate-400">${u.email || '—'}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.location || '—'}</td>
                     <td class="px-5 py-3 text-sm text-slate-400 max-w-xs truncate">${u.skills || '—'}</td>
+                    <td class="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">${u.joinedAt || '—'}</td>
                     <td class="px-5 py-3">
                         <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
                     </td>
-                </tr>`).join('') : '<tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">No job seekers found.</td></tr>';
+                </tr>`).join('') : '<tr><td colspan="7" class="px-5 py-10 text-center text-slate-400">No job seekers found.</td></tr>';
         }
 
         async function loadEmployers() {
@@ -382,10 +385,11 @@
                     <td class="px-5 py-3 text-sm text-slate-400">${u.email || '—'}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.location || '—'}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.jobTitle || '—'}</td>
+                    <td class="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">${u.joinedAt || '—'}</td>
                     <td class="px-5 py-3">
                         <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
                     </td>
-                </tr>`).join('') : '<tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">No employers found.</td></tr>';
+                </tr>`).join('') : '<tr><td colspan="7" class="px-5 py-10 text-center text-slate-400">No employers found.</td></tr>';
         }
 
         let allJobsCache = [];

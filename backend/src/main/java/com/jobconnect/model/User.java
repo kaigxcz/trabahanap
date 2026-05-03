@@ -1,6 +1,11 @@
 package com.jobconnect.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
@@ -28,6 +33,14 @@ public class User {
     private String resumeFilename;
     private String role; // CANDIDATE, EMPLOYER, ADMIN
     private String phone;
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     public User() {}
 
@@ -63,4 +76,5 @@ public class User {
     public void setRole(String role) { this.role = role; }
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }
