@@ -50,6 +50,10 @@
             <button onclick="showTab('jobs')" id="tab-jobs" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
                 <span>💼</span><span>Job Listings</span>
             </button>
+            <button onclick="showTab('messages')" id="tab-messages" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>💬</span><span>Messages</span>
+                <span id="admin-msg-badge" class="ml-auto text-[10px] font-bold bg-red-500 text-white px-2 py-0.5 rounded-full hidden"></span>
+            </button>
         </nav>
     </aside>
 
@@ -220,6 +224,61 @@
             <div id="admin-jobs-list" class="space-y-4"></div>
         </div>
 
+        <!-- Messages Tab -->
+        <div id="view-messages" class="hidden" style="height:calc(100vh - 2rem)">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Messages</h1>
+                    <p class="text-slate-400 text-sm mt-1">Conversations with job seekers and employers.</p>
+                </div>
+                <button onclick="openAdminNewMsg()" class="h-9 px-4 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">✏️ New Message</button>
+            </div>
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex" style="height:calc(100% - 80px)">
+                <!-- Conversation list -->
+                <div class="w-80 border-r border-slate-100 flex flex-col shrink-0">
+                    <div class="p-4 border-b border-slate-100">
+                        <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+                            <input type="text" id="admin-search-convo" oninput="adminFilterConvos()" placeholder="Search conversations..."
+                                class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 transition text-xs">
+                        </div>
+                    </div>
+                    <div id="admin-convo-list" class="flex-1 overflow-y-auto p-3 space-y-1">
+                        <p class="text-slate-400 text-sm text-center py-8">Loading...</p>
+                    </div>
+                </div>
+                <!-- Chat area -->
+                <div class="flex-1 flex flex-col">
+                    <div id="admin-chat-empty" class="flex-1 flex items-center justify-center text-slate-400">
+                        <div class="text-center">
+                            <div class="text-5xl mb-3">💬</div>
+                            <p class="font-bold text-slate-600">Select a conversation</p>
+                            <p class="text-sm mt-1 text-slate-400">or start a new one</p>
+                        </div>
+                    </div>
+                    <div id="admin-chat-header" class="p-4 border-b border-slate-100 hidden">
+                        <div class="flex items-center gap-3">
+                            <div id="admin-chat-avatar" class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">?</div>
+                            <div>
+                                <h2 id="admin-chat-name" class="font-bold text-slate-900 text-sm"></h2>
+                                <p id="admin-chat-username" class="text-xs text-slate-400"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="admin-chat-messages" class="flex-1 overflow-y-auto p-5 space-y-3 hidden bg-slate-50"></div>
+                    <div id="admin-chat-input" class="p-4 border-t border-slate-100 hidden">
+                        <div class="flex gap-2 items-end">
+                            <textarea id="admin-msg-input" rows="1" placeholder="Type a message…"
+                                class="input flex-1 resize-none text-sm" style="max-height:100px;overflow-y:auto"
+                                oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminSendMessage();}"></textarea>
+                            <button onclick="adminSendMessage()" class="btn btn-primary h-10 px-4 shrink-0">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script src="js/api.js"></script>
@@ -230,7 +289,7 @@
         const roleColors = { ADMIN: 'bg-red-50 text-red-600', EMPLOYER: 'bg-indigo-50 text-indigo-600', CANDIDATE: 'bg-teal-50 text-teal-600' };
 
         function showTab(tab) {
-            ['dashboard','users','jobseekers','employers','jobs'].forEach(t => {
+            ['dashboard','users','jobseekers','employers','jobs','messages'].forEach(t => {
                 document.getElementById('view-' + t).classList.add('hidden');
                 document.getElementById('tab-' + t).classList.remove('active');
             });
@@ -241,6 +300,7 @@
             if (tab === 'jobs') loadJobs();
             if (tab === 'jobseekers') loadSeekers();
             if (tab === 'employers') loadEmployers();
+            if (tab === 'messages') loadAdminConversations();
         }
 
         async function loadStats() {
@@ -472,12 +532,101 @@
             document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
         }
 
+        // ── Admin Messaging ──
+        let adminCurrentConvo = null, adminAllConvos = [];
+
+        async function loadAdminConversations() {
+            const msgs = await apiGet('/messages/inbox');
+            const seen = new Set();
+            adminAllConvos = [];
+            msgs.forEach(m => {
+                const other = m.isMine ? m.receiverUsername : m.senderUsername;
+                const name = m.isMine ? m.receiverUsername : m.senderName;
+                if (!seen.has(other)) { seen.add(other); adminAllConvos.push({ username: other, name, last: m }); }
+            });
+            adminRenderConvos(adminAllConvos);
+            // Update badge
+            const unread = msgs.filter(m => !m.isRead && !m.isMine).length;
+            const badge = document.getElementById('admin-msg-badge');
+            if (unread > 0) { badge.innerText = unread; badge.classList.remove('hidden'); }
+            else badge.classList.add('hidden');
+        }
+
+        function adminFilterConvos() {
+            const q = document.getElementById('admin-search-convo').value.toLowerCase();
+            adminRenderConvos(q ? adminAllConvos.filter(c => c.name.toLowerCase().includes(q) || c.username.toLowerCase().includes(q)) : adminAllConvos);
+        }
+
+        function adminRenderConvos(convos) {
+            const list = document.getElementById('admin-convo-list');
+            if (!convos.length) { list.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No conversations yet.</p>'; return; }
+            list.innerHTML = convos.map(c => `
+                <div onclick="adminOpenConvo('${c.username}','${c.name}')"
+                    style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;cursor:pointer;transition:background 0.15s;${adminCurrentConvo===c.username?'background:#eef2ff;':''}">
+                    <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;flex-shrink:0">${c.name[0].toUpperCase()}</div>
+                    <div style="flex:1;min-width:0">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <p style="font-size:13px;font-weight:600;color:#1e293b;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</p>
+                            <p style="font-size:10px;color:#94a3b8;margin:0;flex-shrink:0;margin-left:6px">${timeAgo(c.last.sentAt)}</p>
+                        </div>
+                        <p style="font-size:11px;color:#94a3b8;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.last.isMine?'You: ':''}${c.last.content}</p>
+                    </div>
+                    ${!c.last.isRead&&!c.last.isMine?'<span style="width:8px;height:8px;background:#4f46e5;border-radius:50%;flex-shrink:0"></span>':''}
+                </div>`).join('');
+        }
+
+        async function adminOpenConvo(username, name) {
+            adminCurrentConvo = username;
+            adminRenderConvos(adminAllConvos);
+            document.getElementById('admin-chat-empty').classList.add('hidden');
+            document.getElementById('admin-chat-header').classList.remove('hidden');
+            document.getElementById('admin-chat-messages').classList.remove('hidden');
+            document.getElementById('admin-chat-input').classList.remove('hidden');
+            document.getElementById('admin-chat-name').innerText = name;
+            document.getElementById('admin-chat-username').innerText = '@' + username;
+            document.getElementById('admin-chat-avatar').innerText = name[0].toUpperCase();
+            const msgs = await apiGet('/messages/conversation/' + username);
+            const container = document.getElementById('admin-chat-messages');
+            let lastDate = null;
+            container.innerHTML = msgs.map(m => {
+                const d = new Date((m.sentAt.endsWith('Z')?m.sentAt:m.sentAt+'Z')).toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+                const sep = d !== lastDate ? `<div style="text-align:center;margin:8px 0"><span style="font-size:10px;color:#94a3b8;font-weight:600">${d}</span></div>` : '';
+                lastDate = d;
+                return sep + `<div style="display:flex;justify-content:${m.isMine?'flex-end':'flex-start'}">
+                    <div style="max-width:70%;padding:10px 14px;border-radius:${m.isMine?'18px 18px 4px 18px':'18px 18px 18px 4px'};background:${m.isMine?'linear-gradient(135deg,#4f46e5,#7c3aed)':'white'};color:${m.isMine?'white':'#1e293b'};border:${m.isMine?'none':'1px solid #f1f5f9'};box-shadow:0 1px 4px rgba(0,0,0,0.06)">
+                        <p style="font-size:13px;margin:0">${m.content}</p>
+                        <p style="font-size:10px;margin:4px 0 0;color:${m.isMine?'rgba(255,255,255,0.7)':'#94a3b8'}">${timeAgo(m.sentAt)}</p>
+                    </div></div>`;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function adminSendMessage() {
+            if (!adminCurrentConvo) return;
+            const input = document.getElementById('admin-msg-input');
+            const content = input.value.trim();
+            if (!content) return;
+            input.value = ''; input.style.height = 'auto';
+            await apiPost('/messages', { receiverUsername: adminCurrentConvo, subject: '', content }, true);
+            adminOpenConvo(adminCurrentConvo, document.getElementById('admin-chat-name').innerText);
+        }
+
+        function openAdminNewMsg() {
+            const username = prompt('Enter username to message:');
+            if (username) adminOpenConvo(username.replace('@',''), username.replace('@',''));
+        }
+
         window.onload = () => {
             if (localStorage.getItem('jc_dark')) {
                 document.body.classList.add('dark');
                 document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
             }
             loadStats();
+            // Load unread badge
+            apiGet('/messages/unread-count').then(d => {
+                if (d.count > 0) { const b = document.getElementById('admin-msg-badge'); b.innerText = d.count; b.classList.remove('hidden'); }
+            }).catch(()=>{});
+        };
         };
     </script>
 </body>
