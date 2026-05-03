@@ -319,32 +319,19 @@ async function geocodeAndMoveEmp(query){try{const res=await fetch('https://nomin
 async function searchLocationEmployer(query){clearTimeout(empSuggestTimer);const box=document.getElementById('emp-loc-suggestions');if(!query||query.length<3){box.classList.add('hidden');return;}empSuggestTimer=setTimeout(async()=>{try{const res=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)+'&format=json&limit=5',{headers:{'Accept-Language':'en'}});const results=await res.json();if(!results.length){box.classList.add('hidden');return;}box.classList.remove('hidden');box.innerHTML=results.map(r=>{const short=r.display_name.split(',').slice(0,3).join(',');const dn=r.display_name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");return '<div class="loc-suggestion" onclick="selectLocationEmployer(\''+dn+"',"+r.lat+','+r.lon+')">'+esc(short)+'</div>';}).join('');}catch(e){box.classList.add('hidden');}},350);}
 function selectLocationEmployer(displayName,lat,lon){const parts=displayName.split(',');document.getElementById('f-location').value=parts[0].trim()+(parts[1]?', '+parts[1].trim():'');document.getElementById('emp-loc-suggestions').classList.add('hidden');if(empMap&&empMarker){empMap.setView([lat,lon],13);empMarker.setLatLng([lat,lon]);}}
 
+
     (function() {
         function requireAuth() {
             if (!localStorage.getItem("jc_token")) {
                 window.location.replace("index.html");
             }
         }
-        // Block back/forward - just stay on this page
         history.pushState(null, "", location.href);
         window.addEventListener("popstate", function() {
             history.pushState(null, "", location.href);
         });
-        // If bfcache restores this page after logout, redirect to login
         window.addEventListener("pageshow", function(e) {
             if (e.persisted) requireAuth();
-        });
-    })();
-
-
-
-    (function() {
-        function checkAuth() {
-            if (!localStorage.getItem("jc_token")) {
-                window.location.replace("index.html");
-            }
-        }
-            checkAuth();
         });
     })();
 </script>
