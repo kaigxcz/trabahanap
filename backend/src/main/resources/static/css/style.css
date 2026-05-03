@@ -261,3 +261,19 @@ body.dark .page-loader { background: #0f172a; }
     a { color: black !important; text-decoration: none !important; }
     @page { margin: 1.5cm; }
 }
+
+/* ── Notification panel (fixed, body-level) ── */
+#notif-panel {
+    position: fixed;
+    width: 300px;
+    max-height: 360px;
+    display: none;
+    flex-direction: column;
+    z-index: 99999;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    border: 1px solid #f1f5f9;
+}
+#notif-panel.open { display: flex; }
+body.dark #notif-panel { background: #1e293b !important; border-color: #334155 !important; }

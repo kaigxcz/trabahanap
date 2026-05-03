@@ -1,3 +1,9 @@
 {
-    "html.autoClosingTags": false
+    "html.autoClosingTags": false,
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {},
+    "[html]": {
+        "editor.formatOnSave": false,
+        "editor.defaultFormatter": null
+    }
 }

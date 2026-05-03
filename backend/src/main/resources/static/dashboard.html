@@ -54,6 +54,7 @@
             <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-black text-xs">T</span></div>
             <div>
                 <span class="font-bold text-sm tracking-tight block leading-tight">TrabaHanap</span>
+                <span style="font-size:8px;color:#94a3b8;font-weight:600">Online Job Application System</span>
             </div>
         </div>
         <div class="flex items-center gap-2">
@@ -73,22 +74,15 @@
                 </div>
                 <div>
                     <span class="font-bold text-lg tracking-tight block leading-tight">TrabaHanap</span>
-
+                    <span class="text-[9px] text-slate-400 font-medium leading-tight">Online Job Application System</span>
                 </div>
             </div>
             <div class="flex items-center gap-1">
                 <!-- Notification Bell -->
                 <div class="relative">
-                    <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                    <button id="notif-btn" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
                         🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
-                    <div id="notif-panel" class="hidden absolute left-0 top-11 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100" style="max-height:320px;overflow-y:auto;z-index:9999;position:absolute">
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white">
-                            <span class="font-bold text-slate-800 text-sm">Notifications</span>
-                            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">Γ£ò</button>
-                        </div>
-                        <div id="notif-list" class="p-2"></div>
-                    </div>
                 </div>
                 <!-- Dark Mode Toggle -->
                 <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
@@ -132,8 +126,8 @@
             <hr class="flt-divider">
             <p class="flt-group-title">Experience</p>
             <label class="flt-label"><input type="checkbox" class="filter-check" value="Fresh/Entry" onchange="applyFilters()"><span>Fresh / Entry</span></label>
-            <label class="flt-label"><input type="checkbox" class="filter-check" value="1-3 years" onchange="applyFilters()"><span>1ΓÇô3 years</span></label>
-            <label class="flt-label"><input type="checkbox" class="filter-check" value="3-5 years" onchange="applyFilters()"><span>3ΓÇô5 years</span></label>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="1-3 years" onchange="applyFilters()"><span>1–3 years</span></label>
+            <label class="flt-label"><input type="checkbox" class="filter-check" value="3-5 years" onchange="applyFilters()"><span>3–5 years</span></label>
             <label class="flt-label"><input type="checkbox" class="filter-check" value="5+ years" onchange="applyFilters()"><span>5+ years</span></label>
 
             <hr class="flt-divider">
@@ -148,14 +142,14 @@
 
         <!-- Greeting + Search -->
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-slate-900">Good day, <span id="greeting-name" class="text-indigo-600">there</span> 👤</h1>
+            <h1 class="text-2xl font-bold text-slate-900">Good day, <span id="greeting-name" class="text-indigo-600">there</span> 👋</h1>
             <p class="text-slate-400 text-sm mt-1">Here are the latest opportunities for you.</p>
         </div>
 
         <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm mb-6">
             <div class="flex flex-col md:flex-row gap-3">
                 <div class="flex-1 relative">
-                    <span class="absolute left-4 top-3.5 text-slate-400 text-sm">🔗</span>
+                    <span class="absolute left-4 top-3.5 text-slate-400 text-sm">🔍</span>
                     <input type="text" id="search-role" oninput="handleSearch()" placeholder="Job title, skills, or company"
                            class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 transition text-sm">
                 </div>
@@ -186,7 +180,7 @@
 
         <!-- Recommended Section -->
         <div id="recommended-section" class="mb-8 hidden">
-            <h3 class="text-sm font-bold text-slate-700 mb-3">Γ¡É Recommended for you</h3>
+            <h3 class="text-sm font-bold text-slate-700 mb-3">⭐ Recommended for you</h3>
             <div id="recommended-grid" class="grid grid-cols-1 gap-3"></div>
         </div>
 
@@ -215,7 +209,7 @@
         <div class="modal-box bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
             <div class="bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-8 text-white shrink-0 relative overflow-hidden">
                 <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 80% 20%, white 0%, transparent 60%)"></div>
-                <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white transition text-sm">Γ£ò</button>
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white transition text-sm">✕</button>
                 <div class="flex items-start gap-5 relative">
                     <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-3xl shrink-0 border border-white/20" id="modal-icon"></div>
                     <div class="flex-1 min-w-0">
@@ -229,7 +223,7 @@
                         </div>
                     </div>
                     <div class="shrink-0 text-center bg-white/20 backdrop-blur rounded-2xl px-4 py-3 border border-white/20">
-                        <p class="text-2xl font-black" id="modal-match-score">ΓÇö</p>
+                        <p class="text-2xl font-black" id="modal-match-score">—</p>
                         <p class="text-xs text-indigo-200">match</p>
                     </div>
                 </div>
@@ -280,13 +274,13 @@
             loadAppCountBadge();
         }
 
-        // ΓöÇΓöÇ Recent searches ΓöÇΓöÇ
+        // ── Recent searches ──
         function loadRecentSearches() {
             const searches = JSON.parse(localStorage.getItem('jc_recent_searches') || '[]');
             if (!searches.length) return;
             document.getElementById('recent-searches').classList.remove('hidden');
             document.getElementById('recent-list').innerHTML = searches.map(s =>
-                `<button onclick="applyRecentSearch('${s}')" class="text-xs bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 text-slate-600 font-medium px-3 py-1.5 rounded-full transition">📊 ${s}</button>`
+                `<button onclick="applyRecentSearch('${s}')" class="text-xs bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 text-slate-600 font-medium px-3 py-1.5 rounded-full transition">🕐 ${s}</button>`
             ).join('');
         }
 
@@ -303,7 +297,7 @@
             handleSearch();
         }
 
-        // ΓöÇΓöÇ App count badge ΓöÇΓöÇ
+        // ── App count badge ──
         async function loadAppCountBadge() {
             try {
                 const apps = await apiGet('/applications');
@@ -333,7 +327,7 @@
             const matchScore = calcLocalMatch(job);
             const matchColor = matchScore >= 70 ? 'text-green-600 bg-green-50' : matchScore >= 40 ? 'text-amber-600 bg-amber-50' : 'text-slate-400 bg-slate-100';
             const daysAgo = job.postedAt ? Math.floor((Date.now() - new Date(job.postedAt)) / 86400000) : null;
-            const postedLabel = daysAgo === null ? '' : daysAgo === 0 ? '<span class="badge badge-green">🎯 Today</span>' : daysAgo <= 3 ? `<span class="badge badge-indigo">${daysAgo}d ago</span>` : `<span class="badge badge-slate">${daysAgo}d ago</span>`;
+            const postedLabel = daysAgo === null ? '' : daysAgo === 0 ? '<span class="badge badge-green">🆕 Today</span>' : daysAgo <= 3 ? `<span class="badge badge-indigo">${daysAgo}d ago</span>` : `<span class="badge badge-slate">${daysAgo}d ago</span>`;
             return `
                 <div class="job-card card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 cursor-pointer" onclick="openJobModal(${job.id})">
                     <div class="flex items-center gap-4">
@@ -341,12 +335,12 @@
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
                                 <h4 class="text-sm font-bold text-slate-900">${job.title}</h4>
-                                ${job.featured ? '<span class="badge" style="background:#fef3c7;color:#d97706">Γ¡É Featured</span>' : ''}
+                                ${job.featured ? '<span class="badge" style="background:#fef3c7;color:#d97706">⭐ Featured</span>' : ''}
                                 <span class="badge badge-indigo">⚡ Easy Apply</span>
                                 ${matchScore > 0 ? `<span class="badge ${matchColor}">${matchScore}% match</span>` : ''}
                                 ${postedLabel}
                             </div>
-                            <p class="text-slate-500 text-xs mt-0.5">${job.company} ΓÇó ${job.location}</p>
+                            <p class="text-slate-500 text-xs mt-0.5">${job.company} • ${job.location}</p>
                             <div class="flex flex-wrap gap-1.5 mt-1.5">
                                 <span class="badge badge-slate">${job.type}</span>
                                 <span class="badge badge-slate">${job.experience}</span>
@@ -372,7 +366,7 @@
         function renderJobs(jobs) {
             const grid = document.getElementById('jobs-grid');
             document.getElementById('result-count').innerText = `${jobs.length} job${jobs.length !== 1 ? 's' : ''}`;
-            if (!jobs.length) { grid.innerHTML = '<div class="text-center py-16 text-slate-400 fade-in"><div class="text-5xl mb-3">🔗</div><p class="font-semibold text-slate-600">No jobs found</p><p class="text-sm mt-1">Try adjusting your search or filters.</p></div>'; return; }
+            if (!jobs.length) { grid.innerHTML = '<div class="text-center py-16 text-slate-400 fade-in"><div class="text-5xl mb-3">🔍</div><p class="font-semibold text-slate-600">No jobs found</p><p class="text-sm mt-1">Try adjusting your search or filters.</p></div>'; return; }
             grid.innerHTML = jobs.map((j, i) => `<div style="animation-delay:${i*40}ms" class="fade-in">${buildJobCard(j)}</div>`).join('');
         }
 
@@ -458,7 +452,7 @@
             document.getElementById('modal-reqs').innerHTML = reqs.map(r => `<span class="bg-slate-100 text-slate-600 text-xs font-medium px-3 py-1 rounded-full">${r}</span>`).join('');
             const score = calcLocalMatch(job);
             const scoreEl = document.getElementById('modal-match-score');
-            scoreEl.innerText = score > 0 ? score + '%' : 'ΓÇö';
+            scoreEl.innerText = score > 0 ? score + '%' : '—';
             scoreEl.className = 'text-2xl font-black ' + (score >= 70 ? 'text-green-400' : score >= 40 ? 'text-amber-400' : 'text-white');
             const isSaved = savedIds.includes(job.id);
             const saveBtn = document.getElementById('modal-save-btn');
@@ -475,9 +469,9 @@
                         <span class="text-xl">${s.icon}</span>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-semibold text-slate-800 truncate">${s.title}</p>
-                            <p class="text-xs text-slate-500">${s.company} ΓÇó ${s.salary}</p>
+                            <p class="text-xs text-slate-500">${s.company} • ${s.salary}</p>
                         </div>
-                        <span class="text-xs text-indigo-500 font-semibold shrink-0">View ΓåÆ</span>
+                        <span class="text-xs text-indigo-500 font-semibold shrink-0">View →</span>
                     </div>`).join('');
             } else {
                 simSection.classList.add('hidden');
@@ -518,15 +512,24 @@
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
-            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
-            if (notifOpen) { loadNotificationDropdown(); }
+            const panel = document.getElementById('notif-panel');
+            if (notifOpen) {
+                const btn = document.getElementById('notif-btn');
+                const rect = btn.getBoundingClientRect();
+                panel.style.top = (rect.bottom + 8) + 'px';
+                panel.style.left = Math.min(rect.left, window.innerWidth - 316) + 'px';
+                panel.classList.add('open');
+                loadNotificationDropdown();
+            } else {
+                panel.classList.remove('open');
+            }
         }
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', e => {
-            if (!e.target.closest('#notif-panel') && !e.target.closest('[onclick="toggleNotifPanel()"]')) {
+            if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn') && !e.target.closest('[onclick="toggleNotifPanel()"]')) {
                 notifOpen = false;
-                document.getElementById('notif-panel')?.classList.add('hidden');
+                document.getElementById('notif-panel')?.classList.remove('open');
             }
         });
 
@@ -535,17 +538,26 @@
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('jc_dark', isDark ? '1' : '');
-            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? 'ΓÿÇ∩╕Å' : '🌙');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
         }
 
         window.onload = () => {
             if (localStorage.getItem('jc_dark')) {
                 document.body.classList.add('dark');
-                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = 'ΓÿÇ∩╕Å');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
             }
             init();
         };
     </script>
+
+    <!-- Notification Panel -->
+    <div id="notif-panel">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100" style="flex-shrink:0;background:inherit;border-radius:1rem 1rem 0 0">
+            <span class="font-bold text-slate-800 text-sm">Notifications</span>
+            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
+        </div>
+        <div id="notif-list" class="p-2" style="overflow-y:auto;flex:1"></div>
+    </div>
 
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav hidden">
