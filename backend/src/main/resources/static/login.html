@@ -200,6 +200,17 @@
     </div>
     <script src="js/api.js"></script>
     <script>
+        // If already logged in, redirect to appropriate page
+        (function() {
+            const token = localStorage.getItem('jc_token');
+            const user = JSON.parse(localStorage.getItem('jc_user') || '{}');
+            if (token) {
+                if (user.role === 'ADMIN') window.location.replace('/admin');
+                else if (user.role === 'EMPLOYER') window.location.replace('/employer');
+                else window.location.replace('/dashboard');
+            }
+        })();
+
         let selectedRole = 'CANDIDATE';
         function switchMode(mode) {
             const isLogin = mode === 'login';

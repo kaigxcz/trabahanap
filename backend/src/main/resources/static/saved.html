@@ -160,19 +160,31 @@
         function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.replace('index.html'); }
 
     (function() {
+        function requireAuth() {
+            if (!localStorage.getItem("jc_token")) {
+                window.location.replace("index.html");
+            }
+        }
+        // Block back/forward - just stay on this page
+        history.pushState(null, "", location.href);
+        window.addEventListener("popstate", function() {
+            history.pushState(null, "", location.href);
+        });
+        // If bfcache restores this page after logout, redirect to login
+        window.addEventListener("pageshow", function(e) {
+            if (e.persisted) requireAuth();
+        });
+    })();
+
+
+    (function() {
         function checkAuth() {
             if (!localStorage.getItem("jc_token")) {
                 window.location.replace("index.html");
             }
         }
-        history.pushState(null, "", location.href);
-        window.addEventListener("popstate", function() {
             checkAuth();
-            history.pushState(null, "", location.href);
         });
-        window.addEventListener("pageshow", function() { checkAuth(); });
-        document.addEventListener("visibilitychange", function() { if (!document.hidden) checkAuth(); });
-        window.addEventListener("focus", checkAuth);
     })();
 
 
