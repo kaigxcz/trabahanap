@@ -1,5 +1,7 @@
 package com.jobconnect.controller;
 
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -106,9 +108,28 @@ public class AdminController {
     }
 
     @GetMapping("/jobs")
-    public List<Job> getAllJobs() {
+    public List<Map<String, Object>> getAllJobs() {
         requireAdmin();
-        return jobRepository.findAll();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+        return jobRepository.findAll().stream().map(j -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id",          j.getId());
+            map.put("title",       j.getTitle());
+            map.put("company",     j.getCompany());
+            map.put("location",    j.getLocation());
+            map.put("salary",      j.getSalary());
+            map.put("category",    j.getCategory());
+            map.put("icon",        j.getIcon());
+            map.put("type",        j.getType());
+            map.put("experience",  j.getExperience());
+            map.put("postedBy",    j.getPostedBy());
+            map.put("active",      j.isActive());
+            map.put("featured",    j.isFeatured());
+            map.put("description", j.getDescription());
+            map.put("requirements",j.getRequirements());
+            map.put("postedAt",    j.getPostedAt() != null ? j.getPostedAt().format(fmt) : "—");
+            return map;
+        }).toList();
     }
 
     @DeleteMapping("/jobs/{id}")
