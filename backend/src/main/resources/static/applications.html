@@ -95,10 +95,6 @@
     <script src="js/api.js"></script>
     <script>
         if (!localStorage.getItem('jc_token')) window.location.replace('index.html');
-        // Prevent back button from returning to login
-        history.pushState(null, '', location.href);
-        window.addEventListener('popstate', () => history.pushState(null, '', location.href));
-
         const STEPS = ['Applied', 'Under Review', 'Interview', 'Offer'];
         const STEP_ICONS = ['📤', '🔍', '🗣️', '🎉'];
         let allApps = [], currentFilter = 'all';
@@ -218,7 +214,23 @@
         }
 
         function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.replace('index.html'); }
-        window.addEventListener('pageshow', e => { if (!localStorage.getItem('jc_token')) window.location.replace('index.html'); });
+
+    (function() {
+        function checkAuth() {
+            if (!localStorage.getItem("jc_token")) {
+                window.location.replace("index.html");
+            }
+        }
+        history.pushState(null, "", location.href);
+        window.addEventListener("popstate", function() {
+            checkAuth();
+            history.pushState(null, "", location.href);
+        });
+        window.addEventListener("pageshow", function() { checkAuth(); });
+        document.addEventListener("visibilitychange", function() { if (!document.hidden) checkAuth(); });
+        window.addEventListener("focus", checkAuth);
+    })();
+
 
         let logoOpen = false;
         function toggleLogoDropdown() {

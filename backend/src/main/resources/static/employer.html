@@ -113,10 +113,6 @@
 <script>
 const user=JSON.parse(localStorage.getItem('jc_user')||'{}');
 if(!localStorage.getItem('jc_token')||user.role!=='EMPLOYER')window.location.replace('index.html');
-// Prevent back button from returning to login
-history.pushState(null,'',location.href);
-window.addEventListener('popstate',()=>history.pushState(null,'',location.href));
-document.getElementById('employer-name').innerText=(user.fullName||'').split(' ')[0]||'Employer';
 let myJobs=[],allApplicants=[];
 function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function escA(s){if(!s)return '';return String(s).replace(/'/g,"\\'");}
@@ -237,7 +233,6 @@ function viewApplicantsForJob(jobId){showTab('applicants');setTimeout(()=>{const
 async function toggleJobActive(id,current){try{await apiPut('/employer/jobs/'+id,{active:String(!current)});loadMyJobs();}catch(e){toast('Failed to update job.','error');}}
 async function deleteJob(id){showConfirm('This will permanently delete this job posting.',async()=>{try{await apiDelete('/employer/jobs/'+id);toast('Job deleted.','info');loadMyJobs();loadStats();}catch(e){toast('Failed to delete job.','error');}});}
 function logout(){localStorage.removeItem('jc_token');localStorage.removeItem('jc_user');window.location.replace('index.html');}
-window.addEventListener('pageshow',e=>{if(!localStorage.getItem('jc_token'))window.location.replace('index.html');});
 let logoOpen=false;
 function toggleLogoDropdown(){logoOpen=!logoOpen;const drop=document.getElementById('logo-dropdown');if(logoOpen){const rect=document.getElementById('logo-btn').getBoundingClientRect();drop.style.top=(rect.bottom+8)+'px';drop.style.left=rect.left+'px';drop.classList.add('open');const u=JSON.parse(localStorage.getItem('jc_user')||'{}');document.getElementById('dropdown-name').innerText=u.fullName||u.username||'User';document.getElementById('dropdown-email').innerText=u.email||'';}else{drop.classList.remove('open');}}
 document.addEventListener('click',e=>{if(!e.target.closest('#logo-dropdown')&&!e.target.closest('#logo-btn')){logoOpen=false;const d=document.getElementById('logo-dropdown');if(d)d.classList.remove('open');}});
@@ -306,6 +301,23 @@ async function reverseGeocodeEmp(lat,lng){try{const res=await fetch('https://nom
 async function geocodeAndMoveEmp(query){try{const res=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)+'&format=json&limit=1',{headers:{'Accept-Language':'en'}});const data=await res.json();if(data.length){empMap.setView([data[0].lat,data[0].lon],13);empMarker.setLatLng([data[0].lat,data[0].lon]);}}catch(e){}}
 async function searchLocationEmployer(query){clearTimeout(empSuggestTimer);const box=document.getElementById('emp-loc-suggestions');if(!query||query.length<3){box.classList.add('hidden');return;}empSuggestTimer=setTimeout(async()=>{try{const res=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)+'&format=json&limit=5',{headers:{'Accept-Language':'en'}});const results=await res.json();if(!results.length){box.classList.add('hidden');return;}box.classList.remove('hidden');box.innerHTML=results.map(r=>{const short=r.display_name.split(',').slice(0,3).join(',');const dn=r.display_name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");return '<div class="loc-suggestion" onclick="selectLocationEmployer(\''+dn+"',"+r.lat+','+r.lon+')">'+esc(short)+'</div>';}).join('');}catch(e){box.classList.add('hidden');}},350);}
 function selectLocationEmployer(displayName,lat,lon){const parts=displayName.split(',');document.getElementById('f-location').value=parts[0].trim()+(parts[1]?', '+parts[1].trim():'');document.getElementById('emp-loc-suggestions').classList.add('hidden');if(empMap&&empMarker){empMap.setView([lat,lon],13);empMarker.setLatLng([lat,lon]);}}
+
+
+    (function() {
+        function checkAuth() {
+            if (!localStorage.getItem("jc_token")) {
+                window.location.replace("index.html");
+            }
+        }
+        history.pushState(null, "", location.href);
+        window.addEventListener("popstate", function() {
+            checkAuth();
+            history.pushState(null, "", location.href);
+        });
+        window.addEventListener("pageshow", function() { checkAuth(); });
+        document.addEventListener("visibilitychange", function() { if (!document.hidden) checkAuth(); });
+        window.addEventListener("focus", checkAuth);
+    })();
 </script>
 </body>
 </html>

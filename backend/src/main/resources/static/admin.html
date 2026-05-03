@@ -322,10 +322,6 @@
     <script>
         const user = JSON.parse(localStorage.getItem('jc_user') || '{}');
         if (!localStorage.getItem('jc_token') || user.role !== 'ADMIN') window.location.replace('index.html');
-        // Prevent back button from returning to login
-        history.pushState(null, '', location.href);
-        window.addEventListener('popstate', () => history.pushState(null, '', location.href));
-
         const roleColors = { ADMIN: 'bg-red-50 text-red-600', EMPLOYER: 'bg-indigo-50 text-indigo-600', CANDIDATE: 'bg-teal-50 text-teal-600' };
 
         function showTab(tab) {
@@ -572,7 +568,23 @@
             localStorage.removeItem('jc_user');
             window.location.replace('index.html');
         }
-        window.addEventListener('pageshow', e => { if (!localStorage.getItem('jc_token')) window.location.replace('index.html'); });
+
+    (function() {
+        function checkAuth() {
+            if (!localStorage.getItem("jc_token")) {
+                window.location.replace("index.html");
+            }
+        }
+        history.pushState(null, "", location.href);
+        window.addEventListener("popstate", function() {
+            checkAuth();
+            history.pushState(null, "", location.href);
+        });
+        window.addEventListener("pageshow", function() { checkAuth(); });
+        document.addEventListener("visibilitychange", function() { if (!document.hidden) checkAuth(); });
+        window.addEventListener("focus", checkAuth);
+    })();
+
 
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');
