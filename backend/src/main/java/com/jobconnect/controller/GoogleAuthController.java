@@ -91,12 +91,15 @@ public class GoogleAuthController {
 
     @PostMapping("/google/complete")
     public ResponseEntity<?> googleComplete(@RequestBody Map<String, String> body) {
-        String email     = body.get("email");
-        String firstName = body.get("firstName");
-        String lastName  = body.get("lastName");
-        String username  = body.get("username");
-        String location  = body.get("location");
-        String role      = body.getOrDefault("role", "CANDIDATE").toUpperCase();
+        String email      = body.get("email");
+        String firstName  = body.get("firstName");
+        String middleName = body.get("middleName");
+        String lastName   = body.get("lastName");
+        String suffix     = body.get("suffix");
+        String username   = body.get("username");
+        String location   = body.get("location");
+        String phone      = body.get("phone");
+        String role       = body.getOrDefault("role", "CANDIDATE").toUpperCase();
 
         if (email == null || username == null || location == null || location.isBlank())
             return ResponseEntity.badRequest().body(Map.of("error", "Missing required fields."));
@@ -110,6 +113,9 @@ public class GoogleAuthController {
                 lastName  != null ? lastName  : "",
                 email, location);
         user.setRole(role);
+        if (middleName != null && !middleName.isBlank()) user.setMiddleName(middleName);
+        if (suffix     != null && !suffix.isBlank())     user.setSuffix(suffix);
+        if (phone      != null && !phone.isBlank())      user.setPhone(phone);
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user.getUsername());

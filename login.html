@@ -418,6 +418,9 @@
             document.getElementById('gc-fname').value = data.firstName || '';
             document.getElementById('gc-lname').value = data.lastName  || '';
             document.getElementById('gc-email').value = data.email     || '';
+            document.getElementById('gc-mname').value = '';
+            document.getElementById('gc-suffix').value = '';
+            document.getElementById('gc-phone').value = '';
             document.getElementById('gc-username').value = '';
             document.getElementById('gc-location').value = '';
             document.getElementById('gc-error').classList.add('hidden');
@@ -433,25 +436,42 @@
         }
 
         async function submitGoogleComplete() {
-            const firstName = document.getElementById('gc-fname').value.trim();
-            const lastName  = document.getElementById('gc-lname').value.trim();
-            const email     = document.getElementById('gc-email').value.trim();
-            const username  = document.getElementById('gc-username').value.trim();
-            const location  = document.getElementById('gc-location').value.trim();
-            const errEl     = document.getElementById('gc-error');
+            const firstName  = document.getElementById('gc-fname').value.trim();
+            const lastName   = document.getElementById('gc-lname').value.trim();
+            const middleName = document.getElementById('gc-mname').value.trim();
+            const suffix     = document.getElementById('gc-suffix').value.trim();
+            const email      = document.getElementById('gc-email').value.trim();
+            const phone      = document.getElementById('gc-phone').value.trim();
+            const username   = document.getElementById('gc-username').value.trim();
+            const location   = document.getElementById('gc-location').value.trim();
+            const errEl      = document.getElementById('gc-error');
             errEl.classList.add('hidden');
 
+            const nameRe  = /^[a-zA-ZÀ-ÿñÑ\s'\-\.]+$/;
+            const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!firstName || !lastName || !username || !location) {
                 errEl.innerText = 'Please fill in all required fields.'; errEl.classList.remove('hidden'); return;
             }
+            if (firstName.length < 2 || firstName.length > 50 || !nameRe.test(firstName)) {
+                errEl.innerText = 'First name must be 2–50 letters only.'; errEl.classList.remove('hidden'); return;
+            }
+            if (lastName.length < 2 || lastName.length > 50 || !nameRe.test(lastName)) {
+                errEl.innerText = 'Last name must be 2–50 letters only.'; errEl.classList.remove('hidden'); return;
+            }
+            if (middleName && (middleName.length < 2 || middleName.length > 50 || !nameRe.test(middleName))) {
+                errEl.innerText = 'Middle name must be 2–50 letters only.'; errEl.classList.remove('hidden'); return;
+            }
             if (username.length < 3) {
                 errEl.innerText = 'Username must be at least 3 characters.'; errEl.classList.remove('hidden'); return;
+            }
+            if (phone && !/^[\d\s\+\-\(\)]+$/.test(phone)) {
+                errEl.innerText = 'Phone number must contain digits only.'; errEl.classList.remove('hidden'); return;
             }
 
             const btn = document.getElementById('gc-submit-btn');
             setLoading(btn, true, 'Creating account...');
             try {
-                const data = await apiPost('/auth/google/complete', { firstName, lastName, email, username, location, role: _gcRole });
+                const data = await apiPost('/auth/google/complete', { firstName, middleName, lastName, suffix, email, phone, username, location, role: _gcRole });
                 if (data.error) { errEl.innerText = data.error; errEl.classList.remove('hidden'); return; }
                 localStorage.setItem('jc_token', data.token);
                 localStorage.setItem('jc_user', JSON.stringify(data));
@@ -489,17 +509,42 @@
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label>
-                    <input type="text" id="gc-fname" class="input-field mt-1">
+                    <input type="text" id="gc-fname" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label>
-                    <input type="text" id="gc-lname" class="input-field mt-1">
+                    <input type="text" id="gc-lname" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                    <input type="text" id="gc-mname" placeholder="Santos" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Suffix <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                    <select id="gc-suffix" class="input-field mt-1">
+                        <option value="">— None —</option>
+                        <option>Jr.</option>
+                        <option>Sr.</option>
+                        <option>II</option>
+                        <option>III</option>
+                        <option>IV</option>
+                        <option>V</option>
+                    </select>
                 </div>
             </div>
             <div class="space-y-3">
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email</label>
                     <input type="email" id="gc-email" class="input-field mt-1 bg-slate-50 cursor-not-allowed" readonly>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                    <div class="flex gap-2 mt-1">
+                        <select class="input-field w-24 shrink-0"><option>+63</option><option>+1</option><option>+44</option></select>
+                        <input type="tel" id="gc-phone" placeholder="9XX XXX XXXX" class="input-field">
+                    </div>
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label>
