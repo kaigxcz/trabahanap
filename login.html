@@ -250,7 +250,14 @@
             const phone = document.getElementById('reg-phone').value.trim();
             const errEl = document.getElementById('reg-error');
             errEl.classList.add('hidden');
+            const nameRe  = /^[a-zA-ZÀ-ÿñÑ\s'\-\.]+$/;
+            const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!firstName || !lastName || !username || !password || !location || !email) { errEl.innerText = 'Please fill in all required fields.'; errEl.classList.remove('hidden'); return; }
+            if (!nameRe.test(firstName)) { errEl.innerText = 'First name must contain letters only.'; errEl.classList.remove('hidden'); return; }
+            if (!nameRe.test(lastName))  { errEl.innerText = 'Last name must contain letters only.';  errEl.classList.remove('hidden'); return; }
+            if (middleName && !nameRe.test(middleName)) { errEl.innerText = 'Middle name must contain letters only.'; errEl.classList.remove('hidden'); return; }
+            if (!emailRe.test(email)) { errEl.innerText = 'Please enter a valid email address.'; errEl.classList.remove('hidden'); return; }
+            if (phone && !/^[\d\s\+\-\(\)]+$/.test(phone)) { errEl.innerText = 'Phone number must contain digits only.'; errEl.classList.remove('hidden'); return; }
             if (password.length < 6) { errEl.innerText = 'Password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
             if (!document.getElementById('terms').checked) { errEl.innerText = 'Please agree to the terms to continue.'; errEl.classList.remove('hidden'); return; }
             const btn = document.getElementById('register-btn');

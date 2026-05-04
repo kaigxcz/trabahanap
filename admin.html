@@ -730,9 +730,9 @@
             const phone    = document.getElementById('udm-phone').value.trim();
             const location = document.getElementById('udm-location').value.trim();
             const birthday = document.getElementById('udm-birthday').value.trim();
-            const nameRe   = /^[a-zA-ZÀ-ÿ\s'\-]+$/;
+            const nameRe   = /^[a-zA-ZÀ-ÿñÑ\s'\-\.]+$/;
             const emailRe  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!fname || !lname || !email || !location) return 'First name, last name, email, and location are required.';
+            if (!fname || !lname || !email || !location) return 'Please fill in all required fields.';
             if (!nameRe.test(fname)) return 'First name must contain letters only.';
             if (!nameRe.test(lname)) return 'Last name must contain letters only.';
             if (mname && !nameRe.test(mname)) return 'Middle name must contain letters only.';
