@@ -600,9 +600,12 @@
             // Then fetch from Nominatim in background (150ms debounce)
             regSuggestTimer = setTimeout(async () => {
                 try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&countrycodes=ph`, { headers: { 'Accept-Language': 'en' } });
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&countrycodes=ph`, { headers: { 'Accept-Language': 'en' } });
                     const results = await res.json();
-                    if (!results.length) return;
+                    // Only update if we got MORE results than local cache, and input still has same value
+                    const inputId = (type === 'emp') ? 'emp-location' : 'reg-location';
+                    const currentVal = document.getElementById(inputId)?.value;
+                    if (!results.length || currentVal !== query) return;
                     box.classList.remove('hidden');
                     box.innerHTML = results.map(r => {
                         const parts = r.display_name.split(',');
@@ -630,6 +633,14 @@
                 document.getElementById('reg-loc-suggestions')?.classList.add('hidden');
             if (!e.target.closest('#emp-location') && !e.target.closest('#emp-loc-suggestions'))
                 document.getElementById('emp-loc-suggestions')?.classList.add('hidden');
+        });
+        document.addEventListener('focusout', e => {
+            setTimeout(() => {
+                if (!document.activeElement.closest('#reg-loc-suggestions') && document.activeElement.id !== 'reg-location')
+                    document.getElementById('reg-loc-suggestions')?.classList.add('hidden');
+                if (!document.activeElement.closest('#emp-loc-suggestions') && document.activeElement.id !== 'emp-location')
+                    document.getElementById('emp-loc-suggestions')?.classList.add('hidden');
+            }, 200);
         });
     </script>
 </body>
