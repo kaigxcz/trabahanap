@@ -73,6 +73,9 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Phone number cannot have 4 or more consecutive identical digits."));
             }
         }
+        if (username.length() < 3 || username.length() > 20) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username must be between 3 and 20 characters."));
+        }
         if (userRepository.existsByUsername(username)) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username already taken."));
         }

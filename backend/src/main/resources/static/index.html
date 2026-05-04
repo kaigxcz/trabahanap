@@ -143,7 +143,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label><input type="text" id="reg-user" placeholder="juandc99" class="input-field mt-1"></div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label>
+                                <input type="text" id="reg-user" placeholder="juandc99" class="input-field mt-1" oninput="validateUsername(this)" maxlength="20">
+                                <p class="field-error text-xs text-red-500 mt-1 hidden" id="reg-user-err"></p>
+                            </div>
                             <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Password *</label><input type="password" id="reg-pass" placeholder="Min. 8 characters" class="input-field mt-1"></div>
                         </div>
                     </div>
@@ -205,7 +209,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label><input type="text" id="emp-user" placeholder="techstart_hr" class="input-field mt-1"></div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label>
+                                <input type="text" id="emp-user" placeholder="techstart_hr" class="input-field mt-1" oninput="validateUsername(this)" maxlength="20">
+                                <p class="field-error text-xs text-red-500 mt-1 hidden" id="emp-user-err"></p>
+                            </div>
                             <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Password *</label><input type="password" id="emp-pass" placeholder="Min. 8 characters" class="input-field mt-1"></div>
                         </div>
                     </div>
@@ -327,6 +335,30 @@
                 err.classList.remove('hidden');
                 input.style.borderColor = '#ef4444';
             } else if (digits.length === 10) {
+                err.classList.add('hidden');
+                input.style.borderColor = '#22c55e';
+            } else {
+                err.classList.add('hidden');
+                input.style.borderColor = '';
+            }
+        }
+
+        // ── Username validation: 3-20 chars ──
+        function validateUsername(input) {
+            const val = input.value;
+            // Hard cap at 20 (maxlength handles this but enforce in JS too)
+            if (val.length > 20) input.value = val.slice(0, 20);
+            const err = input.nextElementSibling;
+            if (!err) return;
+            if (val.length > 0 && val.length < 3) {
+                err.textContent = 'Username must be at least 3 characters.';
+                err.classList.remove('hidden');
+                input.style.borderColor = '#ef4444';
+            } else if (val.length === 20) {
+                err.textContent = 'Maximum 20 characters reached.';
+                err.classList.remove('hidden');
+                input.style.borderColor = '#f59e0b';
+            } else if (val.length >= 3) {
                 err.classList.add('hidden');
                 input.style.borderColor = '#22c55e';
             } else {
