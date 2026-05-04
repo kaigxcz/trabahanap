@@ -77,7 +77,9 @@ public class AdminController {
     public ResponseEntity<?> getAllUsers() {
         requireAdmin();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
-        List<Map<String, Object>> users = userRepository.findAll().stream().map(u -> {
+        List<Map<String, Object>> users = userRepository.findAll().stream()
+            .filter(u -> !u.isArchived())
+            .map(u -> {
             String firstName = u.getFirstName() != null ? u.getFirstName() : "";
             String middleName = u.getMiddleName() != null && !u.getMiddleName().isBlank() ? " " + u.getMiddleName() : "";
             String lastName  = u.getLastName()  != null ? u.getLastName()  : "";
@@ -85,15 +87,22 @@ public class AdminController {
             String fullName  = (firstName + middleName + " " + lastName + suffix).trim();
             if (fullName.isEmpty()) fullName = u.getUsername();
             Map<String, Object> map = new HashMap<>();
-            map.put("id",        u.getId());
-            map.put("username",  u.getUsername());
-            map.put("fullName",  fullName);
-            map.put("email",     u.getEmail()    != null ? u.getEmail()    : "");
-            map.put("role",      u.getRole()     != null ? u.getRole()     : "CANDIDATE");
-            map.put("location",  u.getLocation() != null ? u.getLocation() : "");
-            map.put("jobTitle",  u.getJobTitle() != null ? u.getJobTitle() : "");
-            map.put("skills",    u.getSkills()   != null ? u.getSkills()   : "");
-            map.put("joinedAt",  u.getCreatedAt() != null ? u.getCreatedAt().format(fmt) : "—");
+            map.put("id",         u.getId());
+            map.put("username",   u.getUsername());
+            map.put("fullName",   fullName);
+            map.put("firstName",  firstName);
+            map.put("lastName",   lastName);
+            map.put("middleName", u.getMiddleName() != null ? u.getMiddleName() : "");
+            map.put("suffix",     u.getSuffix()    != null ? u.getSuffix()    : "");
+            map.put("email",      u.getEmail()    != null ? u.getEmail()    : "");
+            map.put("phone",      u.getPhone()    != null ? u.getPhone()    : "");
+            map.put("role",       u.getRole()     != null ? u.getRole()     : "CANDIDATE");
+            map.put("location",   u.getLocation() != null ? u.getLocation() : "");
+            map.put("jobTitle",   u.getJobTitle() != null ? u.getJobTitle() : "");
+            map.put("skills",     u.getSkills()   != null ? u.getSkills()   : "");
+            map.put("birthday",   u.getBirthday() != null ? u.getBirthday() : "");
+            map.put("age",        u.getAge()      != null ? u.getAge()      : "");
+            map.put("joinedAt",   u.getCreatedAt() != null ? u.getCreatedAt().format(fmt) : "—");
             return map;
         }).toList();
         return ResponseEntity.ok(users);
@@ -112,18 +121,83 @@ public class AdminController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/users/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        requireAdmin();
+        return userRepository.findById(id).map(u -> {
+            if (body.containsKey("firstName"))  u.setFirstName(body.get("firstName"));
+            if (body.containsKey("middleName")) u.setMiddleName(body.get("middleName"));
+            if (body.containsKey("lastName"))   u.setLastName(body.get("lastName"));
+            if (body.containsKey("email"))      u.setEmail(body.get("email"));
+            if (body.containsKey("phone"))      u.setPhone(body.get("phone"));
+            if (body.containsKey("location"))   u.setLocation(body.get("location"));
+            if (body.containsKey("jobTitle"))   u.setJobTitle(body.get("jobTitle"));
+            if (body.containsKey("skills"))     u.setSkills(body.get("skills"));
+            if (body.containsKey("birthday"))   u.setBirthday(body.get("birthday"));
+            if (body.containsKey("suffix"))     u.setSuffix(body.get("suffix"));
+            if (body.containsKey("age") && body.get("age") != null && !body.get("age").isBlank()) {
+                try { u.setAge(Integer.parseInt(body.get("age"))); } catch (NumberFormatException ignored) {}
+            }
+            userRepository.save(u);
+            return ResponseEntity.ok(Map.of("message", "User updated."));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/users/{id}/archive")
+    public ResponseEntity<?> archiveUser(@PathVariable Long id) {
+        requireAdmin();
+        return userRepository.findById(id).map(u -> {
+            u.setArchived(true);
+            userRepository.save(u);
+            return ResponseEntity.ok(Map.of("message", "User archived."));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/users/{id}/restore")
+    public ResponseEntity<?> restoreUser(@PathVariable Long id) {
+        requireAdmin();
+        return userRepository.findById(id).map(u -> {
+            u.setArchived(false);
+            userRepository.save(u);
+            return ResponseEntity.ok(Map.of("message", "User restored."));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         requireAdmin();
         return userRepository.findById(id).map(u -> {
-            // Cascade delete related data to avoid FK constraint errors
             applicationRepository.deleteAll(applicationRepository.findByUser(u));
             savedJobRepository.deleteAll(savedJobRepository.findByUser(u));
             notificationRepository.deleteAll(notificationRepository.findByUserOrderByCreatedAtDesc(u));
             messageRepository.deleteAll(messageRepository.findConversations(u));
             userRepository.delete(u);
-            return ResponseEntity.ok(Map.of("message", "User deleted."));
+            return ResponseEntity.ok(Map.of("message", "User permanently deleted."));
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/users/archived")
+    public ResponseEntity<?> getArchivedUsers() {
+        requireAdmin();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+        List<Map<String, Object>> users = userRepository.findAll().stream()
+            .filter(User::isArchived)
+            .map(u -> {
+                String firstName = u.getFirstName() != null ? u.getFirstName() : "";
+                String middleName = u.getMiddleName() != null && !u.getMiddleName().isBlank() ? " " + u.getMiddleName() : "";
+                String lastName  = u.getLastName()  != null ? u.getLastName()  : "";
+                String fullName  = (firstName + middleName + " " + lastName).trim();
+                if (fullName.isEmpty()) fullName = u.getUsername();
+                Map<String, Object> map = new HashMap<>();
+                map.put("id",       u.getId());
+                map.put("username", u.getUsername());
+                map.put("fullName", fullName);
+                map.put("email",    u.getEmail()    != null ? u.getEmail()    : "");
+                map.put("role",     u.getRole()     != null ? u.getRole()     : "CANDIDATE");
+                map.put("joinedAt", u.getCreatedAt() != null ? u.getCreatedAt().format(fmt) : "—");
+                return map;
+            }).toList();
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/jobs")

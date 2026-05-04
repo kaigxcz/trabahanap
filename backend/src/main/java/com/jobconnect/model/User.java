@@ -33,6 +33,7 @@ public class User {
     private String resumeFilename;
     private String role; // CANDIDATE, EMPLOYER, ADMIN
     private String phone;
+    private boolean archived = false;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -85,4 +86,6 @@ public class User {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public boolean isArchived() { return archived; }
+    public void setArchived(boolean archived) { this.archived = archived; }
 }

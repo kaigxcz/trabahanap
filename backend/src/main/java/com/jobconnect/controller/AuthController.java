@@ -35,6 +35,7 @@ public class AuthController {
         String firstName = body.get("firstName");
         String middleName = body.getOrDefault("middleName", "");
         String lastName = body.get("lastName");
+        String suffix = body.getOrDefault("suffix", "");
         String email = body.get("email");
         String location = body.get("location");
         String suffix = body.getOrDefault("suffix", "");
@@ -85,6 +86,7 @@ public class AuthController {
         User user = new User(username, passwordEncoder.encode(password), firstName, lastName, email, location);
         user.setRole(role);
         if (!middleName.isBlank()) user.setMiddleName(middleName);
+        if (!suffix.isBlank()) user.setSuffix(suffix);
         if (body.containsKey("phone")) user.setPhone(body.get("phone"));
         if (body.containsKey("middleName") && !body.get("middleName").isEmpty()) user.setMiddleName(body.get("middleName"));
         if (body.containsKey("birthday") && !body.get("birthday").isEmpty()) {

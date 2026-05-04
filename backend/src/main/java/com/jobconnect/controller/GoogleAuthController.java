@@ -1,5 +1,17 @@
 package com.jobconnect.controller;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -7,14 +19,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.jobconnect.model.User;
 import com.jobconnect.repository.UserRepository;
 import com.jobconnect.security.JwtUtil;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -58,18 +62,14 @@ public class GoogleAuthController {
             // Find or create user
             User user = userRepository.findByEmail(email).orElse(null);
             if (user == null) {
-                // Create new user from Google account
-                String username = email.split("@")[0] + "_" + googleId.substring(0, 6);
-                // Make username unique
-                if (userRepository.existsByUsername(username)) {
-                    username = username + "_" + UUID.randomUUID().toString().substring(0, 4);
-                }
-                user = new User(username, passwordEncoder.encode(UUID.randomUUID().toString()),
-                        firstName != null ? firstName : email.split("@")[0],
-                        lastName != null ? lastName : "",
-                        email, "");
-                user.setRole(role);
-                userRepository.save(user);
+                // New Google user — return their info so the frontend can collect missing fields
+                return ResponseEntity.ok(Map.of(
+                    "needsRegistration", true,
+                    "email",     email != null ? email : "",
+                    "firstName", firstName != null ? firstName : "",
+                    "lastName",  lastName  != null ? lastName  : "",
+                    "googleId",  googleId
+                ));
             }
 
             String token = jwtUtil.generateToken(user.getUsername());
@@ -87,5 +87,40 @@ public class GoogleAuthController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Google authentication failed: " + e.getMessage()));
         }
+    }
+
+    @PostMapping("/google/complete")
+    public ResponseEntity<?> googleComplete(@RequestBody Map<String, String> body) {
+        String email     = body.get("email");
+        String firstName = body.get("firstName");
+        String lastName  = body.get("lastName");
+        String username  = body.get("username");
+        String location  = body.get("location");
+        String role      = body.getOrDefault("role", "CANDIDATE").toUpperCase();
+
+        if (email == null || username == null || location == null || location.isBlank())
+            return ResponseEntity.badRequest().body(Map.of("error", "Missing required fields."));
+        if (userRepository.existsByUsername(username))
+            return ResponseEntity.badRequest().body(Map.of("error", "Username already taken."));
+        if (userRepository.findByEmail(email).isPresent())
+            return ResponseEntity.badRequest().body(Map.of("error", "An account with this email already exists."));
+
+        User user = new User(username, passwordEncoder.encode(UUID.randomUUID().toString()),
+                firstName != null ? firstName : email.split("@")[0],
+                lastName  != null ? lastName  : "",
+                email, location);
+        user.setRole(role);
+        userRepository.save(user);
+
+        String token = jwtUtil.generateToken(user.getUsername());
+        String fullName = ((user.getFirstName() != null ? user.getFirstName() : "") + " " +
+                          (user.getLastName()  != null ? user.getLastName()  : "")).trim();
+        return ResponseEntity.ok(Map.of(
+            "token",    token,
+            "username", user.getUsername(),
+            "fullName", fullName.isEmpty() ? user.getUsername() : fullName,
+            "email",    user.getEmail(),
+            "role",     user.getRole()
+        ));
     }
 }
