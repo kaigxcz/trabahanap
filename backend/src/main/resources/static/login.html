@@ -240,6 +240,7 @@
                 return true;
             }).join('');
             if (val.length > 20) val = val.slice(0, 20);
+            val = val.replace(/(^|\s)(\S)/g, (m, space, char) => space + char.toUpperCase());
             input.value = val;
             const err = input.nextElementSibling;
             if (!err || !err.classList.contains('name-error')) return;

@@ -231,7 +231,6 @@
         // ── Name field real-time validation ──
         function validateName(input) {
             let val = input.value;
-            const pos = input.selectionStart;
 
             // 1. Remove all digits
             val = val.replace(/[0-9]/g, '');
@@ -242,7 +241,7 @@
             // 3. Prevent consecutive spaces
             val = val.replace(/  +/g, ' ');
 
-            // 4. Max 2 spaces total — remove any space beyond the 2nd
+            // 4. Max 2 spaces total
             let spaceCount = 0;
             val = val.split('').filter(ch => {
                 if (ch === ' ') { spaceCount++; return spaceCount <= 2; }
@@ -251,6 +250,9 @@
 
             // 5. Max 20 chars
             if (val.length > 20) val = val.slice(0, 20);
+
+            // 6. Auto-capitalize first letter after start and after each space
+            val = val.replace(/(^|\s)(\S)/g, (m, space, char) => space + char.toUpperCase());
 
             input.value = val;
 
