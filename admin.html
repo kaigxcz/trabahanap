@@ -767,7 +767,10 @@
                 el.classList.add('border-red-400'); errEl.innerText = 'Required.'; return;
             }
             if (val && val.length < 2) {
-                el.classList.add('border-red-400'); errEl.innerText = 'Too short (min 2 characters).'; return;
+                el.classList.add('border-red-400'); errEl.innerText = 'Must be at least 2 characters.'; return;
+            }
+            if (val && val.length > 50) {
+                el.classList.add('border-red-400'); errEl.innerText = 'Must be at most 50 characters.'; return;
             }
             if (val && !_nameRe.test(val)) {
                 el.classList.add('border-red-400'); errEl.innerText = 'Letters only.'; return;
