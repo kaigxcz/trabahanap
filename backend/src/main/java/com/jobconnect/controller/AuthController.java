@@ -83,6 +83,20 @@ public class AuthController {
         User user = new User(username, passwordEncoder.encode(password), firstName, lastName, email, location);
         user.setRole(role);
         if (body.containsKey("phone")) user.setPhone(body.get("phone"));
+        if (body.containsKey("middleName") && !body.get("middleName").isEmpty()) user.setMiddleName(body.get("middleName"));
+        if (body.containsKey("birthday") && !body.get("birthday").isEmpty()) {
+            user.setBirthday(body.get("birthday"));
+            // Compute and validate age
+            try {
+                java.time.LocalDate birth = java.time.LocalDate.parse(body.get("birthday"));
+                int age = java.time.Period.between(birth, java.time.LocalDate.now()).getYears();
+                if (age < 18) return ResponseEntity.badRequest().body(Map.of("error", "You must be at least 18 years old."));
+                if (age > 50) return ResponseEntity.badRequest().body(Map.of("error", "Age must not exceed 50 years."));
+                user.setAge(age);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid birthday format."));
+            }
+        }
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(username);

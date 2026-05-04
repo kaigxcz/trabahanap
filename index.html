@@ -115,6 +115,22 @@
                                 <p class="name-error text-xs text-red-500 mt-1 hidden"></p>
                             </div>
                         </div>
+                        <div class="mb-3">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                            <input type="text" id="reg-mname" placeholder="Santos" class="input-field mt-1" oninput="validateMiddleName(this)" maxlength="20" autocomplete="additional-name">
+                            <p class="name-error text-xs text-red-500 mt-1 hidden"></p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Birthday *</label>
+                                <input type="date" id="reg-bday" class="input-field mt-1" oninput="computeAge('reg')" onchange="computeAge('reg')" max="">
+                                <p class="field-error text-xs text-red-500 mt-1 hidden" id="reg-bday-err"></p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Age</label>
+                                <input type="text" id="reg-age" class="input-field mt-1 bg-slate-100 cursor-not-allowed" readonly placeholder="Auto-computed">
+                            </div>
+                        </div>
                         <div class="space-y-3">
                             <div>
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email *</label>
@@ -164,6 +180,22 @@
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label>
                                 <input type="text" id="emp-lname" placeholder="Santos" class="input-field mt-1" oninput="validateName(this)" maxlength="20" autocomplete="family-name">
                                 <p class="name-error text-xs text-red-500 mt-1 hidden"></p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                            <input type="text" id="emp-mname" placeholder="Reyes" class="input-field mt-1" oninput="validateMiddleName(this)" maxlength="20" autocomplete="additional-name">
+                            <p class="name-error text-xs text-red-500 mt-1 hidden"></p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Birthday *</label>
+                                <input type="date" id="emp-bday" class="input-field mt-1" oninput="computeAge('emp')" onchange="computeAge('emp')" max="">
+                                <p class="field-error text-xs text-red-500 mt-1 hidden" id="emp-bday-err"></p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Age</label>
+                                <input type="text" id="emp-age" class="input-field mt-1 bg-slate-100 cursor-not-allowed" readonly placeholder="Auto-computed">
                             </div>
                         </div>
                         <div class="space-y-3">
@@ -284,6 +316,51 @@
             } else {
                 err.classList.add('hidden');
                 input.style.borderColor = '';
+            }
+        }
+
+        // ── Middle name validation (optional, same rules as name) ──
+        function validateMiddleName(input) {
+            if (!input.value) { input.style.borderColor = ''; input.nextElementSibling?.classList.add('hidden'); return; }
+            validateName(input);
+        }
+
+        // ── Birthday / Age auto-compute ──
+        (function() {
+            const today = new Date();
+            const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+            const minDate = new Date(today.getFullYear() - 50, today.getMonth(), today.getDate());
+            const fmt = d => d.toISOString().split('T')[0];
+            ['reg-bday','emp-bday'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.max = fmt(maxDate); el.min = fmt(minDate); }
+            });
+        })();
+
+        function computeAge(prefix) {
+            const bday = document.getElementById(prefix + '-bday');
+            const ageEl = document.getElementById(prefix + '-age');
+            const err = document.getElementById(prefix + '-bday-err');
+            if (!bday || !bday.value) { if (ageEl) ageEl.value = ''; return; }
+            const birth = new Date(bday.value);
+            const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            const m = today.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+            if (ageEl) ageEl.value = age;
+            if (err) {
+                if (age < 18) {
+                    err.textContent = 'You must be at least 18 years old.';
+                    err.classList.remove('hidden');
+                    bday.style.borderColor = '#ef4444';
+                } else if (age > 50) {
+                    err.textContent = 'Age must not exceed 50 years.';
+                    err.classList.remove('hidden');
+                    bday.style.borderColor = '#ef4444';
+                } else {
+                    err.classList.add('hidden');
+                    bday.style.borderColor = '#22c55e';
+                }
             }
         }
 
@@ -444,24 +521,30 @@
             const errEl = document.getElementById('reg-error');
             errEl.classList.add('hidden');
 
-            let firstName, lastName, username, email, password, location, phone, company;
+            let firstName, lastName, middleName, username, email, password, location, phone, company, birthday, age;
 
             if (selectedRole === 'CANDIDATE') {
                 firstName = document.getElementById('reg-fname').value.trim();
                 lastName = document.getElementById('reg-lname').value.trim();
+                middleName = document.getElementById('reg-mname').value.trim();
                 email = document.getElementById('reg-email').value.trim();
                 phone = document.getElementById('reg-phone').value.replace(/\D/g, '');
                 location = document.getElementById('reg-location').value.trim();
                 username = document.getElementById('reg-user').value.trim();
                 password = document.getElementById('reg-pass').value;
+                birthday = document.getElementById('reg-bday').value;
+                age = parseInt(document.getElementById('reg-age').value) || 0;
             } else {
                 firstName = document.getElementById('emp-fname').value.trim();
                 lastName = document.getElementById('emp-lname').value.trim();
+                middleName = document.getElementById('emp-mname').value.trim();
                 email = document.getElementById('emp-email').value.trim();
                 location = document.getElementById('emp-location').value.trim();
                 username = document.getElementById('emp-user').value.trim();
                 password = document.getElementById('emp-pass').value;
                 company = document.getElementById('emp-company').value.trim();
+                birthday = document.getElementById('emp-bday').value;
+                age = parseInt(document.getElementById('emp-age').value) || 0;
                 const industry = document.getElementById('emp-industry').value;
                 if (!company) { errEl.innerText = 'Please enter your company name.'; errEl.classList.remove('hidden'); return; }
                 if (!industry) { errEl.innerText = 'Please select your industry.'; errEl.classList.remove('hidden'); return; }
@@ -471,13 +554,16 @@
                 errEl.innerText = 'Please fill in all required fields.';
                 errEl.classList.remove('hidden'); return;
             }
+            if (!birthday) { errEl.innerText = 'Please enter your birthday.'; errEl.classList.remove('hidden'); return; }
+            if (age < 18) { errEl.innerText = 'You must be at least 18 years old.'; errEl.classList.remove('hidden'); return; }
+            if (age > 50) { errEl.innerText = 'Age must not exceed 50 years.'; errEl.classList.remove('hidden'); return; }
             if (password.length < 6) { errEl.innerText = 'Password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
             if (!document.getElementById('terms').checked) { errEl.innerText = 'Please agree to the terms to continue.'; errEl.classList.remove('hidden'); return; }
 
             const btn = document.getElementById('register-btn');
             setLoading(btn, true, 'Creating account...');
             try {
-                const payload = { firstName, lastName, username, email, password, location, phone: phone || '', role: selectedRole };
+                const payload = { firstName, lastName, middleName, username, email, password, location, phone: phone || '', birthday, role: selectedRole };
                 if (company) payload.company = company;
                 const data = await apiPost('/auth/register', payload);
                 if (data.error) { errEl.innerText = data.error; errEl.classList.remove('hidden'); return; }
