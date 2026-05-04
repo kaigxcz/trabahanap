@@ -140,7 +140,7 @@
                                     class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">📍</button>
                             </div>
                             <!-- Autocomplete suggestions -->
-                            <div id="reg-loc-suggestions" class="hidden mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden" style="position:relative;z-index:50"></div>
+                            <div id="reg-loc-suggestions" class="hidden" style="position:fixed;z-index:9999;background:white;border:1px solid #e2e8f0;border-radius:1rem;box-shadow:0 8px 32px rgba(0,0,0,0.12);overflow:hidden;min-width:280px;max-height:220px;overflow-y:auto"></div>
                             <!-- Map -->
                             <div id="reg-map-wrap" class="hidden mt-2" style="height:200px;position:relative">
                                 <div id="reg-map" style="height:100%;width:100%;border-radius:1rem"></div>
@@ -377,6 +377,12 @@
                     );
                     const results = await res.json();
                     if (!results.length) { box.classList.add('hidden'); return; }
+                    // Position below the input
+                    const input = document.getElementById('reg-location');
+                    const rect = input.getBoundingClientRect();
+                    box.style.top    = (rect.bottom + 4) + 'px';
+                    box.style.left   = rect.left + 'px';
+                    box.style.width  = rect.width + 'px';
                     box.classList.remove('hidden');
                     box.innerHTML = results.map(r => {
                         const parts = r.display_name.split(',');
