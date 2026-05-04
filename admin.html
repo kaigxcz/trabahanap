@@ -699,7 +699,20 @@
         // ── User Detail Modal (Editable) ──
         let _editingUserId = null, _originalSnapshot = {};
 
-        const _udmFields = ['udm-fname','udm-mname','udm-lname','udm-age','udm-birthday','udm-phone','udm-email','udm-location','udm-jobtitle','udm-skills'];
+        const _udmFields = ['udm-fname','udm-mname','udm-lname','udm-suffix','udm-birthday','udm-phone','udm-email','udm-location','udm-jobtitle','udm-skills'];
+
+        function computeUdmAge() {
+            const val = document.getElementById('udm-birthday').value;
+            const ageEl = document.getElementById('udm-age');
+            if (!val) { ageEl.value = ''; return; }
+            const today = new Date();
+            const dob = new Date(val);
+            if (isNaN(dob.getTime()) || dob > today) { ageEl.value = ''; return; }
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+            ageEl.value = age >= 0 ? age : '';
+        }
 
         function checkUdmDirty() {
             const dirty = _udmFields.some(id => document.getElementById(id).value.trim() !== (_originalSnapshot[id] || ''));
@@ -716,7 +729,7 @@
             const email    = document.getElementById('udm-email').value.trim();
             const phone    = document.getElementById('udm-phone').value.trim();
             const location = document.getElementById('udm-location').value.trim();
-            const age      = document.getElementById('udm-age').value.trim();
+            const birthday = document.getElementById('udm-birthday').value.trim();
             const nameRe   = /^[a-zA-ZÀ-ÿ\s'\-]+$/;
             const emailRe  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!fname || !lname || !email || !location) return 'First name, last name, email, and location are required.';
@@ -725,7 +738,7 @@
             if (mname && !nameRe.test(mname)) return 'Middle name must contain letters only.';
             if (!emailRe.test(email)) return 'Please enter a valid email address.';
             if (phone && !/^[\d\s\+\-\(\)]+$/.test(phone)) return 'Phone number must contain digits only.';
-            if (age && (isNaN(age) || Number(age) < 1 || Number(age) > 120)) return 'Please enter a valid age (1–120).';
+            if (birthday && new Date(birthday) > new Date()) return 'Birthday cannot be in the future.';
             return null;
         }
 
@@ -735,14 +748,14 @@
             if (!u) return;
             const initials = ((u.firstName||'?')[0] + (u.lastName||'?')[0]).toUpperCase();
             document.getElementById('uvm-avatar').innerText = initials;
-            document.getElementById('uvm-name').innerText = u.fullName || u.username;
+            document.getElementById('uvm-name').innerText = (u.fullName || u.username) + (u.suffix ? ' ' + u.suffix : '');
             document.getElementById('uvm-username').innerText = '@' + u.username;
             document.getElementById('uvm-role-badge').innerText = u.role;
             document.getElementById('uvm-fname').innerText    = u.firstName  || '—';
             document.getElementById('uvm-mname').innerText    = u.middleName || '—';
             document.getElementById('uvm-lname').innerText    = u.lastName   || '—';
             document.getElementById('uvm-age').innerText      = u.age ? u.age + ' years old' : '—';
-            document.getElementById('uvm-birthday').innerText = u.birthday   || '—';
+            document.getElementById('uvm-birthday').innerText = u.birthday ? (() => { const d = new Date(u.birthday); return isNaN(d.getTime()) ? u.birthday : d.toLocaleDateString('en-PH', {month:'long', day:'numeric', year:'numeric'}); })() : '—';
             document.getElementById('uvm-phone').innerText    = u.phone      || '—';
             document.getElementById('uvm-email').innerText    = u.email      || '—';
             document.getElementById('uvm-location').innerText = u.location   || '—';
@@ -770,12 +783,19 @@
             document.getElementById('udm-name').innerText = u.fullName || u.username;
             document.getElementById('udm-username').innerText = '@' + u.username;
             document.getElementById('udm-role-badge').innerText = u.role;
+            // Convert birthday to YYYY-MM-DD for the date input
+            function toIsoDate(str) {
+                if (!str) return '';
+                const d = new Date(str);
+                if (isNaN(d.getTime())) return '';
+                return d.toISOString().split('T')[0];
+            }
             const vals = {
                 'udm-fname':    u.firstName  || '',
                 'udm-mname':    u.middleName || '',
                 'udm-lname':    u.lastName   || '',
-                'udm-age':      u.age != null ? String(u.age) : '',
-                'udm-birthday': u.birthday   || '',
+                'udm-suffix':   u.suffix     || '',
+                'udm-birthday': toIsoDate(u.birthday),
                 'udm-phone':    u.phone      || '',
                 'udm-email':    u.email      || '',
                 'udm-location': u.location   || '',
@@ -784,6 +804,7 @@
             };
             _originalSnapshot = { ...vals };
             _udmFields.forEach(id => document.getElementById(id).value = vals[id]);
+            computeUdmAge();
             document.getElementById('udm-joined').innerText = u.joinedAt || '—';
             document.getElementById('udm-jobtitle-wrap').style.display = u.role === 'CANDIDATE' ? '' : 'none';
             document.getElementById('udm-save-status').innerText = '';
@@ -807,6 +828,7 @@
                 firstName:  document.getElementById('udm-fname').value.trim(),
                 middleName: document.getElementById('udm-mname').value.trim(),
                 lastName:   document.getElementById('udm-lname').value.trim(),
+                suffix:     document.getElementById('udm-suffix').value.trim(),
                 age:        document.getElementById('udm-age').value.trim(),
                 birthday:   document.getElementById('udm-birthday').value.trim(),
                 phone:      document.getElementById('udm-phone').value.trim(),
@@ -822,8 +844,10 @@
                     Object.assign(allUsers[idx], payload);
                     const mn = payload.middleName ? ' ' + payload.middleName : '';
                     allUsers[idx].fullName = (payload.firstName + mn + ' ' + payload.lastName).trim() || allUsers[idx].username;
+                    allUsers[idx].suffix = payload.suffix || '';
                 }
-                document.getElementById('udm-name').innerText = allUsers[idx]?.fullName || '';
+                const updatedUser = allUsers[idx];
+                document.getElementById('udm-name').innerText = (updatedUser?.fullName || '') + (updatedUser?.suffix ? ' ' + updatedUser.suffix : '');
                 statusEl.innerText = '✓ Saved';
                 statusEl.className = 'text-xs text-green-600 font-semibold flex-1';
                 toast('User info updated.', 'success');
@@ -1152,12 +1176,12 @@
                         <input id="udm-lname" type="text" class="input mt-1 w-full text-sm" placeholder="Last name" oninput="checkUdmDirty()">
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Age</label>
-                        <input id="udm-age" type="number" class="input mt-1 w-full text-sm" placeholder="Age" oninput="checkUdmDirty()">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Birthday</label>
+                        <input id="udm-birthday" type="date" class="input mt-1 w-full text-sm" oninput="computeUdmAge(); checkUdmDirty()">
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Birthday</label>
-                        <input id="udm-birthday" type="text" class="input mt-1 w-full text-sm" placeholder="e.g. Jan 1, 2000" oninput="checkUdmDirty()">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Age</label>
+                        <input id="udm-age" type="number" class="input mt-1 w-full text-sm bg-slate-50 cursor-not-allowed" placeholder="Auto-computed" readonly>
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone</label>
