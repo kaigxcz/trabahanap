@@ -81,7 +81,8 @@ public class AdminController {
             String firstName = u.getFirstName() != null ? u.getFirstName() : "";
             String middleName = u.getMiddleName() != null && !u.getMiddleName().isBlank() ? " " + u.getMiddleName() : "";
             String lastName  = u.getLastName()  != null ? u.getLastName()  : "";
-            String fullName  = (firstName + middleName + " " + lastName).trim();
+            String suffix    = u.getSuffix()    != null && !u.getSuffix().isBlank() ? " " + u.getSuffix() : "";
+            String fullName  = (firstName + middleName + " " + lastName + suffix).trim();
             if (fullName.isEmpty()) fullName = u.getUsername();
             Map<String, Object> map = new HashMap<>();
             map.put("id",        u.getId());

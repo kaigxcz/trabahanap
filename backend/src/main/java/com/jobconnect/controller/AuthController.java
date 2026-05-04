@@ -37,6 +37,7 @@ public class AuthController {
         String lastName = body.get("lastName");
         String email = body.get("email");
         String location = body.get("location");
+        String suffix = body.getOrDefault("suffix", "");
         String role = body.getOrDefault("role", "CANDIDATE").toUpperCase();
 
         if (!role.equals("CANDIDATE") && !role.equals("EMPLOYER")) role = "CANDIDATE";
@@ -103,7 +104,8 @@ public class AuthController {
 
         String fullName = firstName
             + (middleName != null && !middleName.isBlank() ? " " + middleName : "")
-            + " " + lastName;
+            + " " + lastName
+            + (suffix != null && !suffix.isBlank() ? " " + suffix : "");
 
         String token = jwtUtil.generateToken(username);
         return ResponseEntity.ok(Map.of(
@@ -128,9 +130,11 @@ public class AuthController {
 
         User user = userOpt.get();
         String mn = user.getMiddleName() != null && !user.getMiddleName().isBlank() ? " " + user.getMiddleName() : "";
+        String sfx = user.getSuffix() != null && !user.getSuffix().isBlank() ? " " + user.getSuffix() : "";
         String fullName = ((user.getFirstName() != null ? user.getFirstName() : "")
                           + mn + " "
-                          + (user.getLastName() != null ? user.getLastName() : "")).trim();
+                          + (user.getLastName() != null ? user.getLastName() : "")
+                          + sfx).trim();
         if (fullName.isEmpty()) fullName = username;
         String token = jwtUtil.generateToken(username);
         return ResponseEntity.ok(Map.of(

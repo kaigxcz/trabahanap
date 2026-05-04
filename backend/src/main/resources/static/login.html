@@ -102,9 +102,19 @@
                         <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="reg-fname" placeholder="Juan" class="input-field mt-1"></div>
                         <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="reg-lname" placeholder="Dela Cruz" class="input-field mt-1"></div>
                     </div>
-                    <div class="mb-3">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
-                        <input type="text" id="reg-mname" placeholder="Santos" class="input-field mt-1">
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label><input type="text" id="reg-mname" placeholder="Santos" class="input-field mt-1"></div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Suffix <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                            <select id="reg-suffix" class="input-field mt-1">
+                                <option value="">None</option>
+                                <option>Jr.</option>
+                                <option>Sr.</option>
+                                <option>II</option>
+                                <option>III</option>
+                                <option>IV</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="space-y-3">
                         <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email *</label><input type="email" id="reg-email" placeholder="juan@example.com" class="input-field mt-1"></div>
@@ -224,6 +234,7 @@
             const firstName = document.getElementById('reg-fname').value.trim();
             const lastName = document.getElementById('reg-lname').value.trim();
             const middleName = document.getElementById('reg-mname').value.trim();
+            const suffix = document.getElementById('reg-suffix').value.trim();
             const username = document.getElementById('reg-user').value.trim();
             const email = document.getElementById('reg-email').value.trim();
             const password = document.getElementById('reg-pass').value;
