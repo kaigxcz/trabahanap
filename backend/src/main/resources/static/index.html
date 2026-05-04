@@ -517,7 +517,7 @@
             const mapId = isEmp ? 'emp-reg-map' : 'reg-map';
             const inputId = isEmp ? 'emp-location' : 'reg-location';
             const lat = 12.8797, lng = 121.7740;
-            const map = L.map(mapId, { zoomControl: true }).setView([lat, lng], 6);
+            const map = L.map(mapId, { zoomControl: true, maxBounds: [[4.5, 116.0], [21.5, 127.0]], maxBoundsViscosity: 1.0, minZoom: 5 }).setView([12.8797, 121.7740], 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19
             }).addTo(map);
