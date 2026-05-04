@@ -525,25 +525,73 @@
             } catch(e) {}
         }
 
+        
+        const PH_CITIES = [
+            "Manila","Quezon City","Caloocan","Las Pinas","Makati","Malabon","Mandaluyong","Marikina",
+            "Muntinlupa","Navotas","Paranaque","Pasay","Pasig","San Juan","Taguig","Valenzuela",
+            "Cebu City","Davao City","Zamboanga City","Antipolo","Cagayan de Oro","Parañaque",
+            "Bacoor","Dasmariñas","Imus","General Trias","Tanza","Trece Martires",
+            "Calamba","Santa Rosa","Biñan","San Pedro","Cabuyao","Laguna",
+            "Angeles City","San Fernando","Mabalacat","Clark","Pampanga",
+            "Baguio City","Laoag","Vigan","Tuguegarao","Ilagan",
+            "Batangas City","Lipa","Tanauan","Nasugbu","Bauan",
+            "Iloilo City","Bacolod City","Dumaguete City","Tacloban City",
+            "Cagayan de Oro","Iligan City","Butuan City","General Santos City",
+            "Cotabato City","Koronadal","Kidapawan","Marbel",
+            "Legazpi City","Naga City","Sorsogon","Masbate",
+            "Olongapo City","Subic","Balanga","Malolos","Meycauayan","Marilao",
+            "Cabanatuan","Palayan","Gapan","Munoz","Talavera",
+            "Lucena City","Tayabas","Sariaya","Candelaria",
+            "Roxas City","Kalibo","Boracay","Iloilo","Bacolod",
+            "Tagbilaran City","Bohol","Surigao City","Tandag","Bislig",
+            "Pagadian City","Dipolog City","Dapitan","Ozamiz City",
+            "Marawi City","Lanao del Sur","Maguindanao","Sultan Kudarat",
+            "Puerto Princesa","Palawan","Calapan","Mindoro",
+            "Boac","Marinduque","Romblon","Odiongan",
+            "Catbalogan","Calbayog","Ormoc City","Maasin",
+            "Catarman","Borongan","Guiuan","Samar",
+            "Kabankalan","Silay","Victorias","Escalante","Sagay",
+            "Talisay","Mandaue","Lapu-Lapu","Consolacion","Liloan",
+            "Tagum City","Panabo","Samal","Digos","Mati",
+            "Koronadal","Surallah","Tupi","Polomolok","Alabel",
+            "Zamboanga del Sur","Pagadian","Molave","Dumingag",
+            "Ipil","Kabasalan","Siay","Naga","Zamboanga Sibugay"
+        ];
+        function searchLocalCities(query) {
+            const q = query.toLowerCase();
+            return PH_CITIES.filter(c => c.toLowerCase().startsWith(q) || c.toLowerCase().includes(q)).slice(0,6);
+        }
+
         async function searchRegLocation(query, type) {
             clearTimeout(regSuggestTimer);
             const isEmp = type === 'emp';
             const boxId = isEmp ? 'emp-loc-suggestions' : 'reg-loc-suggestions';
             const box = document.getElementById(boxId);
-            if (!query || query.length < 3) { box.classList.add('hidden'); return; }
+            if (!query || query.length < 2) { box.classList.add('hidden'); return; }
+
+            // Show local results instantly
+            const local = searchLocalCities(query);
+            if (local.length) {
+                box.classList.remove('hidden');
+                box.innerHTML = local.map(city =>
+                    `<div class="loc-suggestion" onclick="pickRegLocation('${city}, Philippines', 0, 0, '${type || 'reg'}')">📍 ${city}, Philippines</div>`
+                ).join('');
+            }
+
+            // Then fetch from Nominatim in background (150ms debounce)
             regSuggestTimer = setTimeout(async () => {
                 try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&countrycodes=ph`, { headers: { 'Accept-Language': 'en' } });
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&countrycodes=ph`, { headers: { 'Accept-Language': 'en' } });
                     const results = await res.json();
-                    if (!results.length) { box.classList.add('hidden'); return; }
+                    if (!results.length) return;
                     box.classList.remove('hidden');
                     box.innerHTML = results.map(r => {
                         const parts = r.display_name.split(',');
                         const label = parts.slice(0, 3).join(',');
-                        return `<div class="loc-suggestion" onclick="pickRegLocation('${r.display_name.replace(/'/g,"\\'")}', ${r.lat}, ${r.lon}, '${type || 'reg'}')">📍 ${label}</div>`;
+                        return `<div class="loc-suggestion" onclick="pickRegLocation('${r.display_name.replace(/'/g,"\'")}', ${r.lat}, ${r.lon}, '${type || 'reg'}')">📍 ${label}</div>`;
                     }).join('');
-                } catch(e) { box.classList.add('hidden'); }
-            }, 350);
+                } catch(e) {}
+            }, 150);
         }
 
         function pickRegLocation(displayName, lat, lon, type) {
