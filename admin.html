@@ -67,6 +67,10 @@
                 <span>💬</span><span>Messages</span>
                 <span id="admin-msg-badge" class="ml-auto text-[10px] font-bold bg-red-500 text-white px-2 py-0.5 rounded-full hidden"></span>
             </button>
+            <button onclick="showTab('archive')" id="tab-archive" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition">
+                <span>🗄️</span><span>Archive</span>
+                <span id="archive-badge" class="ml-auto text-[10px] font-bold bg-slate-400 text-white px-2 py-0.5 rounded-full hidden"></span>
+            </button>
         </nav>
     </aside>
 
@@ -299,6 +303,36 @@
             </div>
         </div>
 
+        <!-- Archive Tab -->
+        <div id="view-archive" class="hidden">
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Archived Users</h1>
+                    <p class="text-slate-400 text-sm mt-1">Restore users or permanently delete them.</p>
+                </div>
+                <div class="relative">
+                    <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+                    <input type="text" id="archive-search" oninput="filterArchive()" placeholder="Search archived..."
+                        class="pl-8 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition w-48">
+                </div>
+            </div>
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Name</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Username</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Email</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Role</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Joined</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="archive-table"></tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Admin New Message Modal -->
         <div id="adminNewMsgModal" class="modal p-4">
             <div class="modal-box bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-8">
@@ -338,16 +372,16 @@
         const roleColors = { ADMIN: 'bg-red-50 text-red-600', EMPLOYER: 'bg-indigo-50 text-indigo-600', CANDIDATE: 'bg-teal-50 text-teal-600' };
 
         function showTab(tab) {
-            ['dashboard','users','jobseekers','employers','jobs','messages'].forEach(t => {
+            ['dashboard','users','jobseekers','employers','jobs','messages','archive'].forEach(t => {
                 const el = document.getElementById('view-' + t);
                 if (el) el.style.display = 'none';
-                document.getElementById('tab-' + t).classList.remove('active');
+                document.getElementById('tab-' + t)?.classList.remove('active');
                 const mob = document.getElementById('mob-' + t);
                 if (mob) mob.classList.remove('active');
             });
             const view = document.getElementById('view-' + tab);
             if (view) view.style.display = tab === 'messages' ? 'flex' : 'block';
-            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('tab-' + tab)?.classList.add('active');
             const mob = document.getElementById('mob-' + tab);
             if (mob) mob.classList.add('active');
             if (tab === 'dashboard') loadStats();
@@ -356,6 +390,7 @@
             if (tab === 'jobseekers') loadSeekers();
             if (tab === 'employers') loadEmployers();
             if (tab === 'messages') loadAdminConversations();
+            if (tab === 'archive') loadArchive();
         }
 
         async function loadStats() {
@@ -428,7 +463,8 @@
                             <select onchange="changeRole(${u.id}, this.value)" class="text-xs p-1.5 border border-slate-200 rounded-lg outline-none bg-white" ${u.username === currentUsername ? 'disabled' : ''}>
                                 ${['CANDIDATE','EMPLOYER','ADMIN'].map(r => `<option ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}
                             </select>
-                            ${u.username !== currentUsername && u.role !== 'ADMIN' ? `<button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>` : ''}
+                            <button onclick="showUserDetail(${u.id})" class="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-100 hover:border-indigo-300 px-2 py-1.5 rounded-lg transition">Edit</button>
+                            ${u.username !== currentUsername && u.role !== 'ADMIN' ? `<button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Archive</button>` : ''}
                         </div>
                     </td>
                 </tr>`).join('');
@@ -440,11 +476,78 @@
         }
 
         async function deleteUser(id, username) {
-            showConfirm(`Delete user @${username}? All their data will be permanently removed.`, async () => {
-                await apiDelete('/admin/users/' + id);
-                toast(`User @${username} deleted.`, 'info');
+            showConfirm(`Archive user @${username}? They can be restored later from the Archive tab.`, async () => {
+                await apiPut('/admin/users/' + id + '/archive', {});
+                toast(`User @${username} archived.`, 'info');
                 allUsers = allUsers.filter(u => u.id !== id);
+                allSeekers = allSeekers.filter(u => u.id !== id);
+                allEmployersList = allEmployersList.filter(u => u.id !== id);
                 filterUsers();
+                loadStats();
+            });
+        }
+
+        let allArchived = [];
+
+        async function loadArchive() {
+            allArchived = await apiGet('/admin/users/archived');
+            renderArchive(allArchived);
+            const badge = document.getElementById('archive-badge');
+            if (allArchived.length > 0) { badge.innerText = allArchived.length; badge.classList.remove('hidden'); }
+            else badge.classList.add('hidden');
+        }
+
+        function filterArchive() {
+            const q = document.getElementById('archive-search').value.toLowerCase();
+            renderArchive(q ? allArchived.filter(u =>
+                u.fullName.toLowerCase().includes(q) ||
+                u.username.toLowerCase().includes(q) ||
+                (u.email || '').toLowerCase().includes(q)
+            ) : allArchived);
+        }
+
+        function renderArchive(users) {
+            document.getElementById('archive-table').innerHTML = users.length ? users.map(u => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 text-sm font-semibold text-slate-500">${u.fullName}</td>
+                    <td class="px-6 py-4 text-sm text-slate-400">@${u.username}</td>
+                    <td class="px-6 py-4 text-sm text-slate-400">${u.email || '—'}</td>
+                    <td class="px-6 py-4">
+                        <span class="text-[11px] font-bold px-3 py-1 rounded-full uppercase ${roleColors[u.role] || 'bg-slate-100 text-slate-500'}">${u.role}</span>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-slate-400 whitespace-nowrap">${u.joinedAt || '—'}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <button onclick="restoreUser(${u.id}, '${u.username}')" class="text-xs text-green-600 hover:text-green-700 border border-green-200 hover:border-green-400 px-3 py-1.5 rounded-lg transition font-semibold">↩ Restore</button>
+                            <button onclick="permanentDeleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-3 py-1.5 rounded-lg transition">🗑 Delete</button>
+                        </div>
+                    </td>
+                </tr>`).join('')
+            : '<tr><td colspan="6" class="px-6 py-12 text-center text-slate-400">No archived users.</td></tr>';
+        }
+
+        async function restoreUser(id, username) {
+            showConfirm(`Restore user @${username}? They will regain access to their account.`, async () => {
+                await apiPut('/admin/users/' + id + '/restore', {});
+                toast(`User @${username} restored.`, 'success');
+                allArchived = allArchived.filter(u => u.id !== id);
+                renderArchive(allArchived);
+                const badge = document.getElementById('archive-badge');
+                if (allArchived.length > 0) { badge.innerText = allArchived.length; badge.classList.remove('hidden'); }
+                else badge.classList.add('hidden');
+                allUsers = [];
+            });
+        }
+
+        async function permanentDeleteUser(id, username) {
+            showConfirm(`⚠️ Permanently delete @${username}? This cannot be undone. All their data will be removed.`, async () => {
+                await apiDelete('/admin/users/' + id);
+                toast(`User @${username} permanently deleted.`, 'info');
+                allArchived = allArchived.filter(u => u.id !== id);
+                renderArchive(allArchived);
+                const badge = document.getElementById('archive-badge');
+                if (allArchived.length > 0) { badge.innerText = allArchived.length; badge.classList.remove('hidden'); }
+                else badge.classList.add('hidden');
                 loadStats();
             });
         }
@@ -478,7 +581,10 @@
                     <td class="px-5 py-3 text-sm text-slate-400 max-w-xs truncate">${u.skills || '—'}</td>
                     <td class="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">${u.joinedAt || '—'}</td>
                     <td class="px-5 py-3">
-                        <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="showUserDetail(${u.id})" class="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-100 hover:border-indigo-300 px-2 py-1.5 rounded-lg transition">Edit</button>
+                            <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Archive</button>
+                        </div>
                     </td>
                 </tr>`).join('') : '<tr><td colspan="7" class="px-5 py-10 text-center text-slate-400">No job seekers found.</td></tr>';
         }
@@ -510,7 +616,10 @@
                     <td class="px-5 py-3 text-sm text-slate-400">${u.jobTitle || '—'}</td>
                     <td class="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">${u.joinedAt || '—'}</td>
                     <td class="px-5 py-3">
-                        <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Delete</button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="showUserDetail(${u.id})" class="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-100 hover:border-indigo-300 px-2 py-1.5 rounded-lg transition">Edit</button>
+                            <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2 py-1.5 rounded-lg transition">Archive</button>
+                        </div>
                     </td>
                 </tr>`).join('') : '<tr><td colspan="7" class="px-5 py-10 text-center text-slate-400">No employers found.</td></tr>';
         }
@@ -586,37 +695,73 @@
             window.location.replace('index.html');
         }
 
-        // ── User Detail Modal ──
+        // ── User Detail Modal (Editable) ──
+        let _editingUserId = null;
+
         function showUserDetail(userId) {
             const u = allUsers.find(x => x.id === userId);
             if (!u) return;
+            _editingUserId = userId;
             const initials = ((u.firstName||'?')[0] + (u.lastName||'?')[0]).toUpperCase();
             document.getElementById('udm-avatar').innerText = initials;
             document.getElementById('udm-name').innerText = u.fullName || u.username;
             document.getElementById('udm-username').innerText = '@' + u.username;
             document.getElementById('udm-role-badge').innerText = u.role;
-            document.getElementById('udm-fname').innerText = u.firstName || '—';
-            document.getElementById('udm-mname').innerText = u.middleName || '—';
-            document.getElementById('udm-lname').innerText = u.lastName || '—';
-            document.getElementById('udm-age').innerText = u.age ? u.age + ' years old' : '—';
-            document.getElementById('udm-birthday').innerText = u.birthday || '—';
-            document.getElementById('udm-phone').innerText = u.phone || '—';
-            document.getElementById('udm-email').innerText = u.email || '—';
-            document.getElementById('udm-location').innerText = u.location || '—';
-            document.getElementById('udm-jobtitle').innerText = u.jobTitle || '—';
+            // Fill inputs
+            document.getElementById('udm-fname').value = u.firstName || '';
+            document.getElementById('udm-mname').value = u.middleName || '';
+            document.getElementById('udm-lname').value = u.lastName || '';
+            document.getElementById('udm-age').value = u.age || '';
+            document.getElementById('udm-birthday').value = u.birthday || '';
+            document.getElementById('udm-phone').value = u.phone || '';
+            document.getElementById('udm-email').value = u.email || '';
+            document.getElementById('udm-location').value = u.location || '';
+            document.getElementById('udm-jobtitle').value = u.jobTitle || '';
+            document.getElementById('udm-skills').value = u.skills || '';
             document.getElementById('udm-joined').innerText = u.joinedAt || '—';
-            const skillsEl = document.getElementById('udm-skills');
-            if (u.skills) {
-                skillsEl.innerHTML = u.skills.split(',').map(s => `<span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">${s.trim()}</span>`).join('');
-                document.getElementById('udm-skills-wrap').classList.remove('hidden');
-            } else {
-                skillsEl.innerHTML = '<span class="text-slate-400 text-sm">No skills listed</span>';
-            }
-            // Hide job title for non-candidates
             document.getElementById('udm-jobtitle-wrap').style.display = u.role === 'CANDIDATE' ? '' : 'none';
+            document.getElementById('udm-save-status').innerText = '';
             document.getElementById('userDetailModal').classList.add('active');
         }
-        function closeUserDetail() { document.getElementById('userDetailModal').classList.remove('active'); }
+
+        async function saveUserDetail() {
+            if (!_editingUserId) return;
+            const btn = document.getElementById('udm-save-btn');
+            btn.disabled = true; btn.innerText = 'Saving…';
+            const payload = {
+                firstName:  document.getElementById('udm-fname').value.trim(),
+                middleName: document.getElementById('udm-mname').value.trim(),
+                lastName:   document.getElementById('udm-lname').value.trim(),
+                age:        document.getElementById('udm-age').value.trim(),
+                birthday:   document.getElementById('udm-birthday').value.trim(),
+                phone:      document.getElementById('udm-phone').value.trim(),
+                email:      document.getElementById('udm-email').value.trim(),
+                location:   document.getElementById('udm-location').value.trim(),
+                jobTitle:   document.getElementById('udm-jobtitle').value.trim(),
+                skills:     document.getElementById('udm-skills').value.trim(),
+            };
+            try {
+                await apiPut('/admin/users/' + _editingUserId, payload);
+                // Update local cache
+                const idx = allUsers.findIndex(u => u.id === _editingUserId);
+                if (idx !== -1) {
+                    Object.assign(allUsers[idx], payload);
+                    const mn = payload.middleName ? ' ' + payload.middleName : '';
+                    allUsers[idx].fullName = (payload.firstName + mn + ' ' + payload.lastName).trim() || allUsers[idx].username;
+                }
+                document.getElementById('udm-name').innerText = allUsers[idx]?.fullName || '';
+                document.getElementById('udm-save-status').innerText = '✓ Saved';
+                document.getElementById('udm-save-status').className = 'text-xs text-green-600 font-semibold';
+                toast('User info updated.', 'success');
+                filterUsers();
+            } catch(e) {
+                document.getElementById('udm-save-status').innerText = 'Save failed';
+                document.getElementById('udm-save-status').className = 'text-xs text-red-500 font-semibold';
+            }
+            btn.disabled = false; btn.innerText = 'Save Changes';
+        }
+
+        function closeUserDetail() { document.getElementById('userDetailModal').classList.remove('active'); _editingUserId = null; }
         document.getElementById('userDetailModal').addEventListener('click', e => { if (e.target === document.getElementById('userDetailModal')) closeUserDetail(); });
 
     (function() {
@@ -798,12 +943,15 @@
             apiGet('/messages/unread-count').then(d => {
                 if (d.count > 0) { const b = document.getElementById('admin-msg-badge'); b.innerText = d.count; b.classList.remove('hidden'); }
             }).catch(()=>{});
+            apiGet('/admin/users/archived').then(list => {
+                if (list.length > 0) { const b = document.getElementById('archive-badge'); b.innerText = list.length; b.classList.remove('hidden'); }
+            }).catch(()=>{});
         };
     </script>
 
     <div id="admin-user-suggestions" style="position:fixed;background:white;border:1px solid #e2e8f0;border-radius:0.875rem;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:999999;display:none;max-height:240px;overflow-y:auto;min-width:280px"></div>
 
-    <!-- User Detail Modal -->
+    <!-- User Detail Modal (Editable) -->
     <div id="userDetailModal" class="modal p-4">
         <div class="modal-box bg-white w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
             <div id="udm-header" class="bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white shrink-0 relative">
@@ -818,52 +966,57 @@
                 </div>
             </div>
             <div class="p-6 overflow-y-auto flex-1 space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-slate-50 rounded-2xl p-4">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">First Name</p>
-                        <p id="udm-fname" class="text-sm font-semibold text-slate-800">—</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">First Name</label>
+                        <input id="udm-fname" type="text" class="input mt-1 w-full text-sm" placeholder="First name">
                     </div>
-                    <div class="bg-slate-50 rounded-2xl p-4">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Middle Name</p>
-                        <p id="udm-mname" class="text-sm font-semibold text-slate-800">—</p>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Middle Name</label>
+                        <input id="udm-mname" type="text" class="input mt-1 w-full text-sm" placeholder="Middle name">
                     </div>
-                    <div class="bg-slate-50 rounded-2xl p-4">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Last Name</p>
-                        <p id="udm-lname" class="text-sm font-semibold text-slate-800">—</p>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Name</label>
+                        <input id="udm-lname" type="text" class="input mt-1 w-full text-sm" placeholder="Last name">
                     </div>
-                    <div class="bg-slate-50 rounded-2xl p-4">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Age</p>
-                        <p id="udm-age" class="text-sm font-semibold text-slate-800">—</p>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Age</label>
+                        <input id="udm-age" type="number" class="input mt-1 w-full text-sm" placeholder="Age">
                     </div>
-                    <div class="bg-slate-50 rounded-2xl p-4">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Birthday</p>
-                        <p id="udm-birthday" class="text-sm font-semibold text-slate-800">—</p>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Birthday</label>
+                        <input id="udm-birthday" type="text" class="input mt-1 w-full text-sm" placeholder="e.g. Jan 1, 2000">
                     </div>
-                    <div class="bg-slate-50 rounded-2xl p-4">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phone</p>
-                        <p id="udm-phone" class="text-sm font-semibold text-slate-800">—</p>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone</label>
+                        <input id="udm-phone" type="text" class="input mt-1 w-full text-sm" placeholder="Phone number">
                     </div>
-                    <div class="bg-slate-50 rounded-2xl p-4 col-span-2">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</p>
-                        <p id="udm-email" class="text-sm font-semibold text-slate-800">—</p>
+                    <div class="col-span-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</label>
+                        <input id="udm-email" type="email" class="input mt-1 w-full text-sm" placeholder="Email address">
                     </div>
-                    <div class="bg-slate-50 rounded-2xl p-4 col-span-2">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Location</p>
-                        <p id="udm-location" class="text-sm font-semibold text-slate-800">—</p>
+                    <div class="col-span-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Location</label>
+                        <input id="udm-location" type="text" class="input mt-1 w-full text-sm" placeholder="City, Province">
                     </div>
-                    <div id="udm-jobtitle-wrap" class="bg-slate-50 rounded-2xl p-4 col-span-2">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Job Title</p>
-                        <p id="udm-jobtitle" class="text-sm font-semibold text-slate-800">—</p>
+                    <div id="udm-jobtitle-wrap" class="col-span-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Job Title</label>
+                        <input id="udm-jobtitle" type="text" class="input mt-1 w-full text-sm" placeholder="e.g. Software Engineer">
                     </div>
-                    <div id="udm-skills-wrap" class="bg-slate-50 rounded-2xl p-4 col-span-2">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Skills</p>
-                        <div id="udm-skills" class="flex flex-wrap gap-2"></div>
+                    <div class="col-span-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Skills <span class="font-normal normal-case text-slate-300">(comma-separated)</span></label>
+                        <input id="udm-skills" type="text" class="input mt-1 w-full text-sm" placeholder="e.g. Java, React, SQL">
                     </div>
-                    <div class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                    <div class="col-span-2 bg-slate-50 rounded-2xl p-3">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Member Since</p>
                         <p id="udm-joined" class="text-sm font-semibold text-slate-800">—</p>
                     </div>
                 </div>
+            </div>
+            <div class="px-6 pb-6 shrink-0 flex items-center gap-3">
+                <span id="udm-save-status" class="text-xs text-green-600 font-semibold flex-1"></span>
+                <button onclick="closeUserDetail()" class="btn btn-secondary h-10 px-5">Cancel</button>
+                <button id="udm-save-btn" onclick="saveUserDetail()" class="btn btn-primary h-10 px-6">Save Changes</button>
             </div>
         </div>
     </div>
