@@ -77,7 +77,7 @@
     <main class="flex-1 p-6 md:p-10 overflow-y-auto">
 
         <!-- Dashboard Tab -->
-        <div id="view-dashboard">
+        <div id="view-dashboard" class="hidden">
             <div class="mb-8">
                 <h1 class="text-2xl font-bold text-slate-900">Platform Overview</h1>
                 <p class="text-slate-400 text-sm mt-1">Monitor the health of TrabaHanap.</p>
@@ -1015,7 +1015,7 @@
                 document.body.classList.add('dark');
                 document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
             }
-            loadStats();
+            showTab('dashboard');
             apiGet('/messages/unread-count').then(d => {
                 if (d.count > 0) { const b = document.getElementById('admin-msg-badge'); b.innerText = d.count; b.classList.remove('hidden'); }
             }).catch(()=>{});
