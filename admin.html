@@ -696,7 +696,17 @@
         }
 
         // ── User Detail Modal (Editable) ──
-        let _editingUserId = null;
+        let _editingUserId = null, _originalSnapshot = {};
+
+        const _udmFields = ['udm-fname','udm-mname','udm-lname','udm-age','udm-birthday','udm-phone','udm-email','udm-location','udm-jobtitle','udm-skills'];
+
+        function checkUdmDirty() {
+            const dirty = _udmFields.some(id => document.getElementById(id).value.trim() !== (_originalSnapshot[id] || ''));
+            const btn = document.getElementById('udm-save-btn');
+            btn.disabled = !dirty;
+            btn.classList.toggle('opacity-50', !dirty);
+            btn.classList.toggle('cursor-not-allowed', !dirty);
+        }
 
         function showUserDetail(userId) {
             const u = allUsers.find(x => x.id === userId);
@@ -707,20 +717,25 @@
             document.getElementById('udm-name').innerText = u.fullName || u.username;
             document.getElementById('udm-username').innerText = '@' + u.username;
             document.getElementById('udm-role-badge').innerText = u.role;
-            // Fill inputs
-            document.getElementById('udm-fname').value = u.firstName || '';
-            document.getElementById('udm-mname').value = u.middleName || '';
-            document.getElementById('udm-lname').value = u.lastName || '';
-            document.getElementById('udm-age').value = u.age || '';
-            document.getElementById('udm-birthday').value = u.birthday || '';
-            document.getElementById('udm-phone').value = u.phone || '';
-            document.getElementById('udm-email').value = u.email || '';
-            document.getElementById('udm-location').value = u.location || '';
-            document.getElementById('udm-jobtitle').value = u.jobTitle || '';
-            document.getElementById('udm-skills').value = u.skills || '';
+            // Fill inputs and snapshot
+            const vals = {
+                'udm-fname':    u.firstName  || '',
+                'udm-mname':    u.middleName || '',
+                'udm-lname':    u.lastName   || '',
+                'udm-age':      u.age != null ? String(u.age) : '',
+                'udm-birthday': u.birthday   || '',
+                'udm-phone':    u.phone      || '',
+                'udm-email':    u.email      || '',
+                'udm-location': u.location   || '',
+                'udm-jobtitle': u.jobTitle   || '',
+                'udm-skills':   u.skills     || '',
+            };
+            _originalSnapshot = { ...vals };
+            _udmFields.forEach(id => document.getElementById(id).value = vals[id]);
             document.getElementById('udm-joined').innerText = u.joinedAt || '—';
             document.getElementById('udm-jobtitle-wrap').style.display = u.role === 'CANDIDATE' ? '' : 'none';
             document.getElementById('udm-save-status').innerText = '';
+            checkUdmDirty();
             document.getElementById('userDetailModal').classList.add('active');
         }
 
@@ -754,6 +769,9 @@
                 document.getElementById('udm-save-status').className = 'text-xs text-green-600 font-semibold';
                 toast('User info updated.', 'success');
                 filterUsers();
+                // Reset snapshot so button goes disabled again
+                _udmFields.forEach(id => _originalSnapshot[id] = document.getElementById(id).value.trim());
+                checkUdmDirty();
             } catch(e) {
                 document.getElementById('udm-save-status').innerText = 'Save failed';
                 document.getElementById('udm-save-status').className = 'text-xs text-red-500 font-semibold';
@@ -969,43 +987,43 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">First Name</label>
-                        <input id="udm-fname" type="text" class="input mt-1 w-full text-sm" placeholder="First name">
+                        <input id="udm-fname" type="text" class="input mt-1 w-full text-sm" placeholder="First name" oninput="checkUdmDirty()">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Middle Name</label>
-                        <input id="udm-mname" type="text" class="input mt-1 w-full text-sm" placeholder="Middle name">
+                        <input id="udm-mname" type="text" class="input mt-1 w-full text-sm" placeholder="Middle name" oninput="checkUdmDirty()">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Name</label>
-                        <input id="udm-lname" type="text" class="input mt-1 w-full text-sm" placeholder="Last name">
+                        <input id="udm-lname" type="text" class="input mt-1 w-full text-sm" placeholder="Last name" oninput="checkUdmDirty()">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Age</label>
-                        <input id="udm-age" type="number" class="input mt-1 w-full text-sm" placeholder="Age">
+                        <input id="udm-age" type="number" class="input mt-1 w-full text-sm" placeholder="Age" oninput="checkUdmDirty()">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Birthday</label>
-                        <input id="udm-birthday" type="text" class="input mt-1 w-full text-sm" placeholder="e.g. Jan 1, 2000">
+                        <input id="udm-birthday" type="text" class="input mt-1 w-full text-sm" placeholder="e.g. Jan 1, 2000" oninput="checkUdmDirty()">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone</label>
-                        <input id="udm-phone" type="text" class="input mt-1 w-full text-sm" placeholder="Phone number">
+                        <input id="udm-phone" type="text" class="input mt-1 w-full text-sm" placeholder="Phone number" oninput="checkUdmDirty()">
                     </div>
                     <div class="col-span-2">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</label>
-                        <input id="udm-email" type="email" class="input mt-1 w-full text-sm" placeholder="Email address">
+                        <input id="udm-email" type="email" class="input mt-1 w-full text-sm" placeholder="Email address" oninput="checkUdmDirty()">
                     </div>
                     <div class="col-span-2">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Location</label>
-                        <input id="udm-location" type="text" class="input mt-1 w-full text-sm" placeholder="City, Province">
+                        <input id="udm-location" type="text" class="input mt-1 w-full text-sm" placeholder="City, Province" oninput="checkUdmDirty()">
                     </div>
                     <div id="udm-jobtitle-wrap" class="col-span-2">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Job Title</label>
-                        <input id="udm-jobtitle" type="text" class="input mt-1 w-full text-sm" placeholder="e.g. Software Engineer">
+                        <input id="udm-jobtitle" type="text" class="input mt-1 w-full text-sm" placeholder="e.g. Software Engineer" oninput="checkUdmDirty()">
                     </div>
                     <div class="col-span-2">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Skills <span class="font-normal normal-case text-slate-300">(comma-separated)</span></label>
-                        <input id="udm-skills" type="text" class="input mt-1 w-full text-sm" placeholder="e.g. Java, React, SQL">
+                        <input id="udm-skills" type="text" class="input mt-1 w-full text-sm" placeholder="e.g. Java, React, SQL" oninput="checkUdmDirty()">
                     </div>
                     <div class="col-span-2 bg-slate-50 rounded-2xl p-3">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Member Since</p>
