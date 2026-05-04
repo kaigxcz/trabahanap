@@ -762,7 +762,6 @@
             document.getElementById('userViewModal').classList.add('active');
         }
         function closeUserView() { document.getElementById('userViewModal').classList.remove('active'); }
-        document.getElementById('userViewModal').addEventListener('click', e => { if (e.target === document.getElementById('userViewModal')) closeUserView(); });
 
         function showUserDetail(userId) {
             const u = allUsers.find(x => x.id === userId);
@@ -841,7 +840,6 @@
         }
 
         function closeUserDetail() { document.getElementById('userDetailModal').classList.remove('active'); _editingUserId = null; }
-        document.getElementById('userDetailModal').addEventListener('click', e => { if (e.target === document.getElementById('userDetailModal')) closeUserDetail(); });
 
     (function() {
         function requireAuth() {
@@ -1018,6 +1016,9 @@
                 document.body.classList.add('dark');
                 document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
             }
+            // Click-outside to close modals (DOM is ready here)
+            document.getElementById('userDetailModal').addEventListener('click', e => { if (e.target === document.getElementById('userDetailModal')) closeUserDetail(); });
+            document.getElementById('userViewModal').addEventListener('click', e => { if (e.target === document.getElementById('userViewModal')) closeUserView(); });
             showTab('dashboard');
             apiGet('/messages/unread-count').then(d => {
                 if (d.count > 0) { const b = document.getElementById('admin-msg-badge'); b.innerText = d.count; b.classList.remove('hidden'); }
