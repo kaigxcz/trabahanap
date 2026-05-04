@@ -374,13 +374,16 @@
         function showTab(tab) {
             ['dashboard','users','jobseekers','employers','jobs','messages','archive'].forEach(t => {
                 const el = document.getElementById('view-' + t);
-                if (el) el.style.display = 'none';
+                if (el) { el.style.display = 'none'; el.classList.add('hidden'); }
                 document.getElementById('tab-' + t)?.classList.remove('active');
                 const mob = document.getElementById('mob-' + t);
                 if (mob) mob.classList.remove('active');
             });
             const view = document.getElementById('view-' + tab);
-            if (view) view.style.display = tab === 'messages' ? 'flex' : 'block';
+            if (view) {
+                view.classList.remove('hidden');
+                view.style.display = tab === 'messages' ? 'flex' : 'block';
+            }
             document.getElementById('tab-' + tab)?.classList.add('active');
             const mob = document.getElementById('mob-' + tab);
             if (mob) mob.classList.add('active');
