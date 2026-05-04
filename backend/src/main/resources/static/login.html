@@ -814,7 +814,7 @@
             setLoading(btn, true, 'Sending...');
             try {
                 const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 10000);
+                const timeout = setTimeout(() => controller.abort(), 15000);
                 const res = await fetch(API + '/auth/forgot-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -822,7 +822,12 @@
                     signal: controller.signal
                 });
                 clearTimeout(timeout);
-                // Always proceed to OTP step regardless of response
+                const data = await res.json();
+                if (data.error) {
+                    errEl.textContent = data.error;
+                    errEl.classList.remove('hidden');
+                    return;
+                }
                 _fpEmail = email;
                 document.getElementById('fp-email-display').textContent = email;
                 fpShowStep(2);

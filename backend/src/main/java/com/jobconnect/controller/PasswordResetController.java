@@ -27,8 +27,10 @@ public class PasswordResetController {
         if (email == null || email.isBlank())
             return ResponseEntity.badRequest().body(Map.of("error", "Email is required."));
         try {
-            resetService.sendOtp(email.trim().toLowerCase());
-            return ResponseEntity.ok(Map.of("message", "If that email is registered, an OTP has been sent."));
+            boolean found = resetService.sendOtp(email.trim().toLowerCase());
+            if (!found)
+                return ResponseEntity.badRequest().body(Map.of("error", "No account found with that email address."));
+            return ResponseEntity.ok(Map.of("message", "OTP sent to your email. Please check your inbox."));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Failed to send OTP. Please try again."));
         }
