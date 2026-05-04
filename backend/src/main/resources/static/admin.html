@@ -733,8 +733,12 @@
             const nameRe   = /^[a-zA-ZÀ-ÿñÑ\s'\-\.]+$/;
             const emailRe  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!fname || !lname || !email || !location) return 'Please fill in all required fields.';
+            if (fname.length < 2 || fname.length > 50) return 'First name must be 2–50 characters.';
             if (!nameRe.test(fname)) return 'First name must contain letters only.';
+            if (lname.length < 2 || lname.length > 50) return 'Last name must be 2–50 characters.';
             if (!nameRe.test(lname)) return 'Last name must contain letters only.';
+            if (mname && mname.length < 2) return 'Middle name must be at least 2 characters.';
+            if (mname && mname.length > 50) return 'Middle name must be at most 50 characters.';
             if (mname && !nameRe.test(mname)) return 'Middle name must contain letters only.';
             if (!emailRe.test(email)) return 'Please enter a valid email address.';
             if (phone && !/^[\d\s\+\-\(\)]+$/.test(phone)) return 'Phone number must contain digits only.';
@@ -745,6 +749,11 @@
         const _nameRe = /^[a-zA-ZÀ-ÿñÑ\s'\-\.]+$/;
         function validateNameInput(id, required) {
             const el = document.getElementById(id);
+            // Auto-capitalize first letter of each word
+            const pos = el.selectionStart;
+            el.value = el.value.replace(/(?:^|\s)\S/g, c => c.toUpperCase());
+            try { el.setSelectionRange(pos, pos); } catch(e) {}
+
             const val = el.value.trim();
             const errId = id + '-err';
             let errEl = document.getElementById(errId);
@@ -756,6 +765,9 @@
             }
             if (required && !val) {
                 el.classList.add('border-red-400'); errEl.innerText = 'Required.'; return;
+            }
+            if (val && val.length < 2) {
+                el.classList.add('border-red-400'); errEl.innerText = 'Too short (min 2 characters).'; return;
             }
             if (val && !_nameRe.test(val)) {
                 el.classList.add('border-red-400'); errEl.innerText = 'Letters only.'; return;
@@ -1192,15 +1204,15 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">First Name</label>
-                        <input id="udm-fname" type="text" class="input mt-1 w-full text-sm" placeholder="First name" oninput="validateNameInput('udm-fname', true)">
+                        <input id="udm-fname" type="text" class="input mt-1 w-full text-sm" placeholder="First name" minlength="2" maxlength="50" autocapitalize="words" oninput="validateNameInput('udm-fname', true)">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Middle Name</label>
-                        <input id="udm-mname" type="text" class="input mt-1 w-full text-sm" placeholder="Middle name" oninput="validateNameInput('udm-mname', false)">
+                        <input id="udm-mname" type="text" class="input mt-1 w-full text-sm" placeholder="Middle name" minlength="2" maxlength="50" autocapitalize="words" oninput="validateNameInput('udm-mname', false)">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Name</label>
-                        <input id="udm-lname" type="text" class="input mt-1 w-full text-sm" placeholder="Last name" oninput="validateNameInput('udm-lname', true)">
+                        <input id="udm-lname" type="text" class="input mt-1 w-full text-sm" placeholder="Last name" minlength="2" maxlength="50" autocapitalize="words" oninput="validateNameInput('udm-lname', true)">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Suffix</label>
