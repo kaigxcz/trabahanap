@@ -742,6 +742,28 @@
             return null;
         }
 
+        const _nameRe = /^[a-zA-ZÀ-ÿñÑ\s'\-\.]+$/;
+        function validateNameInput(id, required) {
+            const el = document.getElementById(id);
+            const val = el.value.trim();
+            const errId = id + '-err';
+            let errEl = document.getElementById(errId);
+            if (!errEl) {
+                errEl = document.createElement('p');
+                errEl.id = errId;
+                errEl.className = 'text-[10px] text-red-500 mt-0.5 font-medium';
+                el.parentNode.appendChild(errEl);
+            }
+            if (required && !val) {
+                el.classList.add('border-red-400'); errEl.innerText = 'Required.'; return;
+            }
+            if (val && !_nameRe.test(val)) {
+                el.classList.add('border-red-400'); errEl.innerText = 'Letters only.'; return;
+            }
+            el.classList.remove('border-red-400'); errEl.innerText = '';
+            checkUdmDirty();
+        }
+
         // ── View-only modal ──
         function showUserView(userId) {
             const u = allUsers.find(x => x.id === userId);
@@ -1170,15 +1192,15 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">First Name</label>
-                        <input id="udm-fname" type="text" class="input mt-1 w-full text-sm" placeholder="First name" oninput="checkUdmDirty()">
+                        <input id="udm-fname" type="text" class="input mt-1 w-full text-sm" placeholder="First name" oninput="validateNameInput('udm-fname', true)">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Middle Name</label>
-                        <input id="udm-mname" type="text" class="input mt-1 w-full text-sm" placeholder="Middle name" oninput="checkUdmDirty()">
+                        <input id="udm-mname" type="text" class="input mt-1 w-full text-sm" placeholder="Middle name" oninput="validateNameInput('udm-mname', false)">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Name</label>
-                        <input id="udm-lname" type="text" class="input mt-1 w-full text-sm" placeholder="Last name" oninput="checkUdmDirty()">
+                        <input id="udm-lname" type="text" class="input mt-1 w-full text-sm" placeholder="Last name" oninput="validateNameInput('udm-lname', true)">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Suffix</label>
