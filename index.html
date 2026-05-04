@@ -125,7 +125,7 @@
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
                                 <div class="flex gap-2 mt-1">
                                     <select class="input-field w-24 shrink-0"><option>+63</option><option>+1</option><option>+44</option></select>
-                                    <input type="text" id="reg-phone" placeholder="9XX XXX XXXX" class="input-field" inputmode="numeric" pattern="[0-9]*" oninput="validatePhone(this)" onkeydown="blockNonDigit(event)" maxlength="13">
+                                    <input type="text" id="reg-phone" placeholder="9XX XXX XXXX" class="input-field" inputmode="numeric" pattern="[0-9]*" oninput="validatePhone(this)" onkeydown="blockNonDigit(event)" maxlength="12">
                                 </div>
                                 <p class="field-error text-xs text-red-500 mt-1 hidden" id="reg-phone-err"></p>
                             </div>
@@ -311,7 +311,7 @@
             // Block 4+ consecutive same digit
             digits = digits.replace(/(\d)\1{3,}/g, (m) => m.slice(0, 3));
             // Max 11 digits
-            if (digits.length > 11) digits = digits.slice(0, 11);
+            if (digits.length > 10) digits = digits.slice(0, 10);
             // Auto-format: 9XX XXX XXXX
             let formatted = digits;
             if (digits.length > 6) {
@@ -322,11 +322,11 @@
             input.value = formatted;
             const err = document.getElementById(input.id + '-err') || input.closest('div').nextElementSibling;
             if (!err) return;
-            if (digits.length > 0 && digits.length < 11) {
-                err.textContent = 'Phone number must be exactly 11 digits.';
+            if (digits.length > 0 && digits.length < 10) {
+                err.textContent = 'Phone number must be exactly 10 digits.';
                 err.classList.remove('hidden');
                 input.style.borderColor = '#ef4444';
-            } else if (digits.length === 11) {
+            } else if (digits.length === 10) {
                 err.classList.add('hidden');
                 input.style.borderColor = '#22c55e';
             } else {

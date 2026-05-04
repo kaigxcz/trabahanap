@@ -66,8 +66,8 @@ public class AuthController {
         // Phone validation: 11 digits, no 4+ consecutive same digit
         String phone = body.getOrDefault("phone", "");
         if (!phone.isEmpty()) {
-            if (!phone.matches("\\d{11}")) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Phone number must be exactly 11 digits."));
+            if (!phone.matches("\\d{10}")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Phone number must be exactly 10 digits."));
             }
             if (phone.matches(".*(\\d)\\1{3,}.*")) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Phone number cannot have 4 or more consecutive identical digits."));
