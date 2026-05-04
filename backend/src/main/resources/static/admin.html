@@ -416,7 +416,7 @@
             const currentUsername = JSON.parse(localStorage.getItem('jc_user') || '{}').username;
             document.getElementById('users-table').innerHTML = users.map(u => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td class="px-6 py-4 text-sm font-semibold text-slate-800">${u.fullName}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-slate-800 cursor-pointer hover:text-indigo-600 transition" onclick="showUserDetail(${u.id})">${u.fullName}</td>
                     <td class="px-6 py-4 text-sm text-slate-500">@${u.username}</td>
                     <td class="px-6 py-4 text-sm text-slate-400">${u.email || '—'}</td>
                     <td class="px-6 py-4">
@@ -471,7 +471,7 @@
             else if (sort === 'location') list.sort((a, b) => (a.location || '').localeCompare(b.location || ''));
             document.getElementById('seekers-table').innerHTML = list.length ? list.map(u => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td class="px-5 py-3 text-sm font-semibold text-slate-800">${u.fullName}</td>
+                    <td class="px-5 py-3 text-sm font-semibold text-slate-800 cursor-pointer hover:text-indigo-600 transition" onclick="showUserDetail(${u.id})">${u.fullName}</td>
                     <td class="px-5 py-3 text-sm text-slate-500">@${u.username}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.email || '—'}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.location || '—'}</td>
@@ -503,7 +503,7 @@
             else if (sort === 'location') list.sort((a, b) => (a.location || '').localeCompare(b.location || ''));
             document.getElementById('employers-table').innerHTML = list.length ? list.map(u => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td class="px-5 py-3 text-sm font-semibold text-slate-800">${u.fullName}</td>
+                    <td class="px-5 py-3 text-sm font-semibold text-slate-800 cursor-pointer hover:text-indigo-600 transition" onclick="showUserDetail(${u.id})">${u.fullName}</td>
                     <td class="px-5 py-3 text-sm text-slate-500">@${u.username}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.email || '—'}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.location || '—'}</td>
@@ -585,6 +585,39 @@
             localStorage.removeItem('jc_user');
             window.location.replace('index.html');
         }
+
+        // ── User Detail Modal ──
+        function showUserDetail(userId) {
+            const u = allUsers.find(x => x.id === userId);
+            if (!u) return;
+            const initials = ((u.firstName||'?')[0] + (u.lastName||'?')[0]).toUpperCase();
+            document.getElementById('udm-avatar').innerText = initials;
+            document.getElementById('udm-name').innerText = u.fullName || u.username;
+            document.getElementById('udm-username').innerText = '@' + u.username;
+            document.getElementById('udm-role-badge').innerText = u.role;
+            document.getElementById('udm-fname').innerText = u.firstName || '—';
+            document.getElementById('udm-mname').innerText = u.middleName || '—';
+            document.getElementById('udm-lname').innerText = u.lastName || '—';
+            document.getElementById('udm-age').innerText = u.age ? u.age + ' years old' : '—';
+            document.getElementById('udm-birthday').innerText = u.birthday || '—';
+            document.getElementById('udm-phone').innerText = u.phone || '—';
+            document.getElementById('udm-email').innerText = u.email || '—';
+            document.getElementById('udm-location').innerText = u.location || '—';
+            document.getElementById('udm-jobtitle').innerText = u.jobTitle || '—';
+            document.getElementById('udm-joined').innerText = u.joinedAt || '—';
+            const skillsEl = document.getElementById('udm-skills');
+            if (u.skills) {
+                skillsEl.innerHTML = u.skills.split(',').map(s => `<span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">${s.trim()}</span>`).join('');
+                document.getElementById('udm-skills-wrap').classList.remove('hidden');
+            } else {
+                skillsEl.innerHTML = '<span class="text-slate-400 text-sm">No skills listed</span>';
+            }
+            // Hide job title for non-candidates
+            document.getElementById('udm-jobtitle-wrap').style.display = u.role === 'CANDIDATE' ? '' : 'none';
+            document.getElementById('userDetailModal').classList.add('active');
+        }
+        function closeUserDetail() { document.getElementById('userDetailModal').classList.remove('active'); }
+        document.getElementById('userDetailModal').addEventListener('click', e => { if (e.target === document.getElementById('userDetailModal')) closeUserDetail(); });
 
     (function() {
         function requireAuth() {
@@ -769,6 +802,71 @@
     </script>
 
     <div id="admin-user-suggestions" style="position:fixed;background:white;border:1px solid #e2e8f0;border-radius:0.875rem;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:999999;display:none;max-height:240px;overflow-y:auto;min-width:280px"></div>
+
+    <!-- User Detail Modal -->
+    <div id="userDetailModal" class="modal p-4">
+        <div class="modal-box bg-white w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div id="udm-header" class="bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white shrink-0 relative">
+                <button onclick="closeUserDetail()" class="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white transition text-sm">✕</button>
+                <div class="flex items-center gap-4">
+                    <div id="udm-avatar" class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold text-white shrink-0"></div>
+                    <div>
+                        <h2 id="udm-name" class="text-xl font-bold"></h2>
+                        <p id="udm-username" class="text-indigo-200 text-sm"></p>
+                        <span id="udm-role-badge" class="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">First Name</p>
+                        <p id="udm-fname" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Middle Name</p>
+                        <p id="udm-mname" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Last Name</p>
+                        <p id="udm-lname" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Age</p>
+                        <p id="udm-age" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Birthday</p>
+                        <p id="udm-birthday" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phone</p>
+                        <p id="udm-phone" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</p>
+                        <p id="udm-email" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Location</p>
+                        <p id="udm-location" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div id="udm-jobtitle-wrap" class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Job Title</p>
+                        <p id="udm-jobtitle" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div id="udm-skills-wrap" class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Skills</p>
+                        <div id="udm-skills" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Member Since</p>
+                        <p id="udm-joined" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <nav class="mobile-bottom-nav hidden">
     <button onclick="showTab('dashboard')" class="mobile-nav-item active" id="mob-dashboard"><span>&#128202;</span><span>Dashboard</span></button>
