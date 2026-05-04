@@ -29,6 +29,7 @@ public class AuthController {
         String username = body.get("username");
         String password = body.get("password");
         String firstName = body.get("firstName");
+        String middleName = body.getOrDefault("middleName", "");
         String lastName = body.get("lastName");
         String email = body.get("email");
         String location = body.get("location");
@@ -45,14 +46,19 @@ public class AuthController {
 
         User user = new User(username, passwordEncoder.encode(password), firstName, lastName, email, location);
         user.setRole(role);
+        if (!middleName.isBlank()) user.setMiddleName(middleName);
         if (body.containsKey("phone")) user.setPhone(body.get("phone"));
         userRepository.save(user);
+
+        String fullName = firstName
+            + (middleName != null && !middleName.isBlank() ? " " + middleName : "")
+            + " " + lastName;
 
         String token = jwtUtil.generateToken(username);
         return ResponseEntity.ok(Map.of(
             "token", token,
             "username", username,
-            "fullName", firstName + " " + lastName,
+            "fullName", fullName.trim(),
             "location", location,
             "email", email != null ? email : "",
             "role", role
@@ -70,8 +76,10 @@ public class AuthController {
         }
 
         User user = userOpt.get();
-        String fullName = ((user.getFirstName() != null ? user.getFirstName() : "") + " " +
-                          (user.getLastName() != null ? user.getLastName() : "")).trim();
+        String mn = user.getMiddleName() != null && !user.getMiddleName().isBlank() ? " " + user.getMiddleName() : "";
+        String fullName = ((user.getFirstName() != null ? user.getFirstName() : "")
+                          + mn + " "
+                          + (user.getLastName() != null ? user.getLastName() : "")).trim();
         if (fullName.isEmpty()) fullName = username;
         String token = jwtUtil.generateToken(username);
         return ResponseEntity.ok(Map.of(

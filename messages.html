@@ -68,6 +68,15 @@
             <a href="/messages" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>💬</span><span class="text-sm">Messages</span></a>
             <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
         </nav>
+        <div class="mt-auto pt-5 border-t border-slate-100">
+            <a href="/profile" class="flex items-center gap-3 px-2 py-2 rounded-2xl hover:bg-slate-50 transition">
+                <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" id="sidebar-avatar">?</div>
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold text-slate-700 truncate" id="sidebar-user-name">—</p>
+                    <p class="text-[10px] text-slate-400">Job Seeker</p>
+                </div>
+            </a>
+        </div>
     </aside>
 
     <main class="flex-1 flex overflow-hidden" style="height:100vh">
@@ -155,6 +164,10 @@
     <script>
         if (!localStorage.getItem('jc_token')) window.location.href = '/login';
         const me = JSON.parse(localStorage.getItem('jc_user') || '{}');
+        // Sidebar user
+        const _sn = document.getElementById('sidebar-user-name'), _sa = document.getElementById('sidebar-avatar');
+        if (_sn) _sn.innerText = me.fullName || me.username || '—';
+        if (_sa && me.fullName) { const _p = me.fullName.split(' '); _sa.innerText = (_p[0][0] + (_p.length > 1 ? _p[_p.length-1][0] : '')).toUpperCase(); }
         let currentConvo = null, allConvos = [];
 
         function filterConvos() {

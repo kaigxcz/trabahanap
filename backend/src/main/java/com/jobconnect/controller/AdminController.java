@@ -57,8 +57,9 @@ public class AdminController {
         requireAdmin();
         List<Map<String, Object>> users = userRepository.findAll().stream().map(u -> {
             String firstName = u.getFirstName() != null ? u.getFirstName() : "";
+            String middleName = u.getMiddleName() != null && !u.getMiddleName().isBlank() ? " " + u.getMiddleName() : "";
             String lastName  = u.getLastName()  != null ? u.getLastName()  : "";
-            String fullName  = (firstName + " " + lastName).trim();
+            String fullName  = (firstName + middleName + " " + lastName).trim();
             if (fullName.isEmpty()) fullName = u.getUsername();
             return Map.<String, Object>of(
                 "id",       u.getId(),
@@ -133,14 +134,18 @@ public class AdminController {
     public ResponseEntity<String> exportUsers() {
         requireAdmin();
         StringBuilder csv = new StringBuilder("ID,Full Name,Username,Email,Role,Location\n");
-        userRepository.findAll().forEach(u -> csv.append(String.format("%d,\"%s %s\",%s,%s,%s,%s\n",
-            u.getId(),
-            u.getFirstName() != null ? u.getFirstName() : "",
-            u.getLastName() != null ? u.getLastName() : "",
-            u.getUsername(),
-            u.getEmail() != null ? u.getEmail() : "",
-            u.getRole() != null ? u.getRole() : "CANDIDATE",
-            u.getLocation() != null ? u.getLocation() : "")));
+        userRepository.findAll().forEach(u -> {
+            String mn = u.getMiddleName() != null && !u.getMiddleName().isBlank() ? " " + u.getMiddleName() : "";
+            csv.append(String.format("%d,\"%s%s %s\",%s,%s,%s,%s\n",
+                u.getId(),
+                u.getFirstName() != null ? u.getFirstName() : "",
+                mn,
+                u.getLastName() != null ? u.getLastName() : "",
+                u.getUsername(),
+                u.getEmail() != null ? u.getEmail() : "",
+                u.getRole() != null ? u.getRole() : "CANDIDATE",
+                u.getLocation() != null ? u.getLocation() : ""));
+        });
         return ResponseEntity.ok()
             .header("Content-Type", "text/csv")
             .header("Content-Disposition", "attachment; filename=users.csv")

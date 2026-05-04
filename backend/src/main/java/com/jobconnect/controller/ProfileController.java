@@ -40,8 +40,10 @@ public class ProfileController {
         User user = getCurrentUser();
         long appCount = applicationRepository.countByUser(user);
         long savedCount = savedJobRepository.findByUser(user).size();
-        String fullName = ((user.getFirstName() != null ? user.getFirstName() : "") + " " +
-                          (user.getLastName() != null ? user.getLastName() : "")).trim();
+        String mn = user.getMiddleName() != null && !user.getMiddleName().isBlank() ? " " + user.getMiddleName() : "";
+        String fullName = ((user.getFirstName() != null ? user.getFirstName() : "")
+                          + mn + " "
+                          + (user.getLastName() != null ? user.getLastName() : "")).trim();
         if (fullName.isEmpty()) fullName = user.getUsername();
 
         return ResponseEntity.ok(Map.of(
