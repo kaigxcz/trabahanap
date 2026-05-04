@@ -99,64 +99,102 @@
                             <p class="text-xs text-slate-400 mt-0.5">Post jobs</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="reg-fname" placeholder="Juan" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)"></div>
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="reg-lname" placeholder="Dela Cruz" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)"></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
-                            <input type="text" id="reg-mname" placeholder="Santos" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)">
+
+                    <!-- JOB SEEKER FIELDS -->
+                    <div id="fields-candidate">
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="reg-fname" placeholder="Juan" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="reg-lname" placeholder="Dela Cruz" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)"></div>
                         </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Suffix <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
-                            <select id="reg-suffix" class="input-field mt-1">
-                                <option value="">— None —</option>
-                                <option>Jr.</option>
-                                <option>Sr.</option>
-                                <option>II</option>
-                                <option>III</option>
-                                <option>IV</option>
-                                <option>V</option>
-                            </select>
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                                <input type="text" id="reg-mname" placeholder="Santos" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Suffix <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                                <select id="reg-suffix" class="input-field mt-1">
+                                    <option value="">— None —</option>
+                                    <option>Jr.</option><option>Sr.</option><option>II</option><option>III</option><option>IV</option><option>V</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email *</label><input type="email" id="reg-email" placeholder="juan@example.com" class="input-field mt-1"></div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
+                                <div class="flex gap-2 mt-1">
+                                    <select class="input-field w-24 shrink-0"><option>+63</option><option>+1</option><option>+44</option></select>
+                                    <input type="tel" id="reg-phone" placeholder="9XX XXX XXXX" class="input-field">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Location *</label>
+                                <div class="relative mt-1">
+                                    <input type="text" id="reg-location" placeholder="e.g. Quezon City" class="input-field pr-12" oninput="searchRegLocation(this.value)">
+                                    <button type="button" onclick="toggleRegMap()" title="Pick on map" class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">📍</button>
+                                </div>
+                                <div id="reg-loc-suggestions" class="hidden" style="position:fixed;z-index:9999;background:white;border:1px solid #e2e8f0;border-radius:1rem;box-shadow:0 8px 32px rgba(0,0,0,0.12);overflow:hidden;min-width:280px;max-height:220px;overflow-y:auto"></div>
+                                <div id="reg-map-wrap" class="hidden mt-2" style="height:200px;position:relative">
+                                    <div id="reg-map" style="height:100%;width:100%;border-radius:1rem"></div>
+                                    <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:999">
+                                        <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);font-size:11px;font-weight:600;color:#475569;padding:4px 12px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">Drag the pin or click to set your location</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label><input type="text" id="reg-user" placeholder="juandc99" class="input-field mt-1"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Password *</label>
+                                <div class="relative mt-1">
+                                    <input type="password" id="reg-pass" placeholder="Min. 8 characters" class="input-field pr-12">
+                                    <button type="button" onclick="togglePw('reg-pass',this)" class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition text-base" tabindex="-1">👁</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="space-y-3">
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email *</label><input type="email" id="reg-email" placeholder="juan@example.com" class="input-field mt-1"></div>
+
+                    <!-- EMPLOYER FIELDS -->
+                    <div id="fields-employer" class="hidden space-y-3">
+                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Company Name *</label><input type="text" id="emp-company" placeholder="e.g. TechStart Inc." class="input-field mt-1"></div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Industry *</label>
+                                <select id="emp-industry" class="input-field mt-1">
+                                    <option value="">Select industry</option>
+                                    <option>Technology</option><option>Finance</option><option>Healthcare</option>
+                                    <option>Education</option><option>Retail</option><option>Manufacturing</option>
+                                    <option>Marketing</option><option>Construction</option><option>Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Company Size</label>
+                                <select id="emp-size" class="input-field mt-1">
+                                    <option value="">Select size</option>
+                                    <option>1–10</option><option>11–50</option><option>51–200</option>
+                                    <option>201–500</option><option>500+</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Work Email *</label><input type="email" id="emp-email" placeholder="hr@company.com" class="input-field mt-1"></div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
                             <div class="flex gap-2 mt-1">
                                 <select class="input-field w-24 shrink-0"><option>+63</option><option>+1</option><option>+44</option></select>
-                                <input type="tel" id="reg-phone" placeholder="9XX XXX XXXX" class="input-field">
+                                <input type="tel" id="emp-phone" placeholder="9XX XXX XXXX" class="input-field">
                             </div>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Location *</label>
-                            <div class="relative mt-1">
-                                <input type="text" id="reg-location" placeholder="e.g. Quezon City"
-                                    class="input-field pr-12"
-                                    oninput="searchRegLocation(this.value)">
-                                <button type="button" onclick="toggleRegMap()" title="Pick on map"
-                                    class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">📍</button>
-                            </div>
-                            <!-- Autocomplete suggestions -->
-                            <div id="reg-loc-suggestions" class="hidden" style="position:fixed;z-index:9999;background:white;border:1px solid #e2e8f0;border-radius:1rem;box-shadow:0 8px 32px rgba(0,0,0,0.12);overflow:hidden;min-width:280px;max-height:220px;overflow-y:auto"></div>
-                            <!-- Map -->
-                            <div id="reg-map-wrap" class="hidden mt-2" style="height:200px;position:relative">
-                                <div id="reg-map" style="height:100%;width:100%;border-radius:1rem"></div>
-                                <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:999">
-                                    <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);font-size:11px;font-weight:600;color:#475569;padding:4px 12px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">Drag the pin or click to set your location</span>
-                                </div>
-                            </div>
+                            <input type="text" id="emp-location" placeholder="e.g. Makati City" class="input-field mt-1">
                         </div>
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label><input type="text" id="reg-user" placeholder="juandc99" class="input-field mt-1"></div>
+                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label><input type="text" id="emp-user" placeholder="techstart_hr" class="input-field mt-1"></div>
                         <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Password *</label>
                             <div class="relative mt-1">
-                                <input type="password" id="reg-pass" placeholder="Min. 8 characters" class="input-field pr-12">
-                                <button type="button" onclick="togglePw('reg-pass',this)" class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition text-base" tabindex="-1">👁</button>
+                                <input type="password" id="emp-pass" placeholder="Min. 8 characters" class="input-field pr-12">
+                                <button type="button" onclick="togglePw('emp-pass',this)" class="absolute right-3 top-3 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition text-base" tabindex="-1">👁</button>
                             </div>
                         </div>
                     </div>
+
                     <div class="flex items-start gap-2 mt-4 mb-5">
                         <input type="checkbox" id="terms" class="mt-0.5 w-4 h-4 accent-indigo-600">
                         <label for="terms" class="text-xs text-slate-500">I agree to the <span class="text-indigo-600 font-semibold">Terms of Service</span> and <span class="text-indigo-600 font-semibold">Privacy Policy</span></label>
@@ -197,6 +235,8 @@
             selectedRole = role;
             document.getElementById('role-candidate').classList.toggle('selected', role === 'CANDIDATE');
             document.getElementById('role-employer').classList.toggle('selected', role === 'EMPLOYER');
+            document.getElementById('fields-candidate').classList.toggle('hidden', role !== 'CANDIDATE');
+            document.getElementById('fields-employer').classList.toggle('hidden', role !== 'EMPLOYER');
         }
         function redirectByRole(role) {
             if (role === 'ADMIN') window.location.href = '/admin';
@@ -248,26 +288,58 @@
             finally { setLoading(btn, false); btn.innerText = 'Sign In'; }
         }
         async function handleRegister() {
-            const firstName = document.getElementById('reg-fname').value.trim();
-            const lastName = document.getElementById('reg-lname').value.trim();
-            const middleName = document.getElementById('reg-mname').value.trim();
-            const suffix = document.getElementById('reg-suffix').value.trim();
-            const username = document.getElementById('reg-user').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const password = document.getElementById('reg-pass').value;
-            const location = document.getElementById('reg-location').value.trim();
-            const phone = document.getElementById('reg-phone').value.trim();
             const errEl = document.getElementById('reg-error');
             errEl.classList.add('hidden');
-            const nameRe  = /^[a-zA-ZÀ-ÿñÑ\s'\-\.]+$/;
             const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (selectedRole === 'EMPLOYER') {
+                const company  = document.getElementById('emp-company').value.trim();
+                const industry = document.getElementById('emp-industry').value.trim();
+                const email    = document.getElementById('emp-email').value.trim();
+                const location = document.getElementById('emp-location').value.trim();
+                const username = document.getElementById('emp-user').value.trim();
+                const password = document.getElementById('emp-pass').value;
+                const phone    = document.getElementById('emp-phone').value.trim();
+                const size     = document.getElementById('emp-size').value.trim();
+                if (!company || !industry || !email || !location || !username || !password) { errEl.innerText = 'Please fill in all required fields.'; errEl.classList.remove('hidden'); return; }
+                if (!emailRe.test(email)) { errEl.innerText = 'Please enter a valid email address.'; errEl.classList.remove('hidden'); return; }
+                if (password.length < 6) { errEl.innerText = 'Password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
+                if (!document.getElementById('terms').checked) { errEl.innerText = 'Please agree to the terms to continue.'; errEl.classList.remove('hidden'); return; }
+                const btn = document.getElementById('register-btn');
+                setLoading(btn, true, 'Creating account...');
+                try {
+                    const data = await apiPost('/auth/register', {
+                        firstName: company, lastName: 'Employer',
+                        username, email, password, location, phone,
+                        role: 'EMPLOYER',
+                        jobTitle: industry + (size ? ' · ' + size + ' employees' : '')
+                    });
+                    if (data.error) { errEl.innerText = data.error; errEl.classList.remove('hidden'); return; }
+                    localStorage.setItem('jc_token', data.token);
+                    localStorage.setItem('jc_user', JSON.stringify(data));
+                    redirectByRole(data.role);
+                } catch(e) { errEl.innerText = 'Cannot connect to server.'; errEl.classList.remove('hidden'); }
+                finally { setLoading(btn, false); btn.innerText = 'Create Account'; }
+                return;
+            }
+
+            // CANDIDATE
+            const firstName  = document.getElementById('reg-fname').value.trim();
+            const lastName   = document.getElementById('reg-lname').value.trim();
+            const middleName = document.getElementById('reg-mname').value.trim();
+            const suffix     = document.getElementById('reg-suffix').value.trim();
+            const username   = document.getElementById('reg-user').value.trim();
+            const email      = document.getElementById('reg-email').value.trim();
+            const password   = document.getElementById('reg-pass').value;
+            const location   = document.getElementById('reg-location').value.trim();
+            const phone      = document.getElementById('reg-phone').value.trim();
+            const nameRe     = /^[a-zA-ZÀ-ÿñÑ\s'\-\.]+$/;
             if (!firstName || !lastName || !username || !password || !location || !email) { errEl.innerText = 'Please fill in all required fields.'; errEl.classList.remove('hidden'); return; }
             if (firstName.length < 2 || firstName.length > 50) { errEl.innerText = 'First name must be 2–50 characters.'; errEl.classList.remove('hidden'); return; }
             if (!nameRe.test(firstName)) { errEl.innerText = 'First name must contain letters only.'; errEl.classList.remove('hidden'); return; }
             if (lastName.length < 2 || lastName.length > 50) { errEl.innerText = 'Last name must be 2–50 characters.'; errEl.classList.remove('hidden'); return; }
             if (!nameRe.test(lastName))  { errEl.innerText = 'Last name must contain letters only.';  errEl.classList.remove('hidden'); return; }
             if (middleName && middleName.length < 2) { errEl.innerText = 'Middle name must be at least 2 characters.'; errEl.classList.remove('hidden'); return; }
-            if (middleName && middleName.length > 50) { errEl.innerText = 'Middle name must be at most 50 characters.'; errEl.classList.remove('hidden'); return; }
             if (middleName && !nameRe.test(middleName)) { errEl.innerText = 'Middle name must contain letters only.'; errEl.classList.remove('hidden'); return; }
             if (!emailRe.test(email)) { errEl.innerText = 'Please enter a valid email address.'; errEl.classList.remove('hidden'); return; }
             if (phone && !/^[\d\s\+\-\(\)]+$/.test(phone)) { errEl.innerText = 'Phone number must contain digits only.'; errEl.classList.remove('hidden'); return; }
