@@ -19,20 +19,19 @@
 
     <!-- Mobile Header -->
     <header class="mobile-header hidden">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 cursor-pointer select-none" id="admin-logo-btn" onclick="toggleAdminLogoDropdown()">
             <div class="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center"><span class="text-white font-bold text-xs">A</span></div>
             <span class="font-bold text-sm">Admin Panel</span>
             <span class="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-lg ml-1">Admin</span>
         </div>
         <div class="flex items-center gap-1">
             <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">🌙</button>
-            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition">🚪</button>
         </div>
     </header>
 
     <aside class="desktop-sidebar w-full md:w-72 bg-white border-r border-slate-100 p-8 flex flex-col">
         <div class="flex items-center justify-between mb-12">
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-3 cursor-pointer select-none" id="admin-logo-btn-desk" onclick="toggleAdminLogoDropdown()">
                 <div class="w-8 h-8 bg-red-600 rounded-xl shadow-lg flex items-center justify-center">
                     <span class="text-white font-bold text-xs">A</span>
                 </div>
@@ -44,7 +43,6 @@
             <div class="flex items-center gap-1">
                 <span class="text-xs bg-red-100 text-red-700 font-bold px-2 py-1 rounded-lg">Admin</span>
                 <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
-                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
             </div>
         </div>
         <nav class="space-y-2 flex-1">
@@ -864,6 +862,24 @@
             document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
         }
 
+        let _adminLogoOpen = false;
+        function toggleAdminLogoDropdown() {
+            _adminLogoOpen = !_adminLogoOpen;
+            const drop = document.getElementById('admin-logo-dropdown');
+            if (_adminLogoOpen) {
+                const btn = document.getElementById('admin-logo-btn-desk') || document.getElementById('admin-logo-btn');
+                const rect = btn.getBoundingClientRect();
+                drop.style.top = (rect.bottom + 6) + 'px';
+                drop.style.left = rect.left + 'px';
+                drop.style.display = 'flex';
+                const u = JSON.parse(localStorage.getItem('jc_user') || '{}');
+                document.getElementById('admin-dropdown-name').innerText = u.fullName || u.username || 'Admin';
+                document.getElementById('admin-dropdown-email').innerText = u.email || '';
+            } else {
+                drop.style.display = 'none';
+            }
+        }
+
         // ── Admin Messaging ──
         let adminCurrentConvo = null, adminAllConvos = [];
 
@@ -1019,6 +1035,13 @@
             // Click-outside to close modals (DOM is ready here)
             document.getElementById('userDetailModal').addEventListener('click', e => { if (e.target === document.getElementById('userDetailModal')) closeUserDetail(); });
             document.getElementById('userViewModal').addEventListener('click', e => { if (e.target === document.getElementById('userViewModal')) closeUserView(); });
+            // Close admin logo dropdown on outside click
+            document.addEventListener('click', e => {
+                if (!e.target.closest('#admin-logo-dropdown') && !e.target.closest('#admin-logo-btn') && !e.target.closest('#admin-logo-btn-desk')) {
+                    document.getElementById('admin-logo-dropdown').style.display = 'none';
+                    _adminLogoOpen = false;
+                }
+            });
             showTab('dashboard');
             apiGet('/messages/unread-count').then(d => {
                 if (d.count > 0) { const b = document.getElementById('admin-msg-badge'); b.innerText = d.count; b.classList.remove('hidden'); }
@@ -1168,6 +1191,15 @@
                 <button id="udm-save-btn" onclick="saveUserDetail()" class="btn btn-primary h-10 px-6">Save Changes</button>
             </div>
         </div>
+    </div>
+
+    <!-- Admin Logo Dropdown -->
+    <div id="admin-logo-dropdown" style="display:none;position:fixed;width:220px;background:white;border:1px solid #e2e8f0;border-radius:1rem;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:9999;flex-direction:column;overflow:hidden;">
+        <div class="px-4 py-3 border-b border-slate-100">
+            <p class="text-xs font-bold text-slate-800" id="admin-dropdown-name">Admin</p>
+            <p class="text-xs text-slate-400" id="admin-dropdown-email"></p>
+        </div>
+        <div class="logo-dropdown-item danger" onclick="logout()" style="cursor:pointer;">🚪 Log Out</div>
     </div>
 
 <nav class="mobile-bottom-nav hidden">
