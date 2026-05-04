@@ -28,7 +28,6 @@ public class PasswordResetController {
             return ResponseEntity.badRequest().body(Map.of("error", "Email is required."));
         try {
             resetService.sendOtp(email.trim().toLowerCase());
-            // Always return success to avoid email enumeration
             return ResponseEntity.ok(Map.of("message", "If that email is registered, an OTP has been sent."));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Failed to send OTP. Please try again."));

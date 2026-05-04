@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,8 +42,8 @@ public class PasswordResetService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    /** Generate OTP, store it, and send email. Returns false if email not found. */
-    public boolean sendOtp(String email) throws Exception {
+    /** Generate OTP, store it, and send email async. Always returns true if email found. */
+    public boolean sendOtp(String email) {
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
             log.warn("OTP requested for unknown email: {}", email);
@@ -50,15 +51,19 @@ public class PasswordResetService {
         }
         String otp = String.format("%06d", random.nextInt(1_000_000));
         store.put(email.toLowerCase(), new OtpEntry(otp, Instant.now().plusMillis(OTP_TTL_MS)));
-        log.info("Sending OTP to {}", email);
-        try {
-            sendOtpEmail(email, user.getFirstName() != null ? user.getFirstName() : "User", otp);
-            log.info("OTP email sent successfully to {}", email);
-        } catch (Exception e) {
-            log.error("Failed to send OTP email to {}: {}", email, e.getMessage(), e);
-            throw e;
-        }
+        sendOtpEmailAsync(email, user.getFirstName() != null ? user.getFirstName() : "User", otp);
         return true;
+    }
+
+    @Async
+    public void sendOtpEmailAsync(String to, String firstName, String otp) {
+        try {
+            log.info("Sending OTP email to {}", to);
+            sendOtpEmail(to, firstName, otp);
+            log.info("OTP email sent successfully to {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send OTP email to {}: {}", to, e.getMessage(), e);
+        }
     }
 
     /** Returns true if OTP is valid and not expired. */
