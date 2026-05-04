@@ -741,7 +741,16 @@
             const btn = document.getElementById('fp-send-btn');
             setLoading(btn, true, 'Sending...');
             try {
-                await apiPost('/auth/forgot-password', { email });
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 10000);
+                const res = await fetch(API + '/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+                // Always proceed to OTP step regardless of response
                 _fpEmail = email;
                 document.getElementById('fp-email-display').textContent = email;
                 fpShowStep(2);
@@ -749,7 +758,11 @@
                 fpStartTimer(120);
                 setTimeout(() => document.getElementById('otp-0').focus(), 100);
             } catch(e) {
-                errEl.textContent = 'Could not send OTP. Please try again.';
+                if (e.name === 'AbortError') {
+                    errEl.textContent = 'Request timed out. Please try again.';
+                } else {
+                    errEl.textContent = 'Could not send OTP. Please try again.';
+                }
                 errEl.classList.remove('hidden');
             } finally {
                 setLoading(btn, false);
