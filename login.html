@@ -145,7 +145,7 @@
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label>
-                                <input type="text" id="reg-user" placeholder="juandc99" class="input-field mt-1" oninput="validateUsername(this)" maxlength="20">
+                                <input type="text" id="reg-user" placeholder="juandc99" class="input-field mt-1" oninput="validateUsername(this)" onkeydown="capUsername(event,this)" maxlength="20">
                                 <p class="field-error text-xs text-red-500 mt-1 hidden" id="reg-user-err"></p>
                             </div>
                             <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Password *</label><input type="password" id="reg-pass" placeholder="Min. 8 characters" class="input-field mt-1"></div>
@@ -211,7 +211,7 @@
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username *</label>
-                                <input type="text" id="emp-user" placeholder="techstart_hr" class="input-field mt-1" oninput="validateUsername(this)" maxlength="20">
+                                <input type="text" id="emp-user" placeholder="techstart_hr" class="input-field mt-1" oninput="validateUsername(this)" onkeydown="capUsername(event,this)" maxlength="20">
                                 <p class="field-error text-xs text-red-500 mt-1 hidden" id="emp-user-err"></p>
                             </div>
                             <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Password *</label><input type="password" id="emp-pass" placeholder="Min. 8 characters" class="input-field mt-1"></div>
@@ -321,6 +321,12 @@
         }
 
         // ── Username validation: 3-20 chars ──
+        function capUsername(e, input) {
+            const allowed = ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'];
+            if (allowed.includes(e.key)) return;
+            if ((e.ctrlKey || e.metaKey) && ['a','c','v','x'].includes(e.key.toLowerCase())) return;
+            if (input.value.length >= 20) e.preventDefault();
+        }
         function validateUsername(input) {
             if (input.value.length > 20) input.value = input.value.slice(0, 20);
             const val = input.value;
