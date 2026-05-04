@@ -120,6 +120,18 @@
                             <input type="text" id="reg-mname" placeholder="Santos" class="input-field mt-1" oninput="validateMiddleName(this)" maxlength="20" autocomplete="additional-name">
                             <p class="name-error text-xs text-red-500 mt-1 hidden"></p>
                         </div>
+                        <div class="mb-3">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Suffix <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                            <select id="reg-suffix" class="input-field mt-1">
+                                <option value="">— None —</option>
+                                <option>Jr.</option>
+                                <option>Sr.</option>
+                                <option>II</option>
+                                <option>III</option>
+                                <option>IV</option>
+                                <option>V</option>
+                            </select>
+                        </div>
                         <div class="grid grid-cols-2 gap-3 mb-3">
                             <div>
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Birthday *</label>
@@ -186,6 +198,18 @@
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
                             <input type="text" id="emp-mname" placeholder="Reyes" class="input-field mt-1" oninput="validateMiddleName(this)" maxlength="20" autocomplete="additional-name">
                             <p class="name-error text-xs text-red-500 mt-1 hidden"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Suffix <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
+                            <select id="emp-suffix" class="input-field mt-1">
+                                <option value="">— None —</option>
+                                <option>Jr.</option>
+                                <option>Sr.</option>
+                                <option>II</option>
+                                <option>III</option>
+                                <option>IV</option>
+                                <option>V</option>
+                            </select>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-3">
                             <div>
@@ -521,12 +545,13 @@
             const errEl = document.getElementById('reg-error');
             errEl.classList.add('hidden');
 
-            let firstName, lastName, middleName, username, email, password, location, phone, company, birthday, age;
+            let firstName, lastName, middleName, suffix, username, email, password, location, phone, company, birthday, age;
 
             if (selectedRole === 'CANDIDATE') {
                 firstName = document.getElementById('reg-fname').value.trim();
                 lastName = document.getElementById('reg-lname').value.trim();
                 middleName = document.getElementById('reg-mname').value.trim();
+                suffix = document.getElementById('reg-suffix').value.trim();
                 email = document.getElementById('reg-email').value.trim();
                 phone = document.getElementById('reg-phone').value.replace(/\D/g, '');
                 location = document.getElementById('reg-location').value.trim();
@@ -538,6 +563,7 @@
                 firstName = document.getElementById('emp-fname').value.trim();
                 lastName = document.getElementById('emp-lname').value.trim();
                 middleName = document.getElementById('emp-mname').value.trim();
+                suffix = document.getElementById('emp-suffix').value.trim();
                 email = document.getElementById('emp-email').value.trim();
                 location = document.getElementById('emp-location').value.trim();
                 username = document.getElementById('emp-user').value.trim();
@@ -563,7 +589,7 @@
             const btn = document.getElementById('register-btn');
             setLoading(btn, true, 'Creating account...');
             try {
-                const payload = { firstName, lastName, middleName, username, email, password, location, phone: phone || '', birthday, role: selectedRole };
+                const payload = { firstName, lastName, middleName, suffix, username, email, password, location, phone: phone || '', birthday, role: selectedRole };
                 if (company) payload.company = company;
                 const data = await apiPost('/auth/register', payload);
                 if (data.error) { errEl.innerText = data.error; errEl.classList.remove('hidden'); return; }
