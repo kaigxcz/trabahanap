@@ -1,14 +1,23 @@
 package com.jobconnect.controller;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.jobconnect.model.Message;
 import com.jobconnect.model.User;
 import com.jobconnect.repository.MessageRepository;
 import com.jobconnect.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
 
 @RestController
 @RequestMapping("/api/messages")
@@ -77,5 +86,22 @@ public class MessageController {
     @GetMapping("/unread-count")
     public Map<String, Long> getUnreadCount() {
         return Map.of("count", messageRepository.countByReceiverAndIsReadFalse(getCurrentUser()));
+    }
+
+    @GetMapping("/search-users")
+    public List<Map<String, Object>> searchUsers(@RequestParam String q) {
+        User me = getCurrentUser();
+        return userRepository.findAll().stream()
+            .filter(u -> !u.getId().equals(me.getId()))
+            .filter(u -> u.getUsername().toLowerCase().contains(q.toLowerCase()) ||
+                         (u.getFirstName() != null && u.getFirstName().toLowerCase().contains(q.toLowerCase())) ||
+                         (u.getLastName() != null && u.getLastName().toLowerCase().contains(q.toLowerCase())))
+            .limit(8)
+            .map(u -> Map.<String, Object>of(
+                "username", u.getUsername(),
+                "fullName", ((u.getFirstName() != null ? u.getFirstName() : "") + " " + (u.getLastName() != null ? u.getLastName() : "")).trim(),
+                "role", u.getRole() != null ? u.getRole() : "CANDIDATE"
+            ))
+            .toList();
     }
 }

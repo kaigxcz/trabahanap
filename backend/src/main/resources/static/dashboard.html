@@ -54,7 +54,6 @@
             <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-black text-xs">T</span></div>
             <div>
                 <span class="font-bold text-sm tracking-tight block leading-tight">TrabaHanap</span>
-                <span style="font-size:8px;color:#94a3b8;font-weight:600">Online Job Application System</span>
             </div>
         </div>
         <div class="flex items-center gap-2">
@@ -68,28 +67,20 @@
     <!-- Desktop Sidebar -->
     <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex-col shrink-0 overflow-y-auto" style="height:100vh;position:sticky;top:0">
         <div class="flex items-center justify-between mb-10">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 cursor-pointer select-none" id="logo-btn" onclick="toggleLogoDropdown()">
                 <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md">
                     <span class="text-white font-black text-xs">T</span>
                 </div>
                 <div>
                     <span class="font-bold text-lg tracking-tight block leading-tight">TrabaHanap</span>
-                    <span class="text-[9px] text-slate-400 font-medium leading-tight">Online Job Application System</span>
                 </div>
             </div>
             <div class="flex items-center gap-1">
                 <!-- Notification Bell -->
                 <div class="relative">
-                    <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                    <button id="notif-btn" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
                         🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
-                    <div id="notif-panel" class="hidden absolute left-0 top-11 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50" style="max-height:320px;overflow-y:auto">
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white">
-                            <span class="font-bold text-slate-800 text-sm">Notifications</span>
-                            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">✕</button>
-                        </div>
-                        <div id="notif-list" class="p-2"></div>
-                    </div>
                 </div>
                 <!-- Dark Mode Toggle -->
                 <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
@@ -145,7 +136,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto page-transition">
 
         <!-- Greeting + Search -->
         <div class="mb-6">
@@ -259,11 +250,10 @@
 
     <script src="js/api.js"></script>
     <script>
-        if (!localStorage.getItem('jc_token')) window.location.href = 'index.html';
+        if (!localStorage.getItem('jc_token')) window.location.replace('index.html');
         const currentUser = JSON.parse(localStorage.getItem('jc_user') || '{}');
-        if (currentUser.role === 'EMPLOYER') { window.location.href = 'employer.html'; }
-        if (currentUser.role === 'ADMIN') { window.location.href = 'admin.html'; }
-
+        if (currentUser.role === 'EMPLOYER') { window.location.replace('employer.html'); }
+        if (currentUser.role === 'ADMIN') { window.location.replace('admin.html'); }
         let currentCategory = 'all', savedIds = [], allJobsCache = [], currentModalJob = null;
         let activeTypeFilters = [], activeExpFilters = [], activeWorkFilters = [];
 
@@ -272,9 +262,14 @@
             if (firstName) {
                 document.getElementById('greeting-name').innerText = firstName;
             }
-            savedIds = await apiGet('/saved/ids');
+            try {
+                const ids = await apiGet('/saved/ids');
+                savedIds = (ids || []).map(Number);
+            } catch(e) { savedIds = []; }
             loadNotificationBell();
-            allJobsCache = await apiGet('/jobs?keyword=&location=&category=all');
+            try {
+                allJobsCache = await apiGet('/jobs?keyword=&location=&category=all');
+            } catch(e) { allJobsCache = []; toast('Failed to load jobs. Please refresh.', 'error'); }
             renderRecommended();
             renderJobs(allJobsCache);
             loadRecentSearches();
@@ -519,19 +514,69 @@
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
-            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
-            if (notifOpen) { loadNotificationDropdown(); }
+            const panel = document.getElementById('notif-panel');
+            if (notifOpen) {
+                const btn = document.getElementById('notif-btn');
+                const rect = btn.getBoundingClientRect();
+                panel.style.top = (rect.bottom + 8) + 'px';
+                panel.style.left = Math.min(rect.left, window.innerWidth - 316) + 'px';
+                panel.classList.add('open');
+                loadNotificationDropdown();
+            } else {
+                panel.classList.remove('open');
+            }
         }
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', e => {
-            if (!e.target.closest('#notif-panel') && !e.target.closest('[onclick="toggleNotifPanel()"]')) {
+            if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn') && !e.target.closest('[onclick="toggleNotifPanel()"]')) {
                 notifOpen = false;
-                document.getElementById('notif-panel')?.classList.add('hidden');
+                document.getElementById('notif-panel')?.classList.remove('open');
             }
         });
 
-        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
+        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.replace('index.html'); }
+
+    (function() {
+        function requireAuth() {
+            if (!localStorage.getItem("jc_token")) {
+                window.location.replace("index.html");
+            }
+        }
+        history.pushState(null, "", location.href);
+        window.addEventListener("popstate", function() {
+            history.pushState(null, "", location.href);
+        });
+        window.addEventListener("pageshow", function(e) {
+            if (e.persisted) requireAuth();
+        });
+    })();
+
+
+
+        let logoOpen = false;
+        function toggleLogoDropdown() {
+            logoOpen = !logoOpen;
+            const drop = document.getElementById('logo-dropdown');
+            if (logoOpen) {
+                const btn = document.getElementById('logo-btn');
+                const rect = btn.getBoundingClientRect();
+                drop.style.top = (rect.bottom + 8) + 'px';
+                drop.style.left = rect.left + 'px';
+                drop.classList.add('open');
+                const u = JSON.parse(localStorage.getItem('jc_user') || '{}');
+                document.getElementById('dropdown-name').innerText = u.fullName || u.username || 'User';
+                document.getElementById('dropdown-email').innerText = u.email || '';
+            } else {
+                drop.classList.remove('open');
+            }
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#logo-dropdown') && !e.target.closest('#logo-btn')) {
+                logoOpen = false;
+                document.getElementById('logo-dropdown')?.classList.remove('open');
+            }
+        });
 
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');
@@ -547,6 +592,24 @@
             init();
         };
     </script>
+
+    <!-- Logo Dropdown -->
+    <div id="logo-dropdown">
+        <div class="px-4 py-3 border-b border-slate-100" id="logo-dropdown-user">
+            <p class="text-xs font-bold text-slate-800" id="dropdown-name">Loading...</p>
+            <p class="text-xs text-slate-400" id="dropdown-email"></p>
+        </div>
+        <div class="logo-dropdown-item danger" onclick="logout()">🚪 Log Out</div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div id="notif-panel">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100" style="flex-shrink:0;background:inherit;border-radius:1rem 1rem 0 0">
+            <span class="font-bold text-slate-800 text-sm">Notifications</span>
+            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
+        </div>
+        <div id="notif-list" class="p-2" style="overflow-y:auto;flex:1"></div>
+    </div>
 
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav hidden">

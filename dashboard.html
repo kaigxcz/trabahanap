@@ -67,25 +67,20 @@
     <!-- Desktop Sidebar -->
     <aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex-col shrink-0 overflow-y-auto" style="height:100vh;position:sticky;top:0">
         <div class="flex items-center justify-between mb-10">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 cursor-pointer select-none" id="logo-btn" onclick="toggleLogoDropdown()">
                 <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md">
                     <span class="text-white font-black text-xs">T</span>
                 </div>
-                <span class="font-bold text-lg tracking-tight">TrabaHanap</span>
+                <div>
+                    <span class="font-bold text-lg tracking-tight block leading-tight">TrabaHanap</span>
+                </div>
             </div>
             <div class="flex items-center gap-1">
                 <!-- Notification Bell -->
                 <div class="relative">
-                    <button onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
+                    <button id="notif-btn" onclick="toggleNotifPanel()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg relative">
                         🔔<span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full hidden flex items-center justify-center">0</span>
                     </button>
-                    <div id="notif-panel" class="hidden absolute right-0 top-11 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50" style="max-height:360px;overflow-y:auto">
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white rounded-t-2xl">
-                            <span class="font-bold text-slate-800 text-sm">Notifications</span>
-                            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600">✕</button>
-                        </div>
-                        <div id="notif-list" class="p-2"></div>
-                    </div>
                 </div>
                 <!-- Dark Mode Toggle -->
                 <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg" title="Toggle dark mode">🌙</button>
@@ -103,16 +98,6 @@
             <a href="/messages" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>💬</span><span class="text-sm">Messages</span></a>
             <a href="/profile" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition"><span>👤</span><span class="text-sm">Profile</span></a>
         </nav>
-        <!-- User info at bottom of sidebar -->
-        <div class="mt-auto pt-5 border-t border-slate-100">
-            <a href="/profile" class="flex items-center gap-3 px-2 py-2 rounded-2xl hover:bg-slate-50 transition">
-                <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" id="sidebar-avatar">?</div>
-                <div class="min-w-0">
-                    <p class="text-sm font-semibold text-slate-700 truncate" id="sidebar-user-name">Loading...</p>
-                    <p class="text-[10px] text-slate-400 truncate" id="sidebar-user-role">Candidate</p>
-                </div>
-            </a>
-        </div>
         <!-- Filter Panel -->
         <div class="mt-5 pt-5 border-t border-slate-100">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -151,7 +136,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto page-transition">
 
         <!-- Greeting + Search -->
         <div class="mb-6">
@@ -206,6 +191,7 @@
                     <option value="default">Sort: Default</option>
                     <option value="match">Best Match</option>
                     <option value="newest">Newest</option>
+                    <option value="salary">Salary</option>
                 </select>
             </div>
         </div>
@@ -264,49 +250,33 @@
 
     <script src="js/api.js"></script>
     <script>
-        if (!localStorage.getItem('jc_token')) window.location.href = 'index.html';
+        if (!localStorage.getItem('jc_token')) window.location.replace('index.html');
         const currentUser = JSON.parse(localStorage.getItem('jc_user') || '{}');
-        if (currentUser.role === 'EMPLOYER') { window.location.href = 'employer.html'; }
-        if (currentUser.role === 'ADMIN') { window.location.href = 'admin.html'; }
-
+        if (currentUser.role === 'EMPLOYER') { window.location.replace('employer.html'); }
+        if (currentUser.role === 'ADMIN') { window.location.replace('admin.html'); }
         let currentCategory = 'all', savedIds = [], allJobsCache = [], currentModalJob = null;
         let activeTypeFilters = [], activeExpFilters = [], activeWorkFilters = [];
-        let appliedJobIds = new Set(), appliedTitles = new Set();
 
         async function init() {
             const firstName = (currentUser.fullName || '').split(' ')[0];
-            if (firstName) document.getElementById('greeting-name').innerText = firstName;
-
-            // Load user name in sidebar
-            const userEl = document.getElementById('sidebar-user-name');
-            const roleEl = document.getElementById('sidebar-user-role');
-            const avatarEl = document.getElementById('sidebar-avatar');
-            if (userEl) userEl.innerText = currentUser.fullName || currentUser.username || 'User';
-            if (roleEl) roleEl.innerText = currentUser.role === 'CANDIDATE' ? 'Job Seeker' : (currentUser.role || 'Candidate');
-            if (avatarEl && currentUser.fullName) {
-                const parts = currentUser.fullName.split(' ');
-                avatarEl.innerText = (parts[0][0] + (parts.length > 1 ? parts[parts.length-1][0] : '')).toUpperCase();
+            if (firstName) {
+                document.getElementById('greeting-name').innerText = firstName;
             }
-
-            savedIds = await apiGet('/saved/ids');
-            loadNotificationBell();
-
-            // Load applied jobs for "Already Applied" badge
             try {
-                const apps = await apiGet('/applications');
-                apps.forEach(a => {
-                    if (a.jobId) appliedJobIds.add(a.jobId);
-                    appliedTitles.add(a.jobTitle + '|' + a.company);
-                });
-                const badge = document.getElementById('app-count-badge');
-                if (apps.length > 0) { badge.innerText = apps.length; badge.classList.remove('hidden'); }
-            } catch(e) {}
-
-            allJobsCache = await apiGet('/jobs?keyword=&location=&category=all');
+                const ids = await apiGet('/saved/ids');
+                savedIds = (ids || []).map(Number);
+            } catch(e) { savedIds = []; }
+            loadNotificationBell();
+            try {
+                allJobsCache = await apiGet('/jobs?keyword=&location=&category=all');
+            } catch(e) { allJobsCache = []; toast('Failed to load jobs. Please refresh.', 'error'); }
             renderRecommended();
             renderJobs(allJobsCache);
             loadRecentSearches();
+            loadAppCountBadge();
         }
+
+        // ── Recent searches ──
         function loadRecentSearches() {
             const searches = JSON.parse(localStorage.getItem('jc_recent_searches') || '[]');
             if (!searches.length) return;
@@ -356,23 +326,20 @@
 
         function buildJobCard(job, compact = false) {
             const isSaved = savedIds.includes(job.id);
-            const isApplied = appliedJobIds.has(job.id) || appliedTitles.has(job.title + '|' + job.company);
             const matchScore = calcLocalMatch(job);
             const matchColor = matchScore >= 70 ? 'text-green-600 bg-green-50' : matchScore >= 40 ? 'text-amber-600 bg-amber-50' : 'text-slate-400 bg-slate-100';
             const daysAgo = job.postedAt ? Math.floor((Date.now() - new Date(job.postedAt)) / 86400000) : null;
             const postedLabel = daysAgo === null ? '' : daysAgo === 0 ? '<span class="badge badge-green">🆕 Today</span>' : daysAgo <= 3 ? `<span class="badge badge-indigo">${daysAgo}d ago</span>` : `<span class="badge badge-slate">${daysAgo}d ago</span>`;
-            const matchedSkills = getMatchedSkills(job);
-            const matchTip = matchedSkills.length ? `title="Matched: ${matchedSkills.join(', ')}"` : '';
             return `
-                <div class="job-card card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 cursor-pointer ${isApplied ? 'opacity-75' : ''}" onclick="openJobModal(${job.id})">
+                <div class="job-card card p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 cursor-pointer" onclick="openJobModal(${job.id})">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
                                 <h4 class="text-sm font-bold text-slate-900">${job.title}</h4>
                                 ${job.featured ? '<span class="badge" style="background:#fef3c7;color:#d97706">⭐ Featured</span>' : ''}
-                                ${isApplied ? '<span class="badge bg-green-50 text-green-600">✓ Applied</span>' : '<span class="badge badge-indigo">⚡ Easy Apply</span>'}
-                                ${matchScore > 0 ? `<span class="badge ${matchColor} cursor-help" ${matchTip}>${matchScore}% match</span>` : ''}
+                                <span class="badge badge-indigo">⚡ Easy Apply</span>
+                                ${matchScore > 0 ? `<span class="badge ${matchColor}">${matchScore}% match</span>` : ''}
                                 ${postedLabel}
                             </div>
                             <p class="text-slate-500 text-xs mt-0.5">${job.company} • ${job.location}</p>
@@ -385,19 +352,9 @@
                     </div>
                     <div class="flex items-center gap-2 shrink-0" onclick="event.stopPropagation()">
                         <button onclick="toggleSave(${job.id}, this)" class="btn-icon ${isSaved ? 'text-red-500 border-red-200' : ''}" title="${isSaved ? 'Unsave' : 'Save job'}">${isSaved ? '❤️' : '🤍'}</button>
-                        ${isApplied
-                            ? `<button onclick="window.location.href='/applications'" class="btn btn-secondary btn-sm text-green-600 border-green-200">View</button>`
-                            : `<button onclick="quickApply('${job.title}', '${job.company}', ${job.id})" class="btn btn-primary btn-sm">Apply</button>`
-                        }
+                        <button onclick="quickApply('${job.title}', '${job.company}', ${job.id})" class="btn btn-primary btn-sm">Apply</button>
                     </div>
                 </div>`;
-        }
-
-        function getMatchedSkills(job) {
-            if (!currentUser.skills || !job.requirements) return [];
-            const skills = currentUser.skills.toLowerCase().split(',').map(s => s.trim());
-            const reqs = job.requirements.toLowerCase().split(',').map(r => r.trim());
-            return skills.filter(s => reqs.some(r => r.includes(s) || s.includes(r)));
         }
 
         function calcLocalMatch(job) {
@@ -420,9 +377,12 @@
             let jobs = getFilteredJobs();
             if (sort === 'match') jobs = [...jobs].sort((a, b) => calcLocalMatch(b) - calcLocalMatch(a));
             else if (sort === 'newest') jobs = [...jobs].sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt));
+            else if (sort === 'salary') jobs = [...jobs].sort((a, b) => {
+                const parse = s => parseInt((s || '0').replace(/[^\d]/g, '')) || 0;
+                return parse(b.salary) - parse(a.salary);
+            });
             renderJobs(jobs);
         }
-
         function getFilteredJobs() {
             return allJobsCache.filter(job => {
                 const kw = document.getElementById('search-role').value.toLowerCase();
@@ -475,11 +435,6 @@
 
         async function quickApply(jobTitle, company, jobId) {
             const data = await apiPost('/applications', { jobTitle, company, jobId: String(jobId) }, true);
-            if (!data.error) {
-                appliedJobIds.add(jobId);
-                appliedTitles.add(jobTitle + '|' + company);
-                sortAndRender(); // refresh cards to show "Applied" badge
-            }
             toast(data.message || data.error, data.error ? 'error' : 'success');
         }
 
@@ -495,37 +450,16 @@
             document.getElementById('modal-loc').innerText = '📍 ' + job.location;
             document.getElementById('modal-salary').innerText = job.salary;
             document.getElementById('modal-desc').innerText = job.description || 'No description available.';
-
-            // Requirements with match highlighting
             const reqs = (job.requirements || '').split(',').map(r => r.trim()).filter(Boolean);
-            const matched = getMatchedSkills(job).map(s => s.toLowerCase());
-            document.getElementById('modal-reqs').innerHTML = reqs.map(r => {
-                const isMatch = matched.some(m => r.toLowerCase().includes(m) || m.includes(r.toLowerCase()));
-                return `<span class="${isMatch ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-100 text-slate-600'} text-xs font-medium px-3 py-1 rounded-full">${isMatch ? '✓ ' : ''}${r}</span>`;
-            }).join('');
-
+            document.getElementById('modal-reqs').innerHTML = reqs.map(r => `<span class="bg-slate-100 text-slate-600 text-xs font-medium px-3 py-1 rounded-full">${r}</span>`).join('');
             const score = calcLocalMatch(job);
             const scoreEl = document.getElementById('modal-match-score');
             scoreEl.innerText = score > 0 ? score + '%' : '—';
             scoreEl.className = 'text-2xl font-black ' + (score >= 70 ? 'text-green-400' : score >= 40 ? 'text-amber-400' : 'text-white');
-
             const isSaved = savedIds.includes(job.id);
             const saveBtn = document.getElementById('modal-save-btn');
             saveBtn.innerHTML = isSaved ? '❤️ Saved' : '🤍 Save';
             saveBtn.className = `btn btn-secondary h-12 px-5 ${isSaved ? 'border-red-200 text-red-500' : ''}`;
-
-            // Already applied?
-            const isApplied = appliedJobIds.has(job.id) || appliedTitles.has(job.title + '|' + job.company);
-            const applyBtn = document.querySelector('#jobModal .btn-primary');
-            if (isApplied) {
-                applyBtn.innerText = '✓ Already Applied';
-                applyBtn.disabled = true;
-                applyBtn.className = 'btn flex-1 h-12 bg-green-50 text-green-600 border border-green-200 cursor-default';
-            } else {
-                applyBtn.innerHTML = '⚡ Easy Apply';
-                applyBtn.disabled = false;
-                applyBtn.className = 'btn btn-primary flex-1 h-12';
-            }
 
             // Similar jobs
             const similar = allJobsCache.filter(j => j.id !== job.id && j.category === job.category).slice(0, 3);
@@ -572,15 +506,7 @@
             const data = await apiPost('/applications', { jobTitle: currentModalJob.title, company: currentModalJob.company, jobId: String(currentModalJob.id) }, true);
             setLoading(btn, false);
             toast(data.message || data.error, data.error ? 'error' : 'success');
-            if (!data.error) {
-                appliedJobIds.add(currentModalJob.id);
-                appliedTitles.add(currentModalJob.title + '|' + currentModalJob.company);
-                btn.innerHTML = '✓ Applied!';
-                btn.disabled = true;
-                btn.className = 'btn flex-1 h-12 bg-green-50 text-green-600 border border-green-200';
-                sortAndRender();
-                setTimeout(closeModal, 1200);
-            }
+            if (!data.error) closeModal();
         }
 
         document.getElementById('jobModal').addEventListener('click', e => { if (e.target === document.getElementById('jobModal')) closeModal(); });
@@ -588,34 +514,102 @@
         let notifOpen = false;
         function toggleNotifPanel() {
             notifOpen = !notifOpen;
-            document.getElementById('notif-panel').classList.toggle('hidden', !notifOpen);
-            if (notifOpen) { loadNotificationDropdown(); }
+            const panel = document.getElementById('notif-panel');
+            if (notifOpen) {
+                const btn = document.getElementById('notif-btn');
+                const rect = btn.getBoundingClientRect();
+                panel.style.top = (rect.bottom + 8) + 'px';
+                panel.style.left = Math.min(rect.left, window.innerWidth - 316) + 'px';
+                panel.classList.add('open');
+                loadNotificationDropdown();
+            } else {
+                panel.classList.remove('open');
+            }
         }
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', e => {
-            if (!e.target.closest('#notif-panel') && !e.target.closest('[onclick="toggleNotifPanel()"]')) {
+            if (!e.target.closest('#notif-panel') && !e.target.closest('#notif-btn') && !e.target.closest('[onclick="toggleNotifPanel()"]')) {
                 notifOpen = false;
-                document.getElementById('notif-panel')?.classList.add('hidden');
+                document.getElementById('notif-panel')?.classList.remove('open');
             }
         });
 
-        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.href = 'index.html'; }
+        function logout() { localStorage.removeItem('jc_token'); localStorage.removeItem('jc_user'); window.location.replace('index.html'); }
+
+    (function() {
+        function requireAuth() {
+            if (!localStorage.getItem("jc_token")) {
+                window.location.replace("index.html");
+            }
+        }
+        history.pushState(null, "", location.href);
+        window.addEventListener("popstate", function() {
+            history.pushState(null, "", location.href);
+        });
+        window.addEventListener("pageshow", function(e) {
+            if (e.persisted) requireAuth();
+        });
+    })();
+
+
+
+        let logoOpen = false;
+        function toggleLogoDropdown() {
+            logoOpen = !logoOpen;
+            const drop = document.getElementById('logo-dropdown');
+            if (logoOpen) {
+                const btn = document.getElementById('logo-btn');
+                const rect = btn.getBoundingClientRect();
+                drop.style.top = (rect.bottom + 8) + 'px';
+                drop.style.left = rect.left + 'px';
+                drop.classList.add('open');
+                const u = JSON.parse(localStorage.getItem('jc_user') || '{}');
+                document.getElementById('dropdown-name').innerText = u.fullName || u.username || 'User';
+                document.getElementById('dropdown-email').innerText = u.email || '';
+            } else {
+                drop.classList.remove('open');
+            }
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#logo-dropdown') && !e.target.closest('#logo-btn')) {
+                logoOpen = false;
+                document.getElementById('logo-dropdown')?.classList.remove('open');
+            }
+        });
 
         function toggleDark() {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('jc_dark', isDark ? '1' : '');
-            document.querySelectorAll('[onclick="toggleDark()"]').forEach(b => b.innerText = isDark ? '☀️' : '🌙');
+            document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = isDark ? '☀️' : '🌙');
         }
 
         window.onload = () => {
             if (localStorage.getItem('jc_dark')) {
                 document.body.classList.add('dark');
-                document.querySelectorAll('[onclick="toggleDark()"]').forEach(b => b.innerText = '☀️');
+                document.querySelectorAll('[onclick="toggleDark()"]').forEach(btn => btn.innerText = '☀️');
             }
             init();
         };
     </script>
+
+    <!-- Logo Dropdown -->
+    <div id="logo-dropdown">
+        <div class="px-4 py-3 border-b border-slate-100" id="logo-dropdown-user">
+            <p class="text-xs font-bold text-slate-800" id="dropdown-name">Loading...</p>
+            <p class="text-xs text-slate-400" id="dropdown-email"></p>
+        </div>
+        <div class="logo-dropdown-item danger" onclick="logout()">🚪 Log Out</div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div id="notif-panel">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100" style="flex-shrink:0;background:inherit;border-radius:1rem 1rem 0 0">
+            <span class="font-bold text-slate-800 text-sm">Notifications</span>
+            <button onclick="toggleNotifPanel()" class="text-slate-400 text-xs hover:text-slate-600 w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100">✕</button>
+        </div>
+        <div id="notif-list" class="p-2" style="overflow-y:auto;flex:1"></div>
+    </div>
 
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav hidden">

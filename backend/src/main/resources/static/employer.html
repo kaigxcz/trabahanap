@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,754 +7,337 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="css/style.css">
-    <!-- Leaflet map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body { background: #f1f5f9; }
-        .tab-btn.active { background: #4f46e5; color: white; border-radius: 1rem; }
-        .kanban-col { min-height: 120px; }
-        .kanban-card { background: white; border: 1px solid #e2e8f0; border-radius: 0.875rem; padding: 0.75rem; transition: all 0.15s; }
-        .kanban-card:hover { border-color: #c7d2fe; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .stat-card { background: white; border-radius: 1.5rem; border: 1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 1.5rem; }
-        .stat-icon { width: 3rem; height: 3rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 0.75rem; }
-        .custom-pin { background: #4f46e5; border: 3px solid white; border-radius: 50% 50% 50% 0; width: 28px; height: 28px; transform: rotate(-45deg); box-shadow: 0 4px 12px rgba(79,70,229,0.5); }
-        .loc-suggestion { padding: 0.625rem 1rem; font-size: 0.8125rem; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.1s; }
-        .loc-suggestion:last-child { border-bottom: none; }
-        .loc-suggestion:hover { background: #f5f3ff; color: #4f46e5; }
+        body{background:#f1f5f9}
+        .tab-btn.active{background:#4f46e5;color:white;border-radius:1rem}
+        .kanban-col{min-height:120px}
+        .stat-card{background:white;border-radius:1rem;border:1px solid #f1f5f9;box-shadow:0 1px 4px rgba(0,0,0,0.04);padding:1rem 1.25rem;display:flex;align-items:center;gap:0.875rem}
+        .stat-icon{width:2.25rem;height:2.25rem;border-radius:0.625rem;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+        .custom-pin{background:#4f46e5;border:3px solid white;border-radius:50% 50% 50% 0;width:28px;height:28px;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(79,70,229,0.5)}
+        .loc-suggestion{padding:0.625rem 1rem;font-size:0.8125rem;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background 0.1s}
+        .loc-suggestion:hover{background:#f5f3ff;color:#4f46e5}
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
 
-    <aside class="w-full md:w-72 bg-white border-r border-slate-100 p-8 flex flex-col">
-        <div class="flex items-center justify-between mb-12">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center">
-                    <span class="text-white font-bold text-xs">T</span>
-                </div>
-                <div>
-                    <span class="font-bold text-xl tracking-tight block leading-tight">TrabaHanap</span>
-                    <span class="text-[9px] text-slate-400 font-medium">Online Job Application System</span>
-                </div>
-            </div>
-            <div class="flex items-center gap-1">
-                <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded-lg">Employer</span>
-                <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition text-base" title="Log out">🚪</button>
-            </div>
+<!-- Mobile Header -->
+<header class="mobile-header hidden">
+    <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><span class="text-white font-bold text-xs">T</span></div>
+        <span class="font-bold text-sm">TrabaHanap</span>
+        <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-lg ml-1">Employer</span>
+    </div>
+    <div class="flex items-center gap-1">
+        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">&#127769;</button>
+        <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition">&#128682;</button>
+    </div>
+</header>
+<aside class="desktop-sidebar w-64 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0" style="height:100vh;position:sticky;top:0;overflow-y:auto">
+    <div class="flex items-center justify-between mb-10">
+        <div class="flex items-center gap-2 cursor-pointer select-none" id="logo-btn" onclick="toggleLogoDropdown()">
+            <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md"><span class="text-white font-bold text-xs">T</span></div>
+            <span class="font-bold text-lg tracking-tight">TrabaHanap</span>
         </div>
-        <nav class="space-y-2 flex-1">
-            <button onclick="showTab('overview')" class="tab-btn active nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-overview">
-                <span>📊</span><span>Overview</span>
-            </button>
-            <button onclick="showTab('jobs')" class="tab-btn nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-jobs">
-                <span>💼</span><span>My Job Posts</span>
-            </button>
-            <button onclick="showTab('applicants')" class="tab-btn nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-applicants">
-                <span>👥</span><span>Applicants</span>
-            </button>
-            <button onclick="showTab('analytics')" class="tab-btn nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-analytics">
-                <span>📊</span><span>Analytics</span>
-            </button>
-            <button onclick="showTab('messages')" class="tab-btn nav-link w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-messages">
-                <span>💬</span><span>Messages</span>
-            </button>
-        </nav>
-    </aside>
-
-    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
-
-        <!-- Overview Tab -->
-        <div id="view-overview">
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-slate-900">Welcome back, <span id="employer-name" class="text-indigo-600">Employer</span> 👋</h1>
-                <p class="text-slate-400 text-sm mt-1">Here's your hiring activity at a glance.</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:#eef2ff">💼</div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Job Posts</p>
-                    <h3 id="stat-jobs" class="text-3xl font-bold text-slate-900">0</h3>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:#eef2ff">✅</div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Active Jobs</p>
-                    <h3 id="stat-active" class="text-3xl font-bold text-indigo-600">0</h3>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:#f0fdfa">👥</div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Applicants</p>
-                    <h3 id="stat-applicants" class="text-3xl font-bold text-teal-600">0</h3>
-                </div>
-            </div>
-            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-4">Quick Actions</h3>
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="openPostModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition">+ Post a New Job</button>
-                    <button onclick="showTab('applicants')" class="border border-slate-200 text-slate-600 px-6 py-3 rounded-2xl font-semibold hover:bg-slate-50 transition">View Applicants</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Jobs Tab -->
-        <div id="view-jobs" class="hidden">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">My Job Posts</h1>
-                    <p class="text-slate-400 text-sm mt-1">Manage your active and inactive listings.</p>
-                </div>
-                <button onclick="openPostModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition">+ Post Job</button>
-            </div>
-            <div id="jobs-list" class="space-y-4"></div>
-        </div>
-
-        <!-- Applicants Tab -->
-        <div id="view-applicants" class="hidden">
-            <div class="mb-6">
-                <h1 class="text-2xl font-bold text-slate-900">Applicants</h1>
-                <p class="text-slate-400 text-sm mt-1">Review and manage candidates for your jobs.</p>
-            </div>
-            <div class="flex flex-wrap gap-3 mb-6 items-center">
-                <select id="job-filter" onchange="loadApplicants()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-indigo-500 font-medium">
-                    <option value="">Select a job...</option>
-                </select>
-                <label class="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-2xl cursor-pointer hover:border-indigo-400 transition">
-                    <input type="checkbox" id="blind-toggle" onchange="loadApplicants()" class="accent-indigo-600">
-                    <span class="text-sm font-medium text-slate-600">🙈 Blind Screening</span>
-                </label>
-                <div class="relative ml-auto">
-                    <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
-                    <input type="text" id="applicant-search" oninput="filterKanban()" placeholder="Search applicants..."
-                        class="pl-8 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-indigo-500 transition w-52">
-                </div>
-            </div>
-            <!-- Kanban Board -->
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kanban-board">
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                    <div class="bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500 uppercase">Applied</div>
-                    <div id="col-Applied" class="kanban-col p-3 space-y-2"></div>
-                </div>
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                    <div class="bg-blue-50 px-4 py-2 text-xs font-bold text-blue-500 uppercase">Under Review</div>
-                    <div id="col-Under Review" class="kanban-col p-3 space-y-2"></div>
-                </div>
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                    <div class="bg-purple-50 px-4 py-2 text-xs font-bold text-purple-500 uppercase">Interview</div>
-                    <div id="col-Interview" class="kanban-col p-3 space-y-2"></div>
-                </div>
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                    <div class="bg-green-50 px-4 py-2 text-xs font-bold text-green-500 uppercase">Offer</div>
-                    <div id="col-Offer" class="kanban-col p-3 space-y-2"></div>
-                </div>
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                    <div class="bg-red-50 px-4 py-2 text-xs font-bold text-red-400 uppercase">Rejected</div>
-                    <div id="col-Rejected" class="kanban-col p-3 space-y-2"></div>
-                </div>
-            </div>
-            <p id="no-applicants" class="text-slate-400 text-sm mt-6 hidden">Select a job above to see applicants.</p>
-        </div>
-
-        <!-- Analytics Tab -->
-        <div id="view-analytics" class="hidden">
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-slate-900">Analytics</h1>
-                <p class="text-slate-400 text-sm mt-1">Applicants per job posting.</p>
-            </div>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <h3 class="font-bold text-slate-800 mb-4">Applicants per Job</h3>
-                    <canvas id="applicantsChart" height="250"></canvas>
-                </div>
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <h3 class="font-bold text-slate-800 mb-4">Job Status Overview</h3>
-                    <canvas id="statusChart" height="250"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Messages Tab -->
-        <div id="view-messages" class="hidden">
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-slate-900">Messages</h1>
-                <p class="text-slate-400 text-sm mt-1">Communicate with candidates.</p>
-            </div>
-            <div class="grid md:grid-cols-3 gap-6 h-[500px]">
-                <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-                    <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                        <p class="font-bold text-slate-800 text-sm">Conversations</p>
-                        <button onclick="openNewMsgEmployer()" class="text-xs text-indigo-600 font-semibold hover:underline">+ New</button>
-                    </div>
-                    <div id="emp-convo-list" class="flex-1 overflow-y-auto p-3 space-y-1"></div>
-                </div>
-                <div class="md:col-span-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-                    <div id="emp-chat-header" class="p-4 border-b border-slate-100 hidden">
-                        <p id="emp-chat-name" class="font-bold text-slate-800 text-sm"></p>
-                    </div>
-                    <div id="emp-chat-empty" class="flex-1 flex items-center justify-center text-slate-400 text-sm">Select a conversation</div>
-                    <div id="emp-chat-msgs" class="flex-1 overflow-y-auto p-4 space-y-3 hidden"></div>
-                    <div id="emp-chat-input" class="p-4 border-t border-slate-100 hidden">
-                        <div class="flex gap-2">
-                            <input type="text" id="emp-msg-input" placeholder="Type a message..." class="input flex-1 text-sm" onkeydown="if(event.key==='Enter') sendEmpMessage()">
-                            <button onclick="sendEmpMessage()" class="btn btn-primary h-10 px-4 text-sm">Send</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Interview Schedule Modal -->
-    <div id="interviewModal" class="modal p-4">
-        <div class="modal-box bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-8">
-            <h3 class="text-lg font-bold mb-5">Schedule Interview</h3>
-            <input type="hidden" id="interview-app-id">
-            <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Date & Time</label>
-                    <input type="datetime-local" id="interview-date" class="input mt-1">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Location</label>
-                    <input type="text" id="interview-location" placeholder="e.g. Online / Office address" class="input mt-1">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Meeting Link (optional)</label>
-                    <input type="url" id="interview-link" placeholder="https://meet.google.com/..." class="input mt-1">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Notes (optional)</label>
-                    <textarea id="interview-notes" rows="2" placeholder="Any instructions for the candidate..." class="input mt-1 resize-none"></textarea>
-                </div>
-                <div class="flex gap-3 pt-2">
-                    <button onclick="closeInterviewModal()" class="btn btn-secondary flex-1 h-11">Cancel</button>
-                    <button onclick="submitInterview()" class="btn btn-primary flex-1 h-11">Schedule</button>
-                </div>
-            </div>
+        <div class="flex items-center gap-1">
+            <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded-lg">Employer</span>
+            <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition text-lg">&#127769;</button>
+            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition">&#128682;</button>
         </div>
     </div>
+    <nav class="space-y-1 flex-1">
+        <button onclick="showTab('overview')" class="tab-btn active nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-overview"><span>&#128202;</span><span class="text-sm">Overview</span></button>
+        <button onclick="showTab('jobs')" class="tab-btn nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-jobs"><span>&#128188;</span><span class="text-sm">My Job Posts</span></button>
+        <button onclick="showTab('applicants')" class="tab-btn nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-applicants"><span>&#128101;</span><span class="text-sm">Applicants</span></button>
+        <button onclick="showTab('analytics')" class="tab-btn nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-analytics"><span>&#128200;</span><span class="text-sm">Analytics</span></button>
+        <button onclick="showTab('messages')" class="tab-btn nav-link w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 transition" id="tab-messages"><span>&#128172;</span><span class="text-sm">Messages</span></button>
+    </nav>
+</aside>
 
-    <!-- New Message Modal (Employer) -->
-    <div id="empNewMsgModal" class="modal p-4">
-        <div class="modal-box bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-8">
-            <h3 class="text-lg font-bold mb-5">New Message</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">To (Username)</label>
-                    <input type="text" id="emp-new-receiver" placeholder="Candidate username" class="input mt-1">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Subject</label>
-                    <input type="text" id="emp-new-subject" placeholder="e.g. Interview invitation" class="input mt-1">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Message</label>
-                    <textarea id="emp-new-content" rows="3" class="input mt-1 resize-none"></textarea>
-                </div>
-                <div class="flex gap-3 pt-2">
-                    <button onclick="closeEmpNewMsg()" class="btn btn-secondary flex-1 h-11">Cancel</button>
-                    <button onclick="sendEmpNewMessage()" class="btn btn-primary flex-1 h-11">Send</button>
-                </div>
-            </div>
+<main class="flex-1 p-6 md:p-10 overflow-y-auto">
+<!-- Overview -->
+<div id="view-overview">
+    <div class="mb-8"><h1 class="text-2xl font-bold text-slate-900">Welcome back, <span id="employer-name" class="text-indigo-600">Employer</span> &#128075;</h1><p class="text-slate-400 text-sm mt-1">Here's your hiring activity at a glance.</p></div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
+        <div class="stat-card"><div class="stat-icon" style="background:#eef2ff">&#128188;</div><div><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Job Posts</p><h3 id="stat-jobs" class="text-xl font-bold text-slate-900">0</h3></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#eef2ff">&#9989;</div><div><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Jobs</p><h3 id="stat-active" class="text-xl font-bold text-indigo-600">0</h3></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#f0fdfa">&#128101;</div><div><p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Applicants</p><h3 id="stat-applicants" class="text-xl font-bold text-teal-600">0</h3></div></div>
+    </div>
+    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm"><h3 class="font-bold text-slate-800 mb-4">Quick Actions</h3><div class="flex flex-wrap gap-3"><button onclick="openPostModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition">+ Post a New Job</button><button onclick="showTab('applicants')" class="border border-slate-200 text-slate-600 px-6 py-3 rounded-2xl font-semibold hover:bg-slate-50 transition">View Applicants</button></div></div>
+</div>
+<!-- Jobs -->
+<div id="view-jobs" class="hidden">
+    <div class="flex items-center justify-between mb-8"><div><h1 class="text-2xl font-bold text-slate-900">My Job Posts</h1><p class="text-slate-400 text-sm mt-1">Manage your active and inactive listings.</p></div><button onclick="openPostModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition">+ Post Job</button></div>
+    <div id="jobs-list" class="space-y-4"></div>
+</div>
+<!-- Applicants -->
+<div id="view-applicants" class="hidden">
+    <div class="mb-6"><h1 class="text-2xl font-bold text-slate-900">Applicants</h1><p class="text-slate-400 text-sm mt-1">Review and manage candidates for your jobs.</p></div>
+    <div class="flex flex-wrap gap-3 mb-6 items-center">
+        <select id="job-filter" onchange="loadApplicants()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-indigo-500 font-medium"><option value="">Select a job...</option></select>
+        <label class="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-2xl cursor-pointer hover:border-indigo-400 transition"><input type="checkbox" id="blind-toggle" onchange="loadApplicants()" class="accent-indigo-600"><span class="text-sm font-medium text-slate-600">&#128584; Blind Screening</span></label>
+        <input type="text" id="applicant-search" oninput="filterKanban()" placeholder="Search applicants..." class="ml-auto pl-4 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-indigo-500 transition w-52">
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="kanban-board">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden"><div class="bg-slate-100 px-4 py-2 text-xs font-bold text-slate-500 uppercase">Applied</div><div id="col-Applied" class="kanban-col p-3 space-y-2"></div></div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden"><div class="bg-blue-50 px-4 py-2 text-xs font-bold text-blue-500 uppercase">Under Review</div><div id="col-UnderReview" class="kanban-col p-3 space-y-2"></div></div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden"><div class="bg-purple-50 px-4 py-2 text-xs font-bold text-purple-500 uppercase">Interview</div><div id="col-Interview" class="kanban-col p-3 space-y-2"></div></div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden"><div class="bg-green-50 px-4 py-2 text-xs font-bold text-green-500 uppercase">Offer</div><div id="col-Offer" class="kanban-col p-3 space-y-2"></div></div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden"><div class="bg-red-50 px-4 py-2 text-xs font-bold text-red-400 uppercase">Rejected</div><div id="col-Rejected" class="kanban-col p-3 space-y-2"></div></div>
+    </div>
+    <p id="no-applicants" class="text-slate-400 text-sm mt-6 hidden">Select a job above to see applicants.</p>
+</div>
+<!-- Analytics -->
+<div id="view-analytics" class="hidden">
+    <div class="mb-8"><h1 class="text-2xl font-bold text-slate-900">Analytics</h1><p class="text-slate-400 text-sm mt-1">Applicants per job posting.</p></div>
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm"><h3 class="font-bold text-slate-800 mb-4">Applicants per Job</h3><canvas id="applicantsChart" height="250"></canvas></div>
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm"><h3 class="font-bold text-slate-800 mb-4">Job Status Overview</h3><canvas id="statusChart" height="250"></canvas></div>
+    </div>
+</div>
+<!-- Messages -->
+<div id="view-messages" class="hidden">
+    <div class="mb-8"><h1 class="text-2xl font-bold text-slate-900">Messages</h1><p class="text-slate-400 text-sm mt-1">Communicate with candidates.</p></div>
+    <div class="grid md:grid-cols-3 gap-6 h-[500px]">
+        <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between"><p class="font-bold text-slate-800 text-sm">Conversations</p><button onclick="openNewMsgEmployer()" class="text-xs text-indigo-600 font-semibold hover:underline">+ New</button></div>
+            <div id="emp-convo-list" class="flex-1 overflow-y-auto p-3 space-y-1"></div>
+        </div>
+        <div class="md:col-span-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+            <div id="emp-chat-header" class="p-4 border-b border-slate-100 hidden"><p id="emp-chat-name" class="font-bold text-slate-800 text-sm"></p></div>
+            <div id="emp-chat-empty" class="flex-1 flex items-center justify-center text-slate-400 text-sm">Select a conversation</div>
+            <div id="emp-chat-msgs" class="flex-1 overflow-y-auto p-4 space-y-3 hidden"></div>
+            <div id="emp-chat-input" class="p-4 border-t border-slate-100 hidden"><div class="flex gap-2"><input type="text" id="emp-msg-input" placeholder="Type a message..." class="input flex-1 text-sm" onkeydown="if(event.key==='Enter') sendEmpMessage()"><button onclick="sendEmpMessage()" class="btn btn-primary h-10 px-4 text-sm">Send</button></div></div>
         </div>
     </div>
+</div>
+</main>
 
-    <!-- Post Job Modal -->
-    <div id="postModal" class="modal p-4">
-        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-8">
-                <h3 class="text-xl font-bold mb-6" id="modal-title">Post a New Job</h3>
-                <input type="hidden" id="edit-job-id">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Job Title *</label>
-                        <input id="f-title" type="text" placeholder="e.g. Frontend Engineer" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
-                    </div>
+<!-- Interview Modal -->
+<div id="interviewModal" class="modal p-4"><div class="modal-box bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-8"><h3 class="text-lg font-bold mb-5">Schedule Interview</h3><input type="hidden" id="interview-app-id"><div class="space-y-4"><div><label class="text-xs font-bold text-slate-500 uppercase">Date &amp; Time</label><input type="datetime-local" id="interview-date" class="input mt-1"></div><div><label class="text-xs font-bold text-slate-500 uppercase">Location</label><input type="text" id="interview-location" placeholder="e.g. Online / Office address" class="input mt-1"></div><div><label class="text-xs font-bold text-slate-500 uppercase">Meeting Link (optional)</label><input type="url" id="interview-link" placeholder="https://meet.google.com/..." class="input mt-1"></div><div><label class="text-xs font-bold text-slate-500 uppercase">Notes (optional)</label><textarea id="interview-notes" rows="2" class="input mt-1 resize-none"></textarea></div><div class="flex gap-3 pt-2"><button onclick="closeInterviewModal()" class="btn btn-secondary flex-1 h-11">Cancel</button><button onclick="submitInterview()" class="btn btn-primary flex-1 h-11">Schedule</button></div></div></div></div>
+<!-- New Message Modal -->
+<div id="empNewMsgModal" class="modal p-4"><div class="modal-box bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-8"><h3 class="text-lg font-bold mb-5">New Message</h3><div class="space-y-4"><div><label class="text-xs font-bold text-slate-500 uppercase">To (Username)</label><input type="text" id="emp-new-receiver" placeholder="Candidate username" class="input mt-1"></div><div><label class="text-xs font-bold text-slate-500 uppercase">Subject</label><input type="text" id="emp-new-subject" placeholder="e.g. Interview invitation" class="input mt-1"></div><div><label class="text-xs font-bold text-slate-500 uppercase">Message</label><textarea id="emp-new-content" rows="3" class="input mt-1 resize-none"></textarea></div><div class="flex gap-3 pt-2"><button onclick="closeEmpNewMsg()" class="btn btn-secondary flex-1 h-11">Cancel</button><button onclick="sendEmpNewMessage()" class="btn btn-primary flex-1 h-11">Send</button></div></div></div></div>
+<!-- Post Job Modal -->
+<div id="postModal" class="modal p-4"><div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl max-h-[90vh] overflow-y-auto"><div class="p-8"><h3 class="text-xl font-bold mb-6" id="modal-title">Post a New Job</h3><input type="hidden" id="edit-job-id"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="md:col-span-2"><label class="text-[10px] font-bold text-slate-400 uppercase">Job Title *</label><input id="f-title" type="text" placeholder="e.g. Frontend Engineer" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm"></div><div><label class="text-[10px] font-bold text-slate-400 uppercase">Company *</label><input id="f-company" type="text" placeholder="Company name" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm"></div><div><label class="text-[10px] font-bold text-slate-400 uppercase">Location *</label><div class="relative mt-1"><input id="f-location" type="text" placeholder="e.g. Remote, Manila" class="w-full p-3 pr-11 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm" oninput="searchLocationEmployer(this.value)"><button type="button" onclick="toggleMapEmployer()" class="absolute right-2 top-2 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition">&#128205;</button></div><div id="emp-loc-suggestions" class="hidden mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden z-50 relative"></div><div id="emp-map-wrap" class="hidden mt-2 rounded-2xl overflow-hidden border border-slate-200 shadow-sm" style="height:200px;position:relative"><div id="emp-map" style="height:100%;width:100%"></div></div></div><div><label class="text-[10px] font-bold text-slate-400 uppercase">Salary Range</label><input id="f-salary" type="text" placeholder="e.g. 50k-80k" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm"></div><div><label class="text-[10px] font-bold text-slate-400 uppercase">Category</label><select id="f-category" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm"><option>Technology</option><option>Creative</option><option>Finance</option><option>Healthcare</option><option>Education</option><option>Marketing</option></select></div><div><label class="text-[10px] font-bold text-slate-400 uppercase">Job Type</label><select id="f-type" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm"><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option></select></div><div><label class="text-[10px] font-bold text-slate-400 uppercase">Experience Level</label><select id="f-experience" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm"><option>Fresh/Entry</option><option>1-3 years</option><option>3-5 years</option><option>5+ years</option></select></div><div class="md:col-span-2"><label class="text-[10px] font-bold text-slate-400 uppercase">Job Description *</label><textarea id="f-desc" rows="3" placeholder="Describe the role..." class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm resize-none"></textarea></div><div class="md:col-span-2"><label class="text-[10px] font-bold text-slate-400 uppercase">Requirements (comma-separated)</label><input id="f-reqs" type="text" placeholder="e.g. React, Java, SQL" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm"></div></div><div class="flex gap-3 mt-6"><button onclick="closePostModal()" class="flex-1 h-12 border border-slate-200 text-slate-400 font-bold rounded-2xl hover:text-slate-600 transition">Cancel</button><button onclick="submitJob()" class="flex-1 h-12 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition">Post Job</button></div></div></div></div>
+<!-- Logo Dropdown -->
+<div id="logo-dropdown"><div class="px-4 py-3 border-b border-slate-100"><p class="text-xs font-bold text-slate-800" id="dropdown-name">Loading...</p><p class="text-xs text-slate-400" id="dropdown-email"></p></div><div class="logo-dropdown-item danger" onclick="logout()">&#128682; Log Out</div></div>
+﻿<script src="js/api.js"></script>
+<script>
+const user=JSON.parse(localStorage.getItem('jc_user')||'{}');
+if(!localStorage.getItem('jc_token')||user.role!=='EMPLOYER')window.location.replace('index.html');
+let myJobs=[],allApplicants=[];
+function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escA(s){if(!s)return '';return String(s).replace(/'/g,"\\'");}
+function showTab(tab){
+    ['overview','jobs','applicants','analytics','messages'].forEach(t=>{
+        document.getElementById('view-'+t).classList.add('hidden');
+        document.getElementById('tab-'+t).classList.remove('active');
+        const mob=document.getElementById('mob-'+t);
+        if(mob) mob.classList.remove('active');
+    });
+    document.getElementById('view-'+tab).classList.remove('hidden');
+    document.getElementById('tab-'+tab).classList.add('active');
+    const mob=document.getElementById('mob-'+tab);
+    if(mob) mob.classList.add('active');
+    if(tab==='overview')loadStats();
+    if(tab==='jobs')loadMyJobs();
+    if(tab==='applicants')loadJobFilter();
+    if(tab==='analytics')loadAnalytics();
+    if(tab==='messages')loadEmpConversations();
+}
+async function loadStats(){
+    try{const s=await apiGet('/employer/stats');document.getElementById('stat-jobs').innerText=s.totalJobs;document.getElementById('stat-active').innerText=s.activeJobs;document.getElementById('stat-applicants').innerText=s.totalApplicants;}
+    catch(e){toast('Failed to load stats.','error');}
+}
+async function loadMyJobs(){
+    try{
+        myJobs=await apiGet('/employer/jobs');
+        const list=document.getElementById('jobs-list');
+        if(!myJobs.length){list.innerHTML='<p class="text-slate-400 italic">No jobs posted yet.</p>';return;}
+        list.innerHTML=myJobs.map(job=>`
+            <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">&#128188;</div>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Company *</label>
-                        <input id="f-company" type="text" placeholder="Company name" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Location *</label>
-                        <div class="relative mt-1">
-                            <input id="f-location" type="text" placeholder="e.g. Remote, Manila"
-                                class="w-full p-3 pr-11 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm"
-                                oninput="searchLocationEmployer(this.value)">
-                            <button type="button" onclick="toggleMapEmployer()" title="Pick on map"
-                                class="absolute right-2 top-2 w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition text-base">📍</button>
+                        <h4 class="font-bold text-slate-900">${esc(job.title)}</h4>
+                        <p class="text-slate-500 text-sm">${esc(job.company)} &bull; ${esc(job.location)}</p>
+                        <div class="flex gap-2 mt-1 flex-wrap">
+                            <span class="text-xs bg-indigo-50 text-indigo-600 font-semibold px-2 py-0.5 rounded-full">${esc(job.type)}</span>
+                            <span class="text-xs ${job.active?'bg-green-50 text-green-600':'bg-slate-100 text-slate-400'} font-semibold px-2 py-0.5 rounded-full">${job.active?'Active':'Inactive'}</span>
                         </div>
-                        <div id="emp-loc-suggestions" class="hidden mt-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden z-50 relative"></div>
-                        <div id="emp-map-wrap" class="hidden mt-2 rounded-2xl overflow-hidden border border-slate-200 shadow-sm" style="height:200px;position:relative">
-                            <div id="emp-map" style="height:100%;width:100%"></div>
-                            <div class="absolute bottom-2 left-0 right-0 flex justify-center pointer-events-none z-[999]">
-                                <span class="bg-white/90 backdrop-blur text-xs font-semibold text-slate-600 px-3 py-1 rounded-full shadow">Click or drag pin to set job location</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Salary Range</label>
-                        <input id="f-salary" type="text" placeholder="e.g. ₱50k-₱80k" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Category</label>
-                        <select id="f-category" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
-                            <option>Technology</option><option>Creative</option><option>Finance</option>
-                            <option>Healthcare</option><option>Education</option><option>Marketing</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Job Type</label>
-                        <select id="f-type" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
-                            <option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Experience Level</label>
-                        <select id="f-experience" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
-                            <option>Fresh/Entry</option><option>1-3 years</option><option>3-5 years</option><option>5+ years</option>
-                        </select>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Job Description *</label>
-                        <textarea id="f-desc" rows="3" placeholder="Describe the role and responsibilities..." class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm resize-none"></textarea>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Requirements (comma-separated)</label>
-                        <input id="f-reqs" type="text" placeholder="e.g. React, Java, SQL" class="w-full mt-1 p-3 bg-slate-50 border rounded-2xl outline-none focus:border-indigo-500 text-sm">
                     </div>
                 </div>
-                <div class="flex gap-3 mt-6">
-                    <button onclick="closePostModal()" class="flex-1 h-12 border border-slate-200 text-slate-400 font-bold rounded-2xl hover:text-slate-600 transition">Cancel</button>
-                    <button onclick="submitJob()" class="flex-1 h-12 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition">Post Job</button>
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    <button onclick="viewApplicantsForJob(${job.id})" class="h-9 px-4 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-sm font-semibold transition">Applicants</button>
+                    <button onclick="editJob(${job.id})" class="h-9 px-4 border border-slate-200 text-slate-500 hover:border-indigo-400 hover:text-indigo-600 rounded-xl text-sm font-medium transition">Edit</button>
+                    <button onclick="toggleJobActive(${job.id},${job.active})" class="h-9 px-4 border border-slate-200 text-slate-500 hover:border-amber-400 hover:text-amber-600 rounded-xl text-sm font-medium transition">${job.active?'Deactivate':'Activate'}</button>
+                    <button onclick="deleteJob(${job.id})" class="h-9 px-4 border border-red-100 text-red-400 hover:bg-red-50 rounded-xl text-sm font-medium transition">Delete</button>
                 </div>
-            </div>
-        </div>
-    </div>
+            </div>`).join('');
+    }catch(e){toast('Failed to load jobs.','error');}
+}
+async function loadJobFilter(){
+    try{
+        myJobs=await apiGet('/employer/jobs');
+        const sel=document.getElementById('job-filter');
+        sel.innerHTML='<option value="">Select a job...</option>'+myJobs.map(j=>`<option value="${j.id}">${esc(j.title)} - ${esc(j.company)}</option>`).join('');
+    }catch(e){toast('Failed to load jobs.','error');}
+}
+function getColId(status){return{'Applied':'col-Applied','Under Review':'col-UnderReview','Interview':'col-Interview','Offer':'col-Offer','Rejected':'col-Rejected'}[status]||'col-Applied';}
+async function loadApplicants(){
+    const jobId=document.getElementById('job-filter').value;
+    const blind=document.getElementById('blind-toggle').checked;
+    ['col-Applied','col-UnderReview','col-Interview','col-Offer','col-Rejected'].forEach(id=>document.getElementById(id).innerHTML='');
+    if(!jobId){document.getElementById('no-applicants').classList.remove('hidden');return;}
+    document.getElementById('no-applicants').classList.add('hidden');
+    try{
+        allApplicants=await apiGet('/employer/jobs/'+jobId+'/applicants?blind='+blind);
+        if(!allApplicants.length){document.getElementById('col-Applied').innerHTML='<p class="text-xs text-slate-400 italic p-2">No applicants yet.</p>';return;}
+        allApplicants.forEach(app=>{
+            const col=document.getElementById(getColId(app.status));
+            if(!col)return;
+            const mc=app.matchScore>=70?'text-green-600 bg-green-50':app.matchScore>=40?'text-amber-600 bg-amber-50':'text-slate-500 bg-slate-100';
+            const card=document.createElement('div');
+            card.className='bg-slate-50 rounded-xl p-3 border border-slate-100 kanban-card-item';
+            card.dataset.search=(app.name||'').toLowerCase();
+            card.innerHTML=`<div class="flex items-center justify-between mb-1"><p class="text-sm font-bold text-slate-800">${esc(app.name)}</p><span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${mc}">${app.matchScore}% match</span></div>
+                <p class="text-xs text-slate-500">${esc(app.jobTitle_candidate||'No title')}</p>
+                <p class="text-xs text-slate-400">${esc(app.location||'')}</p>
+                ${app.skills?`<p class="text-[10px] text-indigo-500 mt-1 truncate">${esc(app.skills)}</p>`:''}
+                <div class="mt-2 space-y-1">
+                    <select onchange="updateStatus(${app.applicationId},this.value)" class="w-full text-xs p-1.5 border border-slate-200 rounded-lg outline-none bg-white">
+                        ${['Applied','Under Review','Interview','Offer','Rejected'].map(s=>`<option ${s===app.status?'selected':''}>${s}</option>`).join('')}
+                    </select>
+                    <button onclick="openInterviewModal(${app.applicationId})" class="w-full text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 font-semibold py-1.5 rounded-lg transition">Schedule Interview</button>
+                    <button onclick="msgCandidate('${escA(app.candidateUsername||'')}')" class="w-full text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-semibold py-1.5 rounded-lg transition">Message</button>
+                </div>`;
+            col.appendChild(card);
+        });
+    }catch(e){toast('Failed to load applicants.','error');}
+}
+function filterKanban(){const q=document.getElementById('applicant-search').value.toLowerCase();document.querySelectorAll('.kanban-card-item').forEach(c=>{c.style.display=(!q||c.dataset.search.includes(q)||c.textContent.toLowerCase().includes(q))?'':'none';});}
+async function updateStatus(appId,status){try{await apiPut('/employer/applications/'+appId+'/status',{status});loadApplicants();}catch(e){toast('Failed to update status.','error');}}
+function openPostModal(job){
+    document.getElementById('edit-job-id').value=job?job.id:'';
+    document.getElementById('modal-title').innerText=job?'Edit Job':'Post a New Job';
+    document.getElementById('f-title').value=job?job.title:'';
+    document.getElementById('f-company').value=job?job.company:'';
+    document.getElementById('f-location').value=job?job.location:'';
+    document.getElementById('f-salary').value=job?(job.salary||''):'';
+    document.getElementById('f-desc').value=job?(job.description||''):'';
+    document.getElementById('f-reqs').value=job?(job.requirements||''):'';
+    if(job&&job.category)document.getElementById('f-category').value=job.category;
+    if(job&&job.type)document.getElementById('f-type').value=job.type;
+    if(job&&job.experience)document.getElementById('f-experience').value=job.experience;
+    document.getElementById('emp-loc-suggestions').classList.add('hidden');
+    document.getElementById('emp-map-wrap').classList.add('hidden');
+    empMapOpen=false;if(empMap){empMap.remove();empMap=null;empMarker=null;}
+    document.getElementById('postModal').classList.add('active');
+}
+function closePostModal(){document.getElementById('postModal').classList.remove('active');document.getElementById('emp-map-wrap').classList.add('hidden');empMapOpen=false;if(empMap){empMap.remove();empMap=null;empMarker=null;}}
+async function submitJob(){
+    const id=document.getElementById('edit-job-id').value;
+    const body={title:document.getElementById('f-title').value.trim(),company:document.getElementById('f-company').value.trim(),location:document.getElementById('f-location').value.trim(),salary:document.getElementById('f-salary').value.trim(),category:document.getElementById('f-category').value,type:document.getElementById('f-type').value,experience:document.getElementById('f-experience').value,description:document.getElementById('f-desc').value.trim(),requirements:document.getElementById('f-reqs').value.trim(),icon:'&#128188;'};
+    if(!body.title||!body.company||!body.location){toast('Please fill in required fields.','warning');return;}
+    const btn=document.querySelector('#postModal button[onclick="submitJob()"]');
+    if(btn)setLoading(btn,true,id?'Saving...':'Posting...');
+    try{if(id){await apiPut('/employer/jobs/'+id,body);toast('Job updated!','success');}else{await apiPost('/employer/jobs',body,true);toast('Job posted!','success');}closePostModal();loadMyJobs();loadStats();}
+    catch(e){toast('Failed to save job.','error');}finally{if(btn)setLoading(btn,false);}
+}
+function editJob(id){const job=myJobs.find(j=>j.id===id);if(job)openPostModal(job);}
+function viewApplicantsForJob(jobId){showTab('applicants');setTimeout(()=>{const sel=document.getElementById('job-filter');if(sel){sel.value=jobId;loadApplicants();}},150);}
+async function toggleJobActive(id,current){try{await apiPut('/employer/jobs/'+id,{active:String(!current)});loadMyJobs();}catch(e){toast('Failed to update job.','error');}}
+async function deleteJob(id){showConfirm('This will permanently delete this job posting.',async()=>{try{await apiDelete('/employer/jobs/'+id);toast('Job deleted.','info');loadMyJobs();loadStats();}catch(e){toast('Failed to delete job.','error');}});}
+function logout(){localStorage.removeItem('jc_token');localStorage.removeItem('jc_user');window.location.replace('index.html');}
+let logoOpen=false;
+function toggleLogoDropdown(){logoOpen=!logoOpen;const drop=document.getElementById('logo-dropdown');if(logoOpen){const rect=document.getElementById('logo-btn').getBoundingClientRect();drop.style.top=(rect.bottom+8)+'px';drop.style.left=rect.left+'px';drop.classList.add('open');const u=JSON.parse(localStorage.getItem('jc_user')||'{}');document.getElementById('dropdown-name').innerText=u.fullName||u.username||'User';document.getElementById('dropdown-email').innerText=u.email||'';}else{drop.classList.remove('open');}}
+document.addEventListener('click',e=>{if(!e.target.closest('#logo-dropdown')&&!e.target.closest('#logo-btn')){logoOpen=false;const d=document.getElementById('logo-dropdown');if(d)d.classList.remove('open');}});
+function toggleDark(){const d=document.body.classList.toggle('dark');localStorage.setItem('jc_dark',d?'1':'');}
+window.onload=()=>{if(localStorage.getItem('jc_dark'))document.body.classList.add('dark');loadStats();};
+document.getElementById('postModal').addEventListener('click',e=>{if(e.target===document.getElementById('postModal'))closePostModal();});
+function openInterviewModal(appId){document.getElementById('interview-app-id').value=appId;document.getElementById('interviewModal').classList.add('active');}
+function closeInterviewModal(){document.getElementById('interviewModal').classList.remove('active');}
+async function submitInterview(){
+    const appId=document.getElementById('interview-app-id').value;
+    const scheduledAt=document.getElementById('interview-date').value;
+    if(!scheduledAt){toast('Please select a date and time.','warning');return;}
+    const location=document.getElementById('interview-location').value||'Online';
+    const meetingLink=document.getElementById('interview-link').value;
+    const notes=document.getElementById('interview-notes').value;
+    try{const data=await apiPost('/interviews',{applicationId:appId,scheduledAt,location,meetingLink,notes},true);if(data.error){toast(data.error,'error');return;}toast('Interview scheduled!','success');closeInterviewModal();loadApplicants();}
+    catch(e){toast('Failed to schedule interview.','error');}
+}
+document.getElementById('interviewModal').addEventListener('click',e=>{if(e.target===document.getElementById('interviewModal'))closeInterviewModal();});
+let chartInstances={};
+async function loadAnalytics(){
+    try{
+        const data=await apiGet('/employer/analytics');
+        if(chartInstances.bar)chartInstances.bar.destroy();
+        if(chartInstances.doughnut)chartInstances.doughnut.destroy();
+        chartInstances.bar=new Chart(document.getElementById('applicantsChart'),{type:'bar',data:{labels:data.map(d=>d.jobTitle),datasets:[{label:'Applicants',data:data.map(d=>d.applicants),backgroundColor:'#6366f1',borderRadius:8}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+        const active=data.filter(d=>d.active).length;
+        chartInstances.doughnut=new Chart(document.getElementById('statusChart'),{type:'doughnut',data:{labels:['Active','Inactive'],datasets:[{data:[active,data.length-active],backgroundColor:['#6366f1','#e2e8f0'],borderWidth:0}]},options:{responsive:true,cutout:'70%'}});
+    }catch(e){toast('Failed to load analytics.','error');}
+}
+let empCurrentConvo=null;
+async function loadEmpConversations(){
+    try{
+        const msgs=await apiGet('/messages/inbox');
+        const list=document.getElementById('emp-convo-list');
+        if(!msgs.length){list.innerHTML='<p class="text-xs text-slate-400 text-center py-4">No messages yet.</p>';return;}
+        const seen=new Set();const convos=[];
+        msgs.forEach(m=>{const other=m.isMine?m.receiverUsername:m.senderUsername;const name=m.isMine?m.receiverUsername:m.senderName;if(!seen.has(other)){seen.add(other);convos.push({username:other,name,last:m});}});
+        list.innerHTML=convos.map(c=>`<div onclick="openEmpConvo('${escA(c.username)}','${escA(c.name)}')" class="flex items-center gap-2 p-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition"><div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs shrink-0">${esc(c.name[0].toUpperCase())}</div><div class="flex-1 min-w-0"><p class="text-xs font-semibold text-slate-800 truncate">${esc(c.name)}</p><p class="text-[10px] text-slate-400 truncate">${esc(c.last.content)}</p></div></div>`).join('');
+    }catch(e){toast('Failed to load conversations.','error');}
+}
+async function openEmpConvo(username,name){
+    empCurrentConvo=username;
+    document.getElementById('emp-chat-empty').classList.add('hidden');
+    document.getElementById('emp-chat-msgs').classList.remove('hidden');
+    document.getElementById('emp-chat-input').classList.remove('hidden');
+    document.getElementById('emp-chat-header').classList.remove('hidden');
+    document.getElementById('emp-chat-name').innerText=name;
+    try{
+        const msgs=await apiGet('/messages/conversation/'+username);
+        const container=document.getElementById('emp-chat-msgs');
+        container.innerHTML=msgs.map(m=>`<div class="flex ${m.isMine?'justify-end':'justify-start'}"><div class="max-w-xs px-3 py-2 rounded-2xl text-xs ${m.isMine?'bg-indigo-600 text-white':'bg-slate-100 text-slate-800'}">${esc(m.content)}</div></div>`).join('');
+        container.scrollTop=container.scrollHeight;
+    }catch(e){toast('Failed to load messages.','error');}
+}
+async function sendEmpMessage(){const content=document.getElementById('emp-msg-input').value.trim();if(!content||!empCurrentConvo)return;try{await apiPost('/messages',{receiverUsername:empCurrentConvo,content},true);document.getElementById('emp-msg-input').value='';openEmpConvo(empCurrentConvo,document.getElementById('emp-chat-name').innerText);}catch(e){toast('Failed to send message.','error');}}
+function openNewMsgEmployer(){document.getElementById('empNewMsgModal').classList.add('active');}
+function closeEmpNewMsg(){document.getElementById('empNewMsgModal').classList.remove('active');}
+async function sendEmpNewMessage(){const receiver=document.getElementById('emp-new-receiver').value.trim();const subject=document.getElementById('emp-new-subject').value.trim();const content=document.getElementById('emp-new-content').value.trim();if(!receiver||!content){toast('Fill in receiver and message.','warning');return;}try{await apiPost('/messages',{receiverUsername:receiver,subject,content},true);toast('Message sent!','success');closeEmpNewMsg();loadEmpConversations();}catch(e){toast('Failed to send message.','error');}}
+function msgCandidate(username){if(!username){toast('No username available.','warning');return;}showTab('messages');setTimeout(()=>{document.getElementById('emp-new-receiver').value=username;openNewMsgEmployer();},150);}
+document.getElementById('empNewMsgModal').addEventListener('click',e=>{if(e.target===document.getElementById('empNewMsgModal'))closeEmpNewMsg();});
+let empMap=null,empMarker=null,empMapOpen=false,empSuggestTimer=null;
+function toggleMapEmployer(){const wrap=document.getElementById('emp-map-wrap');empMapOpen=!empMapOpen;wrap.classList.toggle('hidden',!empMapOpen);if(empMapOpen)setTimeout(()=>{if(!empMap)initEmpMap();else empMap.invalidateSize();},50);}
+function initEmpMap(){empMap=L.map('emp-map', { zoomControl: true, maxBounds: [[4.5, 116.0], [21.5, 127.0]], maxBoundsViscosity: 1.0, minZoom: 5 }).setView([12.8797, 121.7740], 6);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(empMap);const pin=L.divIcon({className:'',html:'<div class="custom-pin"></div>',iconSize:[28,28],iconAnchor:[14,28]});empMarker=L.marker([12.8797,121.7740],{icon:pin,draggable:true}).addTo(empMap);empMarker.on('dragend',()=>{const ll=empMarker.getLatLng();reverseGeocodeEmp(ll.lat,ll.lng);});empMap.on('click',e=>{empMarker.setLatLng(e.latlng);reverseGeocodeEmp(e.latlng.lat,e.latlng.lng);});const ex=document.getElementById('f-location').value;if(ex&&ex!=='Remote')geocodeAndMoveEmp(ex);}
+async function reverseGeocodeEmp(lat,lng){try{const res=await fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json',{headers:{'Accept-Language':'en'}});const data=await res.json();const addr=data.address;const label=addr.city||addr.town||addr.municipality||addr.county||addr.state||data.display_name.split(',')[0];const prov=addr.state||'';document.getElementById('f-location').value=label+(prov&&prov!==label?', '+prov:'');}catch(e){}}
+async function geocodeAndMoveEmp(query){try{const res=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)+'&format=json&limit=1',{headers:{'Accept-Language':'en'}});const data=await res.json();if(data.length){empMap.setView([data[0].lat,data[0].lon],13);empMarker.setLatLng([data[0].lat,data[0].lon]);}}catch(e){}}
 
-    <script src="js/api.js"></script>
-    <script>
-        const user = JSON.parse(localStorage.getItem('jc_user') || '{}');
-        if (!localStorage.getItem('jc_token') || user.role !== 'EMPLOYER') window.location.href = 'index.html';
+    const PH_CITIES = ["Manila","Quezon City","Caloocan","Las Pinas","Makati","Malabon","Mandaluyong","Marikina","Muntinlupa","Navotas","Paranaque","Pasay","Pasig","San Juan","Taguig","Valenzuela","Cebu City","Davao City","Zamboanga City","Antipolo","Cagayan de Oro","Bacoor","Dasmariñas","Imus","General Trias","Calamba","Santa Rosa","Biñan","San Pedro","Angeles City","San Fernando","Mabalacat","Baguio City","Laoag","Vigan","Tuguegarao","Batangas City","Lipa","Tanauan","Iloilo City","Bacolod City","Dumaguete City","Tacloban City","Iligan City","Butuan City","General Santos City","Cotabato City","Legazpi City","Naga City","Olongapo City","Malolos","Meycauayan","Cabanatuan","Lucena City","Roxas City","Tagbilaran City","Surigao City","Pagadian City","Dipolog City","Puerto Princesa","Calapan","Catbalogan","Calbayog","Ormoc City","Tagum City","Panabo","Digos","Koronadal","Kidapawan","Marawi City","Zamboanga del Sur","Talisay","Mandaue","Lapu-Lapu","Parañaque","Trece Martires","Tanza","Cabuyao","Laguna","Pampanga","Sorsogon","Masbate","Subic","Balanga","Palayan","Gapan","Sariaya","Candelaria","Kalibo","Boracay","Bohol","Tandag","Bislig","Ozamiz City","Lanao del Sur","Maguindanao","Mindoro","Marinduque","Romblon","Samar","Kabankalan","Silay","Victorias","Escalante","Sagay","Consolacion","Liloan","Samal","Mati","Surallah","Tupi","Polomolok","Alabel","Molave","Ipil","Kabasalan"];
+    function searchLocalCities(q){const ql=q.toLowerCase();return PH_CITIES.filter(c=>c.toLowerCase().startsWith(ql)||c.toLowerCase().includes(ql)).slice(0,6);}
 
-        document.getElementById('employer-name').innerText = (user.fullName || '').split(' ')[0] || 'Employer';
+    async function searchLocationEmployer(query){clearTimeout(empSuggestTimer);const box=document.getElementById('emp-loc-suggestions');if(!query||query.length<2){box.classList.add('hidden');return;}const local=searchLocalCities(query);if(local.length){box.classList.remove('hidden');box.innerHTML=local.map(city=>'<div class="loc-suggestion" onclick="selectLocationEmployer(\''+city+', Philippines\',14.5995,120.9842)">📍 '+city+', Philippines</div>').join('');}empSuggestTimer=setTimeout(async()=>{try{const res=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)+'&format=json&limit=5',{headers:{'Accept-Language':'en'}});const results=await res.json();if(!results.length){box.classList.add('hidden');return;}box.classList.remove('hidden');box.innerHTML=results.map(r=>{const short=r.display_name.split(',').slice(0,3).join(',');const dn=r.display_name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");return '<div class="loc-suggestion" onclick="selectLocationEmployer(\''+dn+"',"+r.lat+','+r.lon+')">'+esc(short)+'</div>';}).join('');}catch(e){box.classList.add('hidden');}},150);}
+function selectLocationEmployer(displayName,lat,lon){const parts=displayName.split(',');document.getElementById('f-location').value=parts[0].trim()+(parts[1]?', '+parts[1].trim():'');document.getElementById('emp-loc-suggestions').classList.add('hidden');if(empMap&&empMarker){empMap.setView([lat,lon],13);empMarker.setLatLng([lat,lon]);}}
 
-        let myJobs = [];
 
-        function showTab(tab) {
-            ['overview','jobs','applicants','analytics','messages'].forEach(t => {
-                document.getElementById('view-' + t).classList.add('hidden');
-                document.getElementById('tab-' + t).classList.remove('active', 'bg-indigo-600', 'text-white');
-                document.getElementById('tab-' + t).classList.add('text-slate-400');
-            });
-            document.getElementById('view-' + tab).classList.remove('hidden');
-            document.getElementById('tab-' + tab).classList.add('active');
-            if (tab === 'overview') loadStats();
-            if (tab === 'jobs') loadMyJobs();
-            if (tab === 'applicants') loadJobFilter();
-            if (tab === 'analytics') loadAnalytics();
-            if (tab === 'messages') loadEmpConversations();
-        }
-
-        async function loadStats() {
-            const s = await apiGet('/employer/stats');
-            document.getElementById('stat-jobs').innerText = s.totalJobs;
-            document.getElementById('stat-active').innerText = s.activeJobs;
-            document.getElementById('stat-applicants').innerText = s.totalApplicants;
-        }
-
-        async function loadMyJobs() {
-            myJobs = await apiGet('/employer/jobs');
-            const list = document.getElementById('jobs-list');
-            if (!myJobs.length) {
-                list.innerHTML = '<p class="text-slate-400 italic">No jobs posted yet. Click "+ Post Job" to get started.</p>';
-                return;
-            }
-            list.innerHTML = myJobs.map(job => `
-                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition hover:shadow-md hover:border-indigo-100">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 shrink-0">${job.icon}</div>
-                        <div>
-                            <h4 class="font-bold text-slate-900">${job.title}</h4>
-                            <p class="text-slate-500 text-sm">${job.company} • ${job.location}</p>
-                            <div class="flex gap-2 mt-1 flex-wrap">
-                                <span class="text-xs bg-indigo-50 text-indigo-600 font-semibold px-2 py-0.5 rounded-full">${job.type}</span>
-                                <span class="text-xs ${job.active ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-400'} font-semibold px-2 py-0.5 rounded-full">${job.active ? '● Active' : '○ Inactive'}</span>
-                                <span class="text-xs bg-slate-50 text-slate-500 font-semibold px-2 py-0.5 rounded-full">${job.experience}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 shrink-0 flex-wrap">
-                        <button onclick="viewApplicantsForJob(${job.id}, '${job.title} — ${job.company}')" class="h-9 px-4 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-sm font-semibold transition">👥 Applicants</button>
-                        <button onclick="editJob(${job.id})" class="h-9 px-4 border border-slate-200 text-slate-500 hover:border-indigo-400 hover:text-indigo-600 rounded-xl text-sm font-medium transition">Edit</button>
-                        <button onclick="toggleJobActive(${job.id}, ${job.active})" class="h-9 px-4 border border-slate-200 text-slate-500 hover:border-amber-400 hover:text-amber-600 rounded-xl text-sm font-medium transition">${job.active ? 'Deactivate' : 'Activate'}</button>
-                        <button onclick="deleteJob(${job.id})" class="h-9 px-4 border border-red-100 text-red-400 hover:bg-red-50 rounded-xl text-sm font-medium transition">Delete</button>
-                    </div>
-                </div>`).join('');
-        }
-
-        async function loadJobFilter() {
-            myJobs = await apiGet('/employer/jobs');
-            const sel = document.getElementById('job-filter');
-            sel.innerHTML = '<option value="">Select a job...</option>' +
-                myJobs.map(j => `<option value="${j.id}">${j.title} — ${j.company}</option>`).join('');
-        }
-
-        async function loadApplicants() {
-            const jobId = document.getElementById('job-filter').value;
-            const blind = document.getElementById('blind-toggle').checked;
-            ['Applied','Under Review','Interview','Offer','Rejected'].forEach(s => {
-                document.getElementById('col-' + s).innerHTML = '';
-            });
-            if (!jobId) { document.getElementById('no-applicants').classList.remove('hidden'); return; }
-            document.getElementById('no-applicants').classList.add('hidden');
-            const apps = await apiGet(`/employer/jobs/${jobId}/applicants?blind=${blind}`);
-            if (!apps.length) {
-                document.getElementById('col-Applied').innerHTML = '<p class="text-xs text-slate-400 italic p-2">No applicants yet.</p>';
-                return;
-            }
-            apps.forEach(app => {
-                const col = document.getElementById('col-' + app.status) || document.getElementById('col-Applied');
-                const matchColor = app.matchScore >= 70 ? 'text-green-600 bg-green-50' : app.matchScore >= 40 ? 'text-amber-600 bg-amber-50' : 'text-slate-500 bg-slate-100';
-                col.innerHTML += `
-                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 kanban-card-item">
-                        <div class="flex items-center justify-between mb-1">
-                            <p class="text-sm font-bold text-slate-800">${app.name}</p>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${matchColor}">${app.matchScore}% match</span>
-                        </div>
-                        <p class="text-xs text-slate-500">${app.jobTitle_candidate || 'No title'}</p>
-                        <p class="text-xs text-slate-400">${app.location}</p>
-                        ${app.skills ? `<p class="text-[10px] text-indigo-500 mt-1 truncate">${app.skills}</p>` : ''}
-                        <div class="mt-2">
-                            <select onchange="updateStatus(${app.applicationId}, this.value)" class="w-full text-xs p-1.5 border border-slate-200 rounded-lg outline-none bg-white">
-                                ${['Applied','Under Review','Interview','Offer','Rejected'].map(s =>
-                                    `<option ${s === app.status ? 'selected' : ''}>${s}</option>`
-                                ).join('')}
-                            </select>
-                            <button onclick="openInterviewModal(${app.applicationId})" class="w-full mt-1.5 text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 font-semibold py-1.5 rounded-lg transition">🗓️ Schedule Interview</button>
-                            <button onclick="msgCandidate('${app.email || ''}')" class="w-full mt-1 text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-semibold py-1.5 rounded-lg transition">💬 Message</button>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        async function updateStatus(appId, status) {
-            await apiPut(`/employer/applications/${appId}/status`, { status });
-            loadApplicants();
-        }
-
-        function filterKanban() {
-            const q = document.getElementById('applicant-search').value.toLowerCase();
-            document.querySelectorAll('.kanban-card-item').forEach(card => {
-                const text = card.textContent.toLowerCase();
-                card.style.display = (!q || text.includes(q)) ? '' : 'none';
-            });
-        }
-
-        function openPostModal(job = null) {
-            document.getElementById('edit-job-id').value = job ? job.id : '';
-            document.getElementById('modal-title').innerText = job ? 'Edit Job' : 'Post a New Job';
-            document.getElementById('f-title').value = job?.title || '';
-            document.getElementById('f-company').value = job?.company || '';
-            document.getElementById('f-location').value = job?.location || '';
-            document.getElementById('f-salary').value = job?.salary || '';
-            document.getElementById('f-desc').value = job?.description || '';
-            document.getElementById('f-reqs').value = job?.requirements || '';
-            if (job?.category) document.getElementById('f-category').value = job.category;
-            if (job?.type) document.getElementById('f-type').value = job.type;
-            if (job?.experience) document.getElementById('f-experience').value = job.experience;
-            // Reset map
-            document.getElementById('emp-map-wrap').classList.add('hidden');
-            document.getElementById('emp-loc-suggestions').classList.add('hidden');
-            empMapOpen = false;
-            if (empMap) { empMap.remove(); empMap = null; empMarker = null; }
-            document.getElementById('postModal').classList.add('active');
-        }
-
-        function closePostModal() {
-            document.getElementById('postModal').classList.remove('active');
-            document.getElementById('emp-map-wrap').classList.add('hidden');
-            document.getElementById('emp-loc-suggestions').classList.add('hidden');
-            empMapOpen = false;
-            if (empMap) { empMap.remove(); empMap = null; empMarker = null; }
-        }
-
-        async function submitJob() {
-            const id = document.getElementById('edit-job-id').value;
-            const body = {
-                title: document.getElementById('f-title').value,
-                company: document.getElementById('f-company').value,
-                location: document.getElementById('f-location').value,
-                salary: document.getElementById('f-salary').value,
-                category: document.getElementById('f-category').value,
-                type: document.getElementById('f-type').value,
-                experience: document.getElementById('f-experience').value,
-                description: document.getElementById('f-desc').value,
-                requirements: document.getElementById('f-reqs').value,
-                icon: '💼'
-            };
-            if (!body.title || !body.company || !body.location) { toast('Please fill in required fields.', 'warning'); return; }
-            const btn = document.querySelector('#postModal .btn-primary, #postModal button[onclick="submitJob()"]');
-            if (btn) setLoading(btn, true, id ? 'Saving...' : 'Posting...');
-            if (id) { await apiPut('/employer/jobs/' + id, body); toast('Job updated!', 'success'); }
-            else { await apiPost('/employer/jobs', body, true); toast('Job posted!', 'success'); }
-            if (btn) setLoading(btn, false);
-            closePostModal();
-            loadMyJobs();
-            loadStats();
-        }
-
-        function editJob(id) {
-            const job = myJobs.find(j => j.id === id);
-            if (job) openPostModal(job);
-        }
-
-        function viewApplicantsForJob(jobId, label) {
-            showTab('applicants');
-            // Wait for the tab to render, then set the select
-            setTimeout(() => {
-                const sel = document.getElementById('job-filter');
-                if (sel) { sel.value = jobId; loadApplicants(); }
-            }, 100);
-        }
-
-        async function toggleJobActive(id, current) {
-            await apiPut('/employer/jobs/' + id, { active: String(!current) });
-            loadMyJobs();
-        }
-
-        async function deleteJob(id) {
-            showConfirm('This will permanently delete this job posting and all its applicant data.', async () => {
-                await apiDelete('/employer/jobs/' + id);
-                toast('Job deleted.', 'info');
-                loadMyJobs();
-                loadStats();
-            });
-        }
-
-        function logout() {
-            localStorage.removeItem('jc_token');
-            localStorage.removeItem('jc_user');
-            window.location.href = 'index.html';
-        }
-
-        document.getElementById('postModal').addEventListener('click', e => { if (e.target === document.getElementById('postModal')) closePostModal(); });
-
-        // Interview scheduling
-        function openInterviewModal(appId) {
-            document.getElementById('interview-app-id').value = appId;
-            document.getElementById('interviewModal').classList.add('active');
-        }
-        function closeInterviewModal() { document.getElementById('interviewModal').classList.remove('active'); }
-
-        async function submitInterview() {
-            const appId = document.getElementById('interview-app-id').value;
-            const scheduledAt = document.getElementById('interview-date').value;
-            const location = document.getElementById('interview-location').value || 'Online';
-            const meetingLink = document.getElementById('interview-link').value;
-            const notes = document.getElementById('interview-notes').value;
-            if (!scheduledAt) { toast('Please select a date and time.', 'warning'); return; }
-            const data = await apiPost('/interviews', { applicationId: appId, scheduledAt, location, meetingLink, notes }, true);
-            if (data.error) { toast(data.error, 'error'); return; }
-            toast('Interview scheduled! Candidate has been notified.', 'success');
-            closeInterviewModal();
-            loadApplicants();
-        }
-
-        // Analytics
-        let chartInstances = {};
-        async function loadAnalytics() {
-            const data = await apiGet('/employer/analytics');
-            const labels = data.map(d => d.jobTitle);
-            const counts = data.map(d => d.applicants);
-
-            if (chartInstances.bar) chartInstances.bar.destroy();
-            if (chartInstances.doughnut) chartInstances.doughnut.destroy();
-
-            chartInstances.bar = new Chart(document.getElementById('applicantsChart'), {
-                type: 'bar',
-                data: { labels, datasets: [{ label: 'Applicants', data: counts, backgroundColor: '#6366f1', borderRadius: 8 }] },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-
-            const active = data.filter(d => d.active).length;
-            const inactive = data.length - active;
-            chartInstances.doughnut = new Chart(document.getElementById('statusChart'), {
-                type: 'doughnut',
-                data: { labels: ['Active', 'Inactive'], datasets: [{ data: [active, inactive], backgroundColor: ['#6366f1', '#e2e8f0'], borderWidth: 0 }] },
-                options: { responsive: true, cutout: '70%' }
-            });
-        }
-
-        // Employer messaging
-        let empCurrentConvo = null;
-        async function loadEmpConversations() {
-            const msgs = await apiGet('/messages/inbox');
-            const list = document.getElementById('emp-convo-list');
-            if (!msgs.length) { list.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No messages yet.</p>'; return; }
-            const seen = new Set(); const convos = [];
-            msgs.forEach(m => {
-                const other = m.isMine ? m.receiverUsername : m.senderUsername;
-                const name = m.isMine ? m.receiverUsername : m.senderName;
-                if (!seen.has(other)) { seen.add(other); convos.push({ username: other, name, last: m }); }
-            });
-            list.innerHTML = convos.map(c => `
-                <div onclick="openEmpConvo('${c.username}','${c.name}')" class="flex items-center gap-2 p-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition">
-                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs shrink-0">${c.name[0].toUpperCase()}</div>
-                    <div class="flex-1 min-w-0"><p class="text-xs font-semibold text-slate-800 truncate">${c.name}</p><p class="text-[10px] text-slate-400 truncate">${c.last.content}</p></div>
-                </div>`).join('');
-        }
-
-        async function openEmpConvo(username, name) {
-            empCurrentConvo = username;
-            document.getElementById('emp-chat-empty').classList.add('hidden');
-            document.getElementById('emp-chat-msgs').classList.remove('hidden');
-            document.getElementById('emp-chat-input').classList.remove('hidden');
-            document.getElementById('emp-chat-header').classList.remove('hidden');
-            document.getElementById('emp-chat-name').innerText = name;
-            const msgs = await apiGet('/messages/conversation/' + username);
-            const container = document.getElementById('emp-chat-msgs');
-            container.innerHTML = msgs.map(m => `
-                <div class="flex ${m.isMine ? 'justify-end' : 'justify-start'}">
-                    <div class="max-w-xs px-3 py-2 rounded-2xl text-xs ${m.isMine ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-800'}">${m.content}</div>
-                </div>`).join('');
-            container.scrollTop = container.scrollHeight;
-        }
-
-        async function sendEmpMessage() {
-            const content = document.getElementById('emp-msg-input').value.trim();
-            if (!content || !empCurrentConvo) return;
-            await apiPost('/messages', { receiverUsername: empCurrentConvo, content }, true);
-            document.getElementById('emp-msg-input').value = '';
-            openEmpConvo(empCurrentConvo, document.getElementById('emp-chat-name').innerText);
-        }
-
-        function openNewMsgEmployer() { document.getElementById('empNewMsgModal').classList.add('active'); }
-        function closeEmpNewMsg() { document.getElementById('empNewMsgModal').classList.remove('active'); }
-
-        async function sendEmpNewMessage() {
-            const receiver = document.getElementById('emp-new-receiver').value.trim();
-            const subject = document.getElementById('emp-new-subject').value.trim();
-            const content = document.getElementById('emp-new-content').value.trim();
-            if (!receiver || !content) { toast('Fill in all fields.', 'warning'); return; }
-            await apiPost('/messages', { receiverUsername: receiver, subject, content }, true);
-            toast('Message sent!', 'success');
-            closeEmpNewMsg();
-            loadEmpConversations();
-        }
-
-        function msgCandidate(username) {
-            if (!username) { toast('No username available for this candidate.', 'warning'); return; }
-            showTab('messages');
-            document.getElementById('emp-new-receiver').value = username;
-            openNewMsgEmployer();
-        }
-
-        document.getElementById('interviewModal').addEventListener('click', e => { if (e.target === document.getElementById('interviewModal')) closeInterviewModal(); });
-        document.getElementById('empNewMsgModal').addEventListener('click', e => { if (e.target === document.getElementById('empNewMsgModal')) closeEmpNewMsg(); });
-
-        // ── Map picker (employer job post) ──
-        let empMap = null, empMarker = null, empMapOpen = false;
-        let empSuggestTimer = null;
-
-        function toggleMapEmployer() {
-            const wrap = document.getElementById('emp-map-wrap');
-            empMapOpen = !empMapOpen;
-            wrap.classList.toggle('hidden', !empMapOpen);
-            if (empMapOpen) {
-                setTimeout(() => {
-                    if (!empMap) initEmpMap();
-                    else empMap.invalidateSize();
-                }, 50);
+    (function() {
+        function requireAuth() {
+            if (!localStorage.getItem("jc_token")) {
+                window.location.replace("index.html");
             }
         }
-
-        function initEmpMap() {
-            const defaultLat = 12.8797, defaultLng = 121.7740;
-            empMap = L.map('emp-map', { zoomControl: true }).setView([defaultLat, defaultLng], 6);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                maxZoom: 19
-            }).addTo(empMap);
-
-            const pinIcon = L.divIcon({ className: '', html: '<div class="custom-pin"></div>', iconSize: [28, 28], iconAnchor: [14, 28] });
-            empMarker = L.marker([defaultLat, defaultLng], { icon: pinIcon, draggable: true }).addTo(empMap);
-
-            empMarker.on('dragend', () => {
-                const { lat, lng } = empMarker.getLatLng();
-                reverseGeocodeEmp(lat, lng);
-            });
-
-            empMap.on('click', e => {
-                empMarker.setLatLng(e.latlng);
-                reverseGeocodeEmp(e.latlng.lat, e.latlng.lng);
-            });
-
-            const existing = document.getElementById('f-location').value;
-            if (existing && existing !== 'Remote') geocodeAndMoveEmp(existing);
-        }
-
-        async function reverseGeocodeEmp(lat, lng) {
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
-                    headers: { 'Accept-Language': 'en' }
-                });
-                const data = await res.json();
-                const addr = data.address;
-                const label = addr.city || addr.town || addr.municipality || addr.county || addr.state || data.display_name.split(',')[0];
-                const province = addr.state || '';
-                document.getElementById('f-location').value = label + (province && province !== label ? ', ' + province : '');
-            } catch(e) { /* silent */ }
-        }
-
-        async function geocodeAndMoveEmp(query) {
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`, {
-                    headers: { 'Accept-Language': 'en' }
-                });
-                const data = await res.json();
-                if (data.length) {
-                    empMap.setView([data[0].lat, data[0].lon], 13);
-                    empMarker.setLatLng([data[0].lat, data[0].lon]);
-                }
-            } catch(e) { /* silent */ }
-        }
-
-        async function searchLocationEmployer(query) {
-            clearTimeout(empSuggestTimer);
-            const box = document.getElementById('emp-loc-suggestions');
-            if (!query || query.length < 3) { box.classList.add('hidden'); return; }
-            empSuggestTimer = setTimeout(async () => {
-                try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`, {
-                        headers: { 'Accept-Language': 'en' }
-                    });
-                    const results = await res.json();
-                    if (!results.length) { box.classList.add('hidden'); return; }
-                    box.classList.remove('hidden');
-                    box.innerHTML = results.map(r => {
-                        const parts = r.display_name.split(',');
-                        const short = parts.slice(0, 3).join(',');
-                        return `<div class="loc-suggestion" onclick="selectLocationEmployer('${r.display_name.replace(/'/g,"\\'")}', ${r.lat}, ${r.lon})">${short}</div>`;
-                    }).join('');
-                } catch(e) { box.classList.add('hidden'); }
-            }, 350);
-        }
-
-        function selectLocationEmployer(displayName, lat, lon) {
-            const parts = displayName.split(',');
-            const label = parts[0].trim() + (parts[1] ? ', ' + parts[1].trim() : '');
-            document.getElementById('f-location').value = label;
-            document.getElementById('emp-loc-suggestions').classList.add('hidden');
-            if (empMap && empMarker) {
-                empMap.setView([lat, lon], 13);
-                empMarker.setLatLng([lat, lon]);
-            }
-        }
-
-        window.onload = loadStats;
-    </script>
+        history.pushState(null, "", location.href);
+        window.addEventListener("popstate", function() {
+            history.pushState(null, "", location.href);
+        });
+        window.addEventListener("pageshow", function(e) {
+            if (e.persisted) requireAuth();
+        });
+    })();
+</script>
 </body>
 </html>
-
-
-
-
-
