@@ -43,6 +43,20 @@ public class AuthController {
         if (username == null || password == null || firstName == null || lastName == null || location == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "All required fields must be filled."));
         }
+
+        // Name validation
+        String namePattern = "^[^0-9]{2,20}$";
+        if (!firstName.matches(namePattern) || firstName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "First name must be 2-20 characters with no numbers."));
+        }
+        if (!lastName.matches(namePattern) || lastName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Last name must be 2-20 characters with no numbers."));
+        }
+        long firstSpaces = firstName.chars().filter(c -> c == ' ').count();
+        long lastSpaces = lastName.chars().filter(c -> c == ' ').count();
+        if (firstSpaces > 2 || lastSpaces > 2) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Name cannot contain more than 2 spaces."));
+        }
         if (userRepository.existsByUsername(username)) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username already taken."));
         }
