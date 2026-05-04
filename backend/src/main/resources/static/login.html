@@ -103,13 +103,13 @@
                     <!-- JOB SEEKER FIELDS -->
                     <div id="fields-candidate">
                         <div class="grid grid-cols-2 gap-3 mb-3">
-                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="reg-fname" placeholder="Juan" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)"></div>
-                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="reg-lname" placeholder="Dela Cruz" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="reg-fname" placeholder="Juan" class="input-field mt-1" minlength="2" maxlength="20" autocomplete="given-name" oninput="nameInput(this)"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="reg-lname" placeholder="Dela Cruz" class="input-field mt-1" minlength="2" maxlength="20" autocomplete="family-name" oninput="nameInput(this)"></div>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-3">
                             <div>
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
-                                <input type="text" id="reg-mname" placeholder="Santos" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)">
+                                <input type="text" id="reg-mname" placeholder="Santos" class="input-field mt-1" minlength="2" maxlength="20" autocomplete="additional-name" oninput="nameInput(this)">
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Suffix <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
@@ -223,6 +223,30 @@
             if (nonSpaceChars < 2) { e.preventDefault(); return; }
             if (spaceCount >= 2) { e.preventDefault(); return; }
             if (val.endsWith(' ')) { e.preventDefault(); return; }
+        }
+
+        function nameInput(el) {
+            let val = el.value;
+            // Remove numbers
+            val = val.replace(/[0-9]/g, '');
+            // Remove leading space
+            val = val.replace(/^ /, '');
+            // Remove consecutive spaces
+            val = val.replace(/  +/g, ' ');
+            // Enforce max 2 spaces
+            let spaceCount = 0;
+            val = val.split('').filter(c => {
+                if (c === ' ') { spaceCount++; return spaceCount <= 2; }
+                return true;
+            }).join('');
+            // Enforce max 20 chars
+            if (val.length > 20) val = val.slice(0, 20);
+            // Auto-capitalize first letter of each word
+            val = val.replace(/(?:^|\s)\S/g, c => c.toUpperCase());
+            // Preserve cursor position
+            const pos = el.selectionStart - (el.value.length - val.length);
+            el.value = val;
+            try { el.setSelectionRange(pos, pos); } catch(e) {}
         }
         function switchMode(mode) {
             const isLogin = mode === 'login';
@@ -588,17 +612,17 @@
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label>
-                    <input type="text" id="gc-fname" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)">
+                    <input type="text" id="gc-fname" class="input-field mt-1" minlength="2" maxlength="20" autocomplete="given-name" oninput="nameInput(this)">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label>
-                    <input type="text" id="gc-lname" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)">
+                    <input type="text" id="gc-lname" class="input-field mt-1" minlength="2" maxlength="20" autocomplete="family-name" oninput="nameInput(this)">
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
-                    <input type="text" id="gc-mname" placeholder="Santos" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)">
+                    <input type="text" id="gc-mname" placeholder="Santos" class="input-field mt-1" minlength="2" maxlength="20" autocomplete="additional-name" oninput="nameInput(this)">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Suffix <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
