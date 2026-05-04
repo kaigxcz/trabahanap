@@ -451,7 +451,7 @@
             const currentUsername = JSON.parse(localStorage.getItem('jc_user') || '{}').username;
             document.getElementById('users-table').innerHTML = users.map(u => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td class="px-6 py-4 text-sm font-semibold text-slate-800 cursor-pointer hover:text-indigo-600 transition" onclick="showUserDetail(${u.id})">${u.fullName}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-slate-800 cursor-pointer hover:text-indigo-600 transition" onclick="showUserView(${u.id})">${u.fullName}</td>
                     <td class="px-6 py-4 text-sm text-slate-500">@${u.username}</td>
                     <td class="px-6 py-4 text-sm text-slate-400">${u.email || '—'}</td>
                     <td class="px-6 py-4">
@@ -574,7 +574,7 @@
             else if (sort === 'location') list.sort((a, b) => (a.location || '').localeCompare(b.location || ''));
             document.getElementById('seekers-table').innerHTML = list.length ? list.map(u => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td class="px-5 py-3 text-sm font-semibold text-slate-800 cursor-pointer hover:text-indigo-600 transition" onclick="showUserDetail(${u.id})">${u.fullName}</td>
+                    <td class="px-5 py-3 text-sm font-semibold text-slate-800 cursor-pointer hover:text-indigo-600 transition" onclick="showUserView(${u.id})">${u.fullName}</td>
                     <td class="px-5 py-3 text-sm text-slate-500">@${u.username}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.email || '—'}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.location || '—'}</td>
@@ -609,7 +609,7 @@
             else if (sort === 'location') list.sort((a, b) => (a.location || '').localeCompare(b.location || ''));
             document.getElementById('employers-table').innerHTML = list.length ? list.map(u => `
                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td class="px-5 py-3 text-sm font-semibold text-slate-800 cursor-pointer hover:text-indigo-600 transition" onclick="showUserDetail(${u.id})">${u.fullName}</td>
+                    <td class="px-5 py-3 text-sm font-semibold text-slate-800 cursor-pointer hover:text-indigo-600 transition" onclick="showUserView(${u.id})">${u.fullName}</td>
                     <td class="px-5 py-3 text-sm text-slate-500">@${u.username}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.email || '—'}</td>
                     <td class="px-5 py-3 text-sm text-slate-400">${u.location || '—'}</td>
@@ -708,6 +708,59 @@
             btn.classList.toggle('cursor-not-allowed', !dirty);
         }
 
+        function validateUdmFields() {
+            const fname    = document.getElementById('udm-fname').value.trim();
+            const lname    = document.getElementById('udm-lname').value.trim();
+            const mname    = document.getElementById('udm-mname').value.trim();
+            const email    = document.getElementById('udm-email').value.trim();
+            const phone    = document.getElementById('udm-phone').value.trim();
+            const location = document.getElementById('udm-location').value.trim();
+            const age      = document.getElementById('udm-age').value.trim();
+            const nameRe   = /^[a-zA-ZÀ-ÿ\s'\-]+$/;
+            const emailRe  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!fname || !lname || !email || !location) return 'First name, last name, email, and location are required.';
+            if (!nameRe.test(fname)) return 'First name must contain letters only.';
+            if (!nameRe.test(lname)) return 'Last name must contain letters only.';
+            if (mname && !nameRe.test(mname)) return 'Middle name must contain letters only.';
+            if (!emailRe.test(email)) return 'Please enter a valid email address.';
+            if (phone && !/^[\d\s\+\-\(\)]+$/.test(phone)) return 'Phone number must contain digits only.';
+            if (age && (isNaN(age) || Number(age) < 1 || Number(age) > 120)) return 'Please enter a valid age (1–120).';
+            return null;
+        }
+
+        // ── View-only modal ──
+        function showUserView(userId) {
+            const u = allUsers.find(x => x.id === userId);
+            if (!u) return;
+            const initials = ((u.firstName||'?')[0] + (u.lastName||'?')[0]).toUpperCase();
+            document.getElementById('uvm-avatar').innerText = initials;
+            document.getElementById('uvm-name').innerText = u.fullName || u.username;
+            document.getElementById('uvm-username').innerText = '@' + u.username;
+            document.getElementById('uvm-role-badge').innerText = u.role;
+            document.getElementById('uvm-fname').innerText    = u.firstName  || '—';
+            document.getElementById('uvm-mname').innerText    = u.middleName || '—';
+            document.getElementById('uvm-lname').innerText    = u.lastName   || '—';
+            document.getElementById('uvm-age').innerText      = u.age ? u.age + ' years old' : '—';
+            document.getElementById('uvm-birthday').innerText = u.birthday   || '—';
+            document.getElementById('uvm-phone').innerText    = u.phone      || '—';
+            document.getElementById('uvm-email').innerText    = u.email      || '—';
+            document.getElementById('uvm-location').innerText = u.location   || '—';
+            document.getElementById('uvm-jobtitle').innerText = u.jobTitle   || '—';
+            document.getElementById('uvm-joined').innerText   = u.joinedAt   || '—';
+            const skillsEl = document.getElementById('uvm-skills');
+            if (u.skills) {
+                skillsEl.innerHTML = u.skills.split(',').map(s => `<span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">${s.trim()}</span>`).join('');
+            } else {
+                skillsEl.innerHTML = '<span class="text-slate-400 text-sm">No skills listed</span>';
+            }
+            document.getElementById('uvm-jobtitle-wrap').style.display = u.role === 'CANDIDATE' ? '' : 'none';
+            // wire the Edit button inside view modal
+            document.getElementById('uvm-edit-btn').onclick = () => { closeUserView(); showUserDetail(userId); };
+            document.getElementById('userViewModal').classList.add('active');
+        }
+        function closeUserView() { document.getElementById('userViewModal').classList.remove('active'); }
+        document.getElementById('userViewModal').addEventListener('click', e => { if (e.target === document.getElementById('userViewModal')) closeUserView(); });
+
         function showUserDetail(userId) {
             const u = allUsers.find(x => x.id === userId);
             if (!u) return;
@@ -717,7 +770,6 @@
             document.getElementById('udm-name').innerText = u.fullName || u.username;
             document.getElementById('udm-username').innerText = '@' + u.username;
             document.getElementById('udm-role-badge').innerText = u.role;
-            // Fill inputs and snapshot
             const vals = {
                 'udm-fname':    u.firstName  || '',
                 'udm-mname':    u.middleName || '',
@@ -735,12 +787,20 @@
             document.getElementById('udm-joined').innerText = u.joinedAt || '—';
             document.getElementById('udm-jobtitle-wrap').style.display = u.role === 'CANDIDATE' ? '' : 'none';
             document.getElementById('udm-save-status').innerText = '';
+            document.getElementById('udm-save-status').className = 'text-xs font-semibold flex-1';
             checkUdmDirty();
             document.getElementById('userDetailModal').classList.add('active');
         }
 
         async function saveUserDetail() {
             if (!_editingUserId) return;
+            const err = validateUdmFields();
+            const statusEl = document.getElementById('udm-save-status');
+            if (err) {
+                statusEl.innerText = err;
+                statusEl.className = 'text-xs text-red-500 font-semibold flex-1';
+                return;
+            }
             const btn = document.getElementById('udm-save-btn');
             btn.disabled = true; btn.innerText = 'Saving…';
             const payload = {
@@ -757,7 +817,6 @@
             };
             try {
                 await apiPut('/admin/users/' + _editingUserId, payload);
-                // Update local cache
                 const idx = allUsers.findIndex(u => u.id === _editingUserId);
                 if (idx !== -1) {
                     Object.assign(allUsers[idx], payload);
@@ -765,16 +824,15 @@
                     allUsers[idx].fullName = (payload.firstName + mn + ' ' + payload.lastName).trim() || allUsers[idx].username;
                 }
                 document.getElementById('udm-name').innerText = allUsers[idx]?.fullName || '';
-                document.getElementById('udm-save-status').innerText = '✓ Saved';
-                document.getElementById('udm-save-status').className = 'text-xs text-green-600 font-semibold';
+                statusEl.innerText = '✓ Saved';
+                statusEl.className = 'text-xs text-green-600 font-semibold flex-1';
                 toast('User info updated.', 'success');
                 filterUsers();
-                // Reset snapshot so button goes disabled again
                 _udmFields.forEach(id => _originalSnapshot[id] = document.getElementById(id).value.trim());
                 checkUdmDirty();
             } catch(e) {
-                document.getElementById('udm-save-status').innerText = 'Save failed';
-                document.getElementById('udm-save-status').className = 'text-xs text-red-500 font-semibold';
+                statusEl.innerText = 'Save failed. Please try again.';
+                statusEl.className = 'text-xs text-red-500 font-semibold flex-1';
             }
             btn.disabled = false; btn.innerText = 'Save Changes';
         }
@@ -968,6 +1026,75 @@
     </script>
 
     <div id="admin-user-suggestions" style="position:fixed;background:white;border:1px solid #e2e8f0;border-radius:0.875rem;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:999999;display:none;max-height:240px;overflow-y:auto;min-width:280px"></div>
+
+    <!-- User View Modal (Read-only) -->
+    <div id="userViewModal" class="modal p-4">
+        <div class="modal-box bg-white w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white shrink-0 relative">
+                <button onclick="closeUserView()" class="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white transition text-sm">✕</button>
+                <div class="flex items-center gap-4">
+                    <div id="uvm-avatar" class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold text-white shrink-0"></div>
+                    <div>
+                        <h2 id="uvm-name" class="text-xl font-bold"></h2>
+                        <p id="uvm-username" class="text-indigo-200 text-sm"></p>
+                        <span id="uvm-role-badge" class="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">First Name</p>
+                        <p id="uvm-fname" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Middle Name</p>
+                        <p id="uvm-mname" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Last Name</p>
+                        <p id="uvm-lname" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Age</p>
+                        <p id="uvm-age" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Birthday</p>
+                        <p id="uvm-birthday" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phone</p>
+                        <p id="uvm-phone" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</p>
+                        <p id="uvm-email" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Location</p>
+                        <p id="uvm-location" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div id="uvm-jobtitle-wrap" class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Job Title</p>
+                        <p id="uvm-jobtitle" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Skills</p>
+                        <div id="uvm-skills" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Member Since</p>
+                        <p id="uvm-joined" class="text-sm font-semibold text-slate-800">—</p>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 pb-6 shrink-0 flex justify-end gap-3">
+                <button onclick="closeUserView()" class="btn btn-secondary h-10 px-5">Close</button>
+                <button id="uvm-edit-btn" class="btn btn-primary h-10 px-6">✏️ Edit</button>
+            </div>
+        </div>
+    </div>
 
     <!-- User Detail Modal (Editable) -->
     <div id="userDetailModal" class="modal p-4">
