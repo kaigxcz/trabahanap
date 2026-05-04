@@ -120,12 +120,12 @@
                             </div>
                         </div>
                         <div class="space-y-3">
-                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email *</label><input type="email" id="reg-email" placeholder="juan@example.com" class="input-field mt-1"></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email *</label><input type="email" id="reg-email" placeholder="juan@gmail.com" class="input-field mt-1" oninput="emailInput(this)" onblur="emailBlur(this)" data-err="reg-error"></div>
                             <div>
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
                                 <div class="flex gap-2 mt-1">
                                     <select class="input-field w-24 shrink-0"><option>+63</option><option>+1</option><option>+44</option></select>
-                                    <input type="tel" id="reg-phone" placeholder="9XX XXX XXXX" class="input-field">
+                                    <input type="tel" id="reg-phone" placeholder="9XXXXXXXXXX" class="input-field" oninput="phoneInput(this)" maxlength="11">
                                 </div>
                             </div>
                             <div>
@@ -174,12 +174,12 @@
                                 </select>
                             </div>
                         </div>
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Work Email *</label><input type="email" id="emp-email" placeholder="hr@company.com" class="input-field mt-1"></div>
+                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Work Email *</label><input type="email" id="emp-email" placeholder="hr@gmail.com" class="input-field mt-1" oninput="emailInput(this)" onblur="emailBlur(this)" data-err="reg-error"></div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
                             <div class="flex gap-2 mt-1">
                                 <select class="input-field w-24 shrink-0"><option>+63</option><option>+1</option><option>+44</option></select>
-                                <input type="tel" id="emp-phone" placeholder="9XX XXX XXXX" class="input-field">
+                                <input type="tel" id="emp-phone" placeholder="9XXXXXXXXXX" class="input-field" oninput="phoneInput(this)" maxlength="11">
                             </div>
                         </div>
                         <div>
@@ -223,6 +223,66 @@
             if (nonSpaceChars < 2) { e.preventDefault(); return; }
             if (spaceCount >= 2) { e.preventDefault(); return; }
             if (val.endsWith(' ')) { e.preventDefault(); return; }
+        }
+
+        // ── Email validation: only @gmail.com allowed ──
+        function emailInput(el) {
+            // Strip spaces immediately
+            let val = el.value.replace(/\s/g, '');
+            const atIdx = val.indexOf('@');
+            if (atIdx !== -1) {
+                const local = val.slice(0, atIdx);
+                const domain = val.slice(atIdx + 1);
+                // Only allow characters that are a prefix of 'gmail.com'
+                const allowed = 'gmail.com';
+                if (domain.length > 0) {
+                    if (!allowed.startsWith(domain) && domain !== 'gmail.com') {
+                        // Trim domain to the longest valid prefix
+                        let validLen = 0;
+                        for (let i = 1; i <= domain.length; i++) {
+                            if (allowed.startsWith(domain.slice(0, i))) validLen = i;
+                            else break;
+                        }
+                        val = local + '@' + domain.slice(0, validLen);
+                    }
+                }
+            }
+            el.value = val;
+            // Show inline hint
+            const errId = el.dataset.err;
+            const errEl = errId ? document.getElementById(errId) : null;
+            if (errEl && val.includes('@') && !val.endsWith('@gmail.com') && val.length > val.indexOf('@') + 1) {
+                errEl.textContent = 'Only @gmail.com addresses are allowed.';
+                errEl.classList.remove('hidden');
+                el.style.borderColor = '#ef4444';
+            } else if (errEl) {
+                errEl.classList.add('hidden');
+                el.style.borderColor = '';
+            }
+        }
+
+        function emailBlur(el) {
+            const val = el.value.trim();
+            if (!val) return;
+            const errId = el.dataset.err;
+            const errEl = errId ? document.getElementById(errId) : null;
+            if (val.includes('@') && !val.endsWith('@gmail.com')) {
+                el.style.borderColor = '#ef4444';
+                if (errEl) { errEl.textContent = 'Only @gmail.com addresses are allowed.'; errEl.classList.remove('hidden'); }
+            } else {
+                el.style.borderColor = '';
+                if (errEl) errEl.classList.add('hidden');
+            }
+        }
+
+        // ── Phone validation: 11 digits only, no letters/symbols, no 4+ consecutive same digit ──
+        function phoneInput(el) {
+            let val = el.value.replace(/\D/g, ''); // strip non-digits instantly
+            // Block 4+ consecutive identical digits (e.g. 1111 → 111)
+            val = val.replace(/(\d)\1{3,}/g, m => m.slice(0, 3));
+            // Max 11 digits
+            if (val.length > 11) val = val.slice(0, 11);
+            el.value = val;
         }
 
         function nameInput(el) {
@@ -326,7 +386,8 @@
                 const phone    = document.getElementById('emp-phone').value.trim();
                 const size     = document.getElementById('emp-size').value.trim();
                 if (!company || !industry || !email || !location || !username || !password) { errEl.innerText = 'Please fill in all required fields.'; errEl.classList.remove('hidden'); return; }
-                if (!emailRe.test(email)) { errEl.innerText = 'Please enter a valid email address.'; errEl.classList.remove('hidden'); return; }
+                if (!emailRe.test(email) || !email.endsWith('@gmail.com')) { errEl.innerText = 'Only @gmail.com email addresses are allowed.'; errEl.classList.remove('hidden'); return; }
+                if (phone && (phone.length !== 11 || !/^\d{11}$/.test(phone))) { errEl.innerText = 'Phone number must be exactly 11 digits.'; errEl.classList.remove('hidden'); return; }
                 if (password.length < 8) { errEl.innerText = 'Password must be at least 8 characters.'; errEl.classList.remove('hidden'); return; }
                 if (!document.getElementById('terms').checked) { errEl.innerText = 'Please agree to the terms to continue.'; errEl.classList.remove('hidden'); return; }
                 const btn = document.getElementById('register-btn');
@@ -366,8 +427,8 @@
             if (middleName && middleName.length < 2) { errEl.innerText = 'Middle name must be at least 2 characters.'; errEl.classList.remove('hidden'); return; }
             if (middleName && middleName.length > 50) { errEl.innerText = 'Middle name must be at most 50 characters.'; errEl.classList.remove('hidden'); return; }
             if (middleName && !nameRe.test(middleName)) { errEl.innerText = 'Middle name must contain letters only.'; errEl.classList.remove('hidden'); return; }
-            if (!emailRe.test(email)) { errEl.innerText = 'Please enter a valid email address.'; errEl.classList.remove('hidden'); return; }
-            if (phone && !/^[\d\s\+\-\(\)]+$/.test(phone)) { errEl.innerText = 'Phone number must contain digits only.'; errEl.classList.remove('hidden'); return; }
+            if (!emailRe.test(email) || !email.endsWith('@gmail.com')) { errEl.innerText = 'Only @gmail.com email addresses are allowed.'; errEl.classList.remove('hidden'); return; }
+            if (phone && (phone.length !== 11 || !/^\d{11}$/.test(phone))) { errEl.innerText = 'Phone number must be exactly 11 digits.'; errEl.classList.remove('hidden'); return; }
             if (password.length < 8) { errEl.innerText = 'Password must be at least 8 characters.'; errEl.classList.remove('hidden'); return; }
             if (!document.getElementById('terms').checked) { errEl.innerText = 'Please agree to the terms to continue.'; errEl.classList.remove('hidden'); return; }
             const btn = document.getElementById('register-btn');
@@ -646,7 +707,7 @@
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
                     <div class="flex gap-2 mt-1">
                         <select class="input-field w-24 shrink-0"><option>+63</option><option>+1</option><option>+44</option></select>
-                        <input type="tel" id="gc-phone" placeholder="9XX XXX XXXX" class="input-field">
+                        <input type="tel" id="gc-phone" placeholder="9XXXXXXXXXX" class="input-field" oninput="phoneInput(this)" maxlength="11">
                     </div>
                 </div>
                 <div>
