@@ -57,6 +57,22 @@ public class AuthController {
         if (firstSpaces > 2 || lastSpaces > 2) {
             return ResponseEntity.badRequest().body(Map.of("error", "Name cannot contain more than 2 spaces."));
         }
+
+        // Email validation: @gmail.com only
+        if (email == null || !email.endsWith("@gmail.com") || email.equals("@gmail.com")) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Only @gmail.com email addresses are allowed."));
+        }
+
+        // Phone validation: 11 digits, no 4+ consecutive same digit
+        String phone = body.getOrDefault("phone", "");
+        if (!phone.isEmpty()) {
+            if (!phone.matches("\\d{11}")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Phone number must be exactly 11 digits."));
+            }
+            if (phone.matches(".*(\\d)\\1{3,}.*")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Phone number cannot have 4 or more consecutive identical digits."));
+            }
+        }
         if (userRepository.existsByUsername(username)) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username already taken."));
         }
