@@ -567,7 +567,7 @@
             const isEmp = type === 'emp';
             const boxId = isEmp ? 'emp-loc-suggestions' : 'reg-loc-suggestions';
             const box = document.getElementById(boxId);
-            if (!query || query.length < 2) { box.classList.add('hidden'); return; }
+            if (!query || query.length < 1) { box.classList.add('hidden'); return; }
 
             // Show local results instantly
             const local = searchLocalCities(query);
