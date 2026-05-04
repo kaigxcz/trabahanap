@@ -125,7 +125,7 @@
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
                                 <div class="flex gap-2 mt-1">
                                     <select class="input-field w-24 shrink-0"><option>+63</option><option>+1</option><option>+44</option></select>
-                                    <input type="tel" id="reg-phone" placeholder="9XX XXX XXXX" class="input-field" oninput="validatePhone(this)" maxlength="11">
+                                    <input type="text" id="reg-phone" placeholder="9XX XXX XXXX" class="input-field" inputmode="numeric" pattern="[0-9]*" oninput="validatePhone(this)" onkeydown="blockNonDigit(event)" maxlength="11">
                                 </div>
                                 <p class="field-error text-xs text-red-500 mt-1 hidden" id="reg-phone-err"></p>
                             </div>
@@ -280,6 +280,12 @@
         }
 
         // ── Phone validation: 11 digits, no letters, no 4+ consecutive same digit ──
+        function blockNonDigit(e) {
+            const allowed = ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'];
+            if (allowed.includes(e.key)) return;
+            if ((e.ctrlKey || e.metaKey) && ['a','c','v','x'].includes(e.key.toLowerCase())) return;
+            if (!/^\d$/.test(e.key)) e.preventDefault();
+        }
         function validatePhone(input) {
             let val = input.value;
             val = val.replace(/\D/g, '');
