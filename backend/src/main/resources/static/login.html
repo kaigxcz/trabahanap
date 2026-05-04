@@ -303,7 +303,7 @@
                 const size     = document.getElementById('emp-size').value.trim();
                 if (!company || !industry || !email || !location || !username || !password) { errEl.innerText = 'Please fill in all required fields.'; errEl.classList.remove('hidden'); return; }
                 if (!emailRe.test(email)) { errEl.innerText = 'Please enter a valid email address.'; errEl.classList.remove('hidden'); return; }
-                if (password.length < 6) { errEl.innerText = 'Password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
+                if (password.length < 8) { errEl.innerText = 'Password must be at least 8 characters.'; errEl.classList.remove('hidden'); return; }
                 if (!document.getElementById('terms').checked) { errEl.innerText = 'Please agree to the terms to continue.'; errEl.classList.remove('hidden'); return; }
                 const btn = document.getElementById('register-btn');
                 setLoading(btn, true, 'Creating account...');
@@ -340,10 +340,11 @@
             if (lastName.length < 2 || lastName.length > 50) { errEl.innerText = 'Last name must be 2–50 characters.'; errEl.classList.remove('hidden'); return; }
             if (!nameRe.test(lastName))  { errEl.innerText = 'Last name must contain letters only.';  errEl.classList.remove('hidden'); return; }
             if (middleName && middleName.length < 2) { errEl.innerText = 'Middle name must be at least 2 characters.'; errEl.classList.remove('hidden'); return; }
+            if (middleName && middleName.length > 50) { errEl.innerText = 'Middle name must be at most 50 characters.'; errEl.classList.remove('hidden'); return; }
             if (middleName && !nameRe.test(middleName)) { errEl.innerText = 'Middle name must contain letters only.'; errEl.classList.remove('hidden'); return; }
             if (!emailRe.test(email)) { errEl.innerText = 'Please enter a valid email address.'; errEl.classList.remove('hidden'); return; }
             if (phone && !/^[\d\s\+\-\(\)]+$/.test(phone)) { errEl.innerText = 'Phone number must contain digits only.'; errEl.classList.remove('hidden'); return; }
-            if (password.length < 6) { errEl.innerText = 'Password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
+            if (password.length < 8) { errEl.innerText = 'Password must be at least 8 characters.'; errEl.classList.remove('hidden'); return; }
             if (!document.getElementById('terms').checked) { errEl.innerText = 'Please agree to the terms to continue.'; errEl.classList.remove('hidden'); return; }
             const btn = document.getElementById('register-btn');
             setLoading(btn, true, 'Creating account...');
