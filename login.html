@@ -100,13 +100,13 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="reg-fname" placeholder="Juan" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words"></div>
-                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="reg-lname" placeholder="Dela Cruz" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words"></div>
+                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name *</label><input type="text" id="reg-fname" placeholder="Juan" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)"></div>
+                        <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name *</label><input type="text" id="reg-lname" placeholder="Dela Cruz" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Middle Name <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
-                            <input type="text" id="reg-mname" placeholder="Santos" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words">
+                            <input type="text" id="reg-mname" placeholder="Santos" class="input-field mt-1" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Suffix <span class="text-slate-300 font-normal normal-case">(optional)</span></label>
@@ -176,6 +176,15 @@
             const show = input.type === 'password';
             input.type = show ? 'text' : 'password';
             btn.innerText = show ? '🙈' : '👁';
+        }
+        function nameKeydown(e) {
+            if (e.key !== ' ') return;
+            const val = e.target.value;
+            const nonSpaceChars = val.replace(/\s/g, '').length;
+            const spaceCount = (val.match(/ /g) || []).length;
+            if (nonSpaceChars < 2) { e.preventDefault(); return; }
+            if (spaceCount >= 2) { e.preventDefault(); return; }
+            if (val.endsWith(' ')) { e.preventDefault(); return; }
         }
         function switchMode(mode) {
             const isLogin = mode === 'login';

@@ -747,6 +747,20 @@
         }
 
         const _nameRe = /^[a-zA-ZÀ-ÿñÑ\s'\-\.]+$/;
+
+        function nameKeydown(e) {
+            if (e.key !== ' ') return;
+            const val = e.target.value;
+            const nonSpaceChars = val.replace(/\s/g, '').length;
+            const spaceCount = (val.match(/ /g) || []).length;
+            // Need at least 2 non-space chars before first space
+            if (nonSpaceChars < 2) { e.preventDefault(); return; }
+            // Max 2 spaces allowed
+            if (spaceCount >= 2) { e.preventDefault(); return; }
+            // No consecutive spaces
+            if (val.endsWith(' ')) { e.preventDefault(); return; }
+        }
+
         function validateNameInput(id, required) {
             const el = document.getElementById(id);
             // Auto-capitalize first letter of each word
@@ -1207,15 +1221,15 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">First Name</label>
-                        <input id="udm-fname" type="text" class="input mt-1 w-full text-sm" placeholder="First name" minlength="2" maxlength="50" autocapitalize="words" oninput="validateNameInput('udm-fname', true)">
+                        <input id="udm-fname" type="text" class="input mt-1 w-full text-sm" placeholder="First name" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)" oninput="validateNameInput('udm-fname', true)">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Middle Name</label>
-                        <input id="udm-mname" type="text" class="input mt-1 w-full text-sm" placeholder="Middle name" minlength="2" maxlength="50" autocapitalize="words" oninput="validateNameInput('udm-mname', false)">
+                        <input id="udm-mname" type="text" class="input mt-1 w-full text-sm" placeholder="Middle name" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)" oninput="validateNameInput('udm-mname', false)">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Name</label>
-                        <input id="udm-lname" type="text" class="input mt-1 w-full text-sm" placeholder="Last name" minlength="2" maxlength="50" autocapitalize="words" oninput="validateNameInput('udm-lname', true)">
+                        <input id="udm-lname" type="text" class="input mt-1 w-full text-sm" placeholder="Last name" minlength="2" maxlength="50" autocapitalize="words" onkeydown="nameKeydown(event)" oninput="validateNameInput('udm-lname', true)">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Suffix</label>
