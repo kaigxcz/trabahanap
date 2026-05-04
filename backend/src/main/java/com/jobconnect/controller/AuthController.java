@@ -38,7 +38,6 @@ public class AuthController {
         String suffix = body.getOrDefault("suffix", "");
         String email = body.get("email");
         String location = body.get("location");
-        String suffix = body.getOrDefault("suffix", "");
         String role = body.getOrDefault("role", "CANDIDATE").toUpperCase();
 
         if (!role.equals("CANDIDATE") && !role.equals("EMPLOYER")) role = "CANDIDATE";

@@ -1,5 +1,6 @@
 backend/target/
 backend/.mvn/wrapper/maven-wrapper.jar
+backend/src/main/resources/application-local.properties
 uploads/
 deploy/
 *.class
