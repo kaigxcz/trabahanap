@@ -92,6 +92,7 @@ public class AdminController {
             map.put("firstName",  firstName);
             map.put("lastName",   lastName);
             map.put("middleName", u.getMiddleName() != null ? u.getMiddleName() : "");
+            map.put("suffix",     u.getSuffix()    != null ? u.getSuffix()    : "");
             map.put("email",      u.getEmail()    != null ? u.getEmail()    : "");
             map.put("phone",      u.getPhone()    != null ? u.getPhone()    : "");
             map.put("role",       u.getRole()     != null ? u.getRole()     : "CANDIDATE");
@@ -132,6 +133,7 @@ public class AdminController {
             if (body.containsKey("jobTitle"))   u.setJobTitle(body.get("jobTitle"));
             if (body.containsKey("skills"))     u.setSkills(body.get("skills"));
             if (body.containsKey("birthday"))   u.setBirthday(body.get("birthday"));
+            if (body.containsKey("suffix"))     u.setSuffix(body.get("suffix"));
             if (body.containsKey("age") && body.get("age") != null && !body.get("age").isBlank()) {
                 try { u.setAge(Integer.parseInt(body.get("age"))); } catch (NumberFormatException ignored) {}
             }
