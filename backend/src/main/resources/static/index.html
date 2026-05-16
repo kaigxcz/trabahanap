@@ -40,9 +40,9 @@
             <h1 class="text-5xl font-extrabold leading-tight mb-6">Find your next<br><span class="text-indigo-400">big opportunity.</span></h1>
             <p class="text-slate-400 text-lg mb-10">Join thousands of professionals finding their dream jobs every day.</p>
             <div class="grid grid-cols-3 gap-4">
-                <div class="bg-white/10 backdrop-blur rounded-2xl p-4 text-center"><p class="text-2xl font-bold">10k+</p><p class="text-slate-400 text-xs mt-1">Active Jobs</p></div>
-                <div class="bg-white/10 backdrop-blur rounded-2xl p-4 text-center"><p class="text-2xl font-bold">5k+</p><p class="text-slate-400 text-xs mt-1">Companies</p></div>
-                <div class="bg-white/10 backdrop-blur rounded-2xl p-4 text-center"><p class="text-2xl font-bold">50k+</p><p class="text-slate-400 text-xs mt-1">Hired</p></div>
+                <div class="bg-white/10 backdrop-blur rounded-2xl p-4 text-center"><p id="stat-jobs" class="text-2xl font-bold">—</p><p class="text-slate-400 text-xs mt-1">Active Jobs</p></div>
+                <div class="bg-white/10 backdrop-blur rounded-2xl p-4 text-center"><p id="stat-companies" class="text-2xl font-bold">—</p><p class="text-slate-400 text-xs mt-1">Companies</p></div>
+                <div class="bg-white/10 backdrop-blur rounded-2xl p-4 text-center"><p id="stat-hired" class="text-2xl font-bold">—</p><p class="text-slate-400 text-xs mt-1">Hired</p></div>
             </div>
         </div>
         <p class="text-slate-500 text-sm">2026 TrabaHanap. All rights reserved.</p>
@@ -285,6 +285,18 @@
     </div>
     <script src="js/api.js"></script>
     <script>
+        // Load real stats from backend
+        (async function loadStats() {
+            try {
+                const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                    ? 'http://localhost:8080/api' : window.location.origin + '/api';
+                const res = await fetch(API + '/jobs/stats');
+                const data = await res.json();
+                document.getElementById('stat-jobs').textContent      = data.activeJobs;
+                document.getElementById('stat-companies').textContent = data.companies;
+                document.getElementById('stat-hired').textContent     = data.hired;
+            } catch(e) { /* silent — keep dashes */ }
+        })();
         // Only redirect away if navigating back to login while still logged in (bfcache)
         window.addEventListener('pageshow', function(e) {
             if (e.persisted && localStorage.getItem('jc_token')) {
