@@ -13,22 +13,19 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jobconnect.model.User;
 import com.jobconnect.repository.UserRepository;
 import com.jobconnect.security.JwtUtil;
-import com.jobconnect.service.OtpService;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final OtpService otpService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, OtpService otpService) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
-        this.otpService = otpService;
     }
 
     @PostMapping("/register")
@@ -153,29 +150,5 @@ public class AuthController {
         ));
     }
 
-    /** Send OTP to the given email before registration */
-    @PostMapping("/send-otp")
-    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        if (email == null || email.isBlank())
-            return ResponseEntity.badRequest().body(Map.of("error", "Email is required."));
-        try {
-            otpService.sendOtp(email);
-            return ResponseEntity.ok(Map.of("message", "OTP sent to " + email));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Failed to send OTP. Check email address."));
-        }
-    }
-
-    /** Verify OTP entered by the user */
-    @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String otp   = body.get("otp");
-        if (email == null || otp == null)
-            return ResponseEntity.badRequest().body(Map.of("error", "Email and OTP are required."));
-        if (otpService.verifyOtp(email, otp))
-            return ResponseEntity.ok(Map.of("verified", true));
-        return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired OTP."));
-    }
 }
+
