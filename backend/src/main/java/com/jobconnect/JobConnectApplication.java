@@ -1,16 +1,19 @@
 package com.jobconnect;
 
-import com.jobconnect.model.Job;
-import com.jobconnect.model.User;
-import com.jobconnect.repository.JobRepository;
-import com.jobconnect.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.jobconnect.model.Job;
+import com.jobconnect.model.User;
+import com.jobconnect.repository.JobRepository;
+import com.jobconnect.repository.UserRepository;
+
 @SpringBootApplication
+@EnableAsync
 public class JobConnectApplication {
 
     public static void main(String[] args) {
